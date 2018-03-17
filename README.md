@@ -1,8 +1,40 @@
 # CameraMod (Mafia:The city of Lost Heaven) #
 
-CameraMod is a fan modification for game called Mafia:The city of Lost Heaven. It is devoted to server as a tool for movie makers and screenshoters. It allows its users to use free camera mod, to create camera paths and then move camera along them, to hide game GUI and to control game speed (e.g. slow motion effect).
+CameraMod is a fan modification for game called Mafia:The city of Lost Heaven. It is devoted to server as a tool for movie makers and screenshooters. It allows its users to use free camera mod, to create camera paths and then move camera along them, to hide game GUI and to control game speed (e.g. slow motion effect).
 
 This mod was originally coded by Romop5, the author of Lost Heaven Multiplayer (http://lh-mp.eu) in November 2014.  
+
+<div align=center>
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=cbWiwHvqdX8
+" target="_blank"><img src="http://img.youtube.com/vi/cbWiwHvqdX8/0.jpg" 
+alt="CameraMod preview" width="480" height="360" border="10" /></a>
+
+</div>
+
+## Features
+
+- **Run-time attachment** to Mafia process
+- Linear point-to-point **camera transitions**
+- **HUD disablement**
+- **Game speed control**
+
+## Usage
+
+Place the files into directory with Game.exe, run Game.exe and run CameraModInjector.exe, now go to mission (tutorial, freeride, etc.) and press **F1**.
+Controls:
+- **F2** - free cam
+- **F3** - menu/GUI
+- **F4** - creates a point at freecam position
+- **F5** - creates a path - you need to select 2 points on screen using mouse
+- **F6** - plays the first path
+- **F7** - pause/run the game 
+
+## Binaries
+
+Currently, there is a version running from 2014. See releases.
+
+## Compilation
 
 ### How to compile & run app ###
 
