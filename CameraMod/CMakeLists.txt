@@ -28,6 +28,9 @@ add_library(CameraMod SHARED
 	../vendors/cd3dfont/dxutil.h
 
 	windowsHack.cpp
+
+	camera/camera.rc
+	list.rc
 	)
 
 

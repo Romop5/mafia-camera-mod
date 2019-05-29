@@ -91,9 +91,16 @@ bool IsGameRunning()
 
 HMODULE InjectDLL(DWORD ProcessID, char* dllName)
 {
+	char buf[50] = { 0 };
+	HMODULE result = LoadLibrary(dllname);
+	if(result == NULL)
+	{
+		sprintf_s(buf, "Failed to load library: %d", GetLastError());
+		MessageBoxA(NULL, buf, "Loader", NULL);
+		return false;
+	}
 	HANDLE Proc;
 	HANDLE Thread;
-	char buf[50] = { 0 };
 	LPVOID RemoteString, LoadLibAddy;
 	HMODULE hModule = NULL;
 	DWORD dwOut;
