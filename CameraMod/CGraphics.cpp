@@ -9,6 +9,7 @@ extern CCore *core;
 CGraphics::CGraphics()
 {
 	g_font = NULL;
+	Texture = NULL;
 }
 
 void CGraphics::Init()

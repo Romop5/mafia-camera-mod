@@ -156,7 +156,7 @@ void	CHooks::ApplyThem()
 	//IDirect3DDevice8* pointer,*original;
 	original = (IDirect3DDevice8*) *(DWORD*) 0x101C167C;
 	pointer = new CDirect3DDevice8Proxy(original);
-	//core->getGraphics()->SetDevice(pointer);
+	core->getGraphics()->SetDevice(pointer);
 	core->getGraphics()->Init();
 
 	*(DWORD*)0x101C167C = (DWORD)pointer;
