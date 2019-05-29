@@ -156,6 +156,7 @@ bool			CGUI::IsInputActive()
 bool			CGUI::SetInputActive(bool state)
 {
 	this->isInputActive = state;
+	return true;
 }
 
 // extern callbacks

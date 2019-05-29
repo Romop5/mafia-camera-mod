@@ -6,6 +6,7 @@
 // Copyright (c) 1999-2001 Microsoft Corporation. All rights reserved.
 //-----------------------------------------------------------------------------
 #define STRICT
+#define POINTER_64 __ptr64
 #include <stdio.h>
 #include <tchar.h>
 #include <D3DX8.h>

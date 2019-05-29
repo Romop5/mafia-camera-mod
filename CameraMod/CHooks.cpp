@@ -1,5 +1,8 @@
 /*#include "CHooks.h"
 */
+
+#define POINTER_64 __ptr64
+
 #include "CDirect3DDevice8Proxy.h"
 
 #include "CCore.h"

@@ -4,6 +4,8 @@
 
 #define RADIAN (180.0f /  3.14159f)
 #define TORADIAN (3.14159f/180.0f)
+
+#define POINTER_64 __ptr64
 #include <Windows.h>
 
 // hook original function to call newfunc and copy original 5 bytes to patch string

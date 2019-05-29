@@ -7,6 +7,7 @@
 // Copyright (c) 1997-2001 Microsoft Corporation. All rights reserved
 //-----------------------------------------------------------------------------
 #define STRICT
+#define POINTER_64 __ptr64
 #include <tchar.h>
 #include <stdio.h>
 #include "D3DUtil.h"
