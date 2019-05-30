@@ -1,6 +1,6 @@
 #include "camera/resource.h"
 #include "CCore.h"
-
+#include "CD3D9Accessor.h"
 //#include "CGraphics.h"
 
 extern CCore *core;
@@ -45,6 +45,10 @@ void CGraphics::Init()
 		{ 1.0f, -1.0f, -1.0f, 0xFF00FF00 }
 	};
 	memcpy(vertexCube, SetvertexCube, sizeof(SetvertexCube));	// copy to static vertex array
+
+	// Note: this is a hack and it requires d3d8to9 to be compiled using the same compilator
+	// as CameraMode is due to the fact that C++ may not be binary compatible when compiling classes
+	auto d3d9Object = CD3D9Accessor::castFromD3D8(this->device);
 
 }
 

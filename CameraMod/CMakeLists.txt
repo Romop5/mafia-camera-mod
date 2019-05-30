@@ -31,10 +31,13 @@ add_library(CameraMod SHARED
 
 	camera/camera.rc
 	list.rc
+
+	CD3D9Accessor.cpp
 	)
 
 
 target_include_directories(CameraMod PRIVATE ../vendors/ ../vendors/DirectX9SDK2007/Include)
+target_include_directories(CameraMod PRIVATE ../vendors/d3d8to9/source)
 target_link_libraries(CameraMod PRIVATE ${PROJECT_SOURCE_DIR}/vendors/DirectX9SDK2007/Lib/x86/d3dx8.lib)
 target_link_libraries(CameraMod PRIVATE winmm)
 target_link_libraries(CameraMod PRIVATE legacy_stdio_definitions.lib)
