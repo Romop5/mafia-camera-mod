@@ -152,6 +152,9 @@ void	CHooks::ApplyThem()
 		"PeekMessageW");
 	InstallHook((void*)peekOriginal, myPeekMessage, peekOriginalPatch);
 
+        //TODO: store and get width
+	HWND mafiaWindow = (HWND) *(DWORD*) 0x101C167C;
+
 	// hook for directx
 	//IDirect3DDevice8* pointer,*original;
 	original = (IDirect3DDevice8*) *(DWORD*) 0x101C167C;

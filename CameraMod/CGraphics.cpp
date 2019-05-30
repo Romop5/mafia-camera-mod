@@ -1,6 +1,9 @@
 #include "camera/resource.h"
 #include "CCore.h"
 #include "CD3D9Accessor.h"
+#include "CImGUIAdaptor.hpp"
+#include "CLog.hpp"
+#include "CDirect3DDevice8Proxy.h"
 //#include "CGraphics.h"
 
 extern CCore *core;
@@ -9,13 +12,16 @@ extern CCore *core;
 CGraphics::CGraphics()
 {
 	g_font = NULL;
+        g_mono = NULL;
+        betterFont = NULL;
 	Texture = NULL;
 }
 
 void CGraphics::Init()
 {
-
+         
 	//D3DXCreateFontIndirect(device, &fontDesc, &g_font);
+        /*
 	m_chatfontAPI = CreateFont(20, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, 0, TEXT("arialbold"));  //arial bold, lucida console
 	D3DXCreateFont(this->GetDevice(), m_chatfontAPI, &g_font);
 
@@ -45,10 +51,21 @@ void CGraphics::Init()
 		{ 1.0f, -1.0f, -1.0f, 0xFF00FF00 }
 	};
 	memcpy(vertexCube, SetvertexCube, sizeof(SetvertexCube));	// copy to static vertex array
-
+        
+        */
 	// Note: this is a hack and it requires d3d8to9 to be compiled using the same compilator
 	// as CameraMode is due to the fact that C++ may not be binary compatible when compiling classes
-	auto d3d9Object = CD3D9Accessor::castFromD3D8(this->device);
+
+        CLog::getStream() << "D3D8 Device: " << std::hex << this->device << std::dec << std::endl;
+	auto d3d9Object = CD3D9Accessor::castFromD3D8(reinterpret_cast<CDirect3DDevice8Proxy*>(this->device)->getProxy());
+        CLog::getStream() << "D3D9 Device: " << std::hex << d3d9Object << std::dec << std::endl;
+
+        //auto size = this->GetScreenSize();
+        //CLog::getStream() << "Size: " << size.x << " - " << size.y << std::endl; 
+        CLog::getStream() << "Initializing ImGUI" << std::endl;
+        // TODO: fix size
+        Point2D point = {800, 600};
+        adaptor.Initialize(d3d9Object, point);
 
 }
 
@@ -58,6 +75,8 @@ void CGraphics::Unload()
 	this->g_font->Release();
 	this->g_mono->Release();
 	this->Texture->Release();
+    
+        adaptor.CleanUP();
 }
 
 void CGraphics::onEndScene()
@@ -105,6 +124,7 @@ void CGraphics::onEndScene()
 		pos.z = 0.0f;
 		this->DrawCubePoint(pos);
 		*/
+                adaptor.Render();
 }
 
 
@@ -127,7 +147,8 @@ void	CGraphics::TextDraw(int x, int y, char* text, DWORD color)
 {
 	//RECT recta = { x, y, x+1000, y+100 };
 	//g_font->DrawTextA(text, strlen(text), &recta, DT_LEFT | DT_SINGLELINE, color);
-	betterFont->DrawTextA(x,y, color, text, D3DFONT_FILTERED);
+        if(betterFont)
+            betterFont->DrawTextA(x,y, color, text, D3DFONT_FILTERED);
 	//g_font->Begin();
 }
 
@@ -138,7 +159,10 @@ int	CGraphics::TextDrawLength(char* text)
 	return recta.right-recta.left;
 	*/
 	SIZE fontSize;
-	betterFont->GetTextExtent(text, &fontSize);
+        if(betterFont)
+            betterFont->GetTextExtent(text, &fontSize);
+        else 
+            return 0;
 	return fontSize.cx;
 
 	
@@ -147,7 +171,8 @@ int	CGraphics::TextDrawLength(char* text)
 void	CGraphics::TextMonoDraw(int x, int y, char* text, DWORD color)
 {
 	RECT recta = { x, y, x + 1000, y + 100 };
-	g_mono->DrawTextA(text, strlen(text), &recta, DT_LEFT | DT_SINGLELINE, color);
+        if(g_mono)
+            g_mono->DrawTextA(text, strlen(text), &recta, DT_LEFT | DT_SINGLELINE, color);
 }
 
 
@@ -208,6 +233,8 @@ void CGraphics::OnDeviceLost()
 
 	if (this->Texture)
 		this->Texture->Release();
+
+        adaptor.Invalidate(); 
 }
 
 void CGraphics::OnDeviceReset()

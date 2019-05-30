@@ -17,6 +17,10 @@ private:
 	LPDIRECT3DTEXTURE8	pTexture;
 	LPD3DXSPRITE		sprite;*/
 public:
+        IDirect3DDevice8* getProxy() const 
+        {
+            return p_Dev;
+        }
 	CDirect3DDevice8Proxy(IDirect3DDevice8* DID) : p_Dev(DID)
 	{
 		core->getGraphics()->SetDevice(this);

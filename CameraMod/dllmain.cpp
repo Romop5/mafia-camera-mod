@@ -2,6 +2,7 @@
 
 #include "CCore.h"
 #include <Windows.h>
+#include "CLog.hpp"
 
 CCore		*core = NULL;
 
@@ -17,6 +18,8 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 		//CHooks hook;
 		//hook.ApplyThem();
 		DisableThreadLibraryCalls(hModule);
+                CLog::getStream() << "CameraMod injected !" << std::endl;
+                MessageBox(NULL,"LOL","WTF", MB_OK);
 		CCore* coreInstance = new CCore();
 		core = coreInstance;
 		core->getHook()->ApplyThem();

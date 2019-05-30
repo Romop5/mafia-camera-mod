@@ -1,13 +1,13 @@
-#include "structures.h"
-#include "../vendors/cd3dfont/d3dfont.h"
-
 #ifndef C_GRAPHICS
 #define C_GRAPHICS
+#include "structures.h"
+#include "../vendors/cd3dfont/d3dfont.h"
 //#include "../vendors/DirectX9SDK2007/Include/d3d8.h"
 //#include "../vendors/dx8sdk/include/d3dx8.h"
 
 #include "d3d8.h"
 #include "d3dx8.h"
+#include "CImGUIAdaptor.hpp"
 
 struct BasicVertex {
 	float x, y, z, rhw;
@@ -34,6 +34,7 @@ private:
 
 	BasicVertex		vertexCube[18];
 	CD3DFont*	betterFont;
+        CImGUIAdaptor   adaptor;
 public:
 	CGraphics();
 	void	Init();
