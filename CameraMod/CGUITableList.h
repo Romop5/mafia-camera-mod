@@ -2,54 +2,51 @@
 #ifndef C_GUITABLELIST
 #define C_GUITABLELIST
 
-struct TableListElement
-{
-	int ID;
-	char text[100];
-	TableListElement* next;
-	TableListElement(int ID, char* text)
-	{
-		this->ID = ID;
-		sprintf(this->text, "%s", text);
-		this->next = 0;
-	}
+struct TableListElement {
+    int ID;
+    char text[100];
+    TableListElement* next;
+    TableListElement(int ID, char* text)
+    {
+        this->ID = ID;
+        sprintf(this->text, "%s", text);
+        this->next = 0;
+    }
 };
 
-class CGUITableList : public CGUIElement
-{
+class CGUITableList : public CGUIElement {
 private:
-	int					elementsCount;
-	TableListElement*	elements;
-	int shift;
+    int elementsCount;
+    TableListElement* elements;
+    int shift;
 
-	bool needScrollbox;
+    bool needScrollbox;
 
-	int selectedID;
+    int selectedID;
 
-	CGUIScrollbox		scrollbox;
+    CGUIScrollbox scrollbox;
+
 public:
-	CGUITableList();
-	
-	int			GetElementsCount();
+    CGUITableList();
 
-	// delete all elements
-	void		Reset();
-	void		AddElement(int ID, char* text);
-	void		DeleteElement(int uniqueID);
-	void		DeleteElementInOrder(int ID);
+    int GetElementsCount();
 
-	int			GetElementID(int ID);
-	char*		GetElementText(int ID);
+    // delete all elements
+    void Reset();
+    void AddElement(int ID, char* text);
+    void DeleteElement(int uniqueID);
+    void DeleteElementInOrder(int ID);
 
-	int			GetSelectedID();
+    int GetElementID(int ID);
+    char* GetElementText(int ID);
 
-	void		Render();
+    int GetSelectedID();
 
-	void		OnInput(unsigned short VK);
-	void		OnClick();
-	void		OnMouseMove(int x, int y);
+    void Render();
 
-
+    void OnInput(unsigned short VK);
+    void OnClick();
+    void OnMouseMove(int x, int y);
 };
 
 #endif

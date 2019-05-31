@@ -2,16 +2,12 @@
 // Copyright (C) 2006-2014
 // http://www.resedit.net
 
-#include <windows.h>
+#include "resource.h"
 #include <commctrl.h>
 #include <richedit.h>
-#include "resource.h"
-
-
-
+#include <windows.h>
 
 //
 // Bitmap resources
 //
-LANGUAGE 0, SUBLANG_NEUTRAL
-IDB_BITMAP1        BITMAP         "..\\..\\mouse.bmp"
+LANGUAGE 0, SUBLANG_NEUTRAL IDB_BITMAP1 BITMAP "..\\..\\mouse.bmp"

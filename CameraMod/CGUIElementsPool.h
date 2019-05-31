@@ -3,27 +3,26 @@
 #define C_GUIPOOL
 //#include "CGUIElement.h"
 
-struct CGUIElementsPoolStruct
-{
-	CGUIElement*			element;
-	CGUIElementsPoolStruct* next;
+struct CGUIElementsPoolStruct {
+    CGUIElement* element;
+    CGUIElementsPoolStruct* next;
 };
-class CGUIElementsPool
-{
+class CGUIElementsPool {
 private:
-	CGUIElementsPoolStruct*		pool;
-	unsigned int				size;
-	CGUIElementsPoolStruct*		pointer;
+    CGUIElementsPoolStruct* pool;
+    unsigned int size;
+    CGUIElementsPoolStruct* pointer;
+
 public:
-	CGUIElementsPool();
+    CGUIElementsPool();
 
-	__declspec(noinline) void				AddElement(CGUIElement* elem);
-	void				DeleteElement(CGUIElement* elem);
-	CGUIElement*		GetNext();
-	void				Reset();
-	void				ToTheTop(CGUIElement* elem);
+    __declspec(noinline) void AddElement(CGUIElement* elem);
+    void DeleteElement(CGUIElement* elem);
+    CGUIElement* GetNext();
+    void Reset();
+    void ToTheTop(CGUIElement* elem);
 
-	CGUIElementsPoolStruct*		GetFirst();
+    CGUIElementsPoolStruct* GetFirst();
 };
 
 #endif

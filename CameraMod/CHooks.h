@@ -1,11 +1,10 @@
 #ifndef C_HOOKS
 #define C_HOOKS
 
-class CHooks
-{
+class CHooks {
 public:
-	void ApplyThem();
-	void UnloadThem();
+    void ApplyThem();
+    void UnloadThem();
 };
 
 #endif

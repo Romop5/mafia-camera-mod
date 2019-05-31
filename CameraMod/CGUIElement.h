@@ -1,77 +1,72 @@
 #include "CGUI.h"
 #ifndef C_GUIELEMENT
-#define	C_GUIELEMENT
+#define C_GUIELEMENT
 #include "structures.h"
 
-enum GUIElementType
-{
-	GUITYPE_DEFAULT,
-	GUITYPE_GROUP,
-	GUITYPE_BUTTON,
-	GUITYPE_CHECKBOX,
-	GUITYPE_TABLELIST,
-	GUITYPE_LABEL,
-	GUITYPE_WINDOW
+enum GUIElementType {
+    GUITYPE_DEFAULT,
+    GUITYPE_GROUP,
+    GUITYPE_BUTTON,
+    GUITYPE_CHECKBOX,
+    GUITYPE_TABLELIST,
+    GUITYPE_LABEL,
+    GUITYPE_WINDOW
 };
-class CGUIElement
-{
+class CGUIElement {
 private:
-	CGUI*			root;
-	CGUIElement*	owner;
-	Point2D			position;
-	unsigned int	width, height;
-	bool			isVisible;
-	unsigned char	type;
-	bool			hasInput;
+    CGUI* root;
+    CGUIElement* owner;
+    Point2D position;
+    unsigned int width, height;
+    bool isVisible;
+    unsigned char type;
+    bool hasInput;
 
 public:
-	CGUIElement();
+    CGUIElement();
 
-	void			SetRoot(CGUI*);
-	CGUI*			GetRoot();
+    void SetRoot(CGUI*);
+    CGUI* GetRoot();
 
-	void			SetOwner(CGUIElement*);
-	CGUIElement*	GetOwner();
+    void SetOwner(CGUIElement*);
+    CGUIElement* GetOwner();
 
-	void			SetPosition(Point2D pos);
-	Point2D			GetPosition();
+    void SetPosition(Point2D pos);
+    Point2D GetPosition();
 
-	void			SetX(int);
-	void			SetY(int);
-	int				GetX();
-	int				GetY();
+    void SetX(int);
+    void SetY(int);
+    int GetX();
+    int GetY();
 
-	int				GetRelativeX();
-	int				GetRelativeY();
+    int GetRelativeX();
+    int GetRelativeY();
 
+    void SetWidth(unsigned int);
+    unsigned int GetWidth();
 
+    void SetHeight(unsigned int);
+    unsigned int GetHeight();
 
-	void			SetWidth(unsigned int);
-	unsigned int	GetWidth();
+    void SetVisible(bool);
+    bool IsVisible();
 
-	void			SetHeight(unsigned int);
-	unsigned int	GetHeight();
+    void SetType(unsigned char);
+    unsigned char GetType();
 
-	void			SetVisible(bool);
-	bool			IsVisible();
+    void SetHasInput(bool state);
+    bool HasInput();
 
-	void			SetType(unsigned char);
-	unsigned char	GetType();
+    virtual void Render(){};
 
-	void			SetHasInput(bool state);
-	bool			HasInput();
+    virtual void OnHover(){};
+    virtual CGUIElement* OnHoverCheck(Point2D& point);
+    virtual void OnClick(){};
+    virtual void OnClickEnd(){};
+    virtual void OnMouseMove(int x, int y){};
+    virtual void OnInput(unsigned short VK){};
 
-	virtual void	Render() {};
-
-	virtual void	OnHover() {};
-	virtual CGUIElement*	OnHoverCheck(Point2D &point);
-	virtual void	OnClick() {};
-	virtual void	OnClickEnd() {};
-	virtual void	OnMouseMove(int x, int y) {};
-	virtual void	OnInput(unsigned short VK) {};
-
-	virtual void	GetAbsolutePos(Point2D &position);
-
+    virtual void GetAbsolutePos(Point2D& position);
 };
 
 #endif

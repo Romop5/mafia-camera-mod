@@ -2,19 +2,19 @@
 #ifndef C_GUIEDITBOX
 #define C_GUIEDITBOX
 
-class CGUIEditbox : public CGUIElement
-{
+class CGUIEditbox : public CGUIElement {
 private:
-	char input[255];
-	unsigned char	status;
+    char input[255];
+    unsigned char status;
+
 public:
-	CGUIEditbox();
-	void		SetInput(char* text);
-	char*		GetInput();
+    CGUIEditbox();
+    void SetInput(char* text);
+    char* GetInput();
 
-	void		Render();
+    void Render();
 
-	void		OnInput(unsigned short VK);
+    void OnInput(unsigned short VK);
 };
 
 #endif

@@ -2,20 +2,20 @@
 #ifndef C_GUILABEL
 #define C_GUILABEL
 
-class CGUILabel : public CGUIElement
-{
+class CGUILabel : public CGUIElement {
 private:
-	char		text[200];
-	unsigned int	color;
+    char text[200];
+    unsigned int color;
+
 public:
-	CGUILabel();
-	char*		GetText();
-	void		SetText(char*);
+    CGUILabel();
+    char* GetText();
+    void SetText(char*);
 
-	void		SetColor(unsigned int);
-	unsigned int GetColor();
+    void SetColor(unsigned int);
+    unsigned int GetColor();
 
-	void		Render();
+    void Render();
 };
 
 #endif

@@ -2,50 +2,40 @@
 
 CGUIGroup::CGUIGroup()
 {
-	CGUIElement::CGUIElement();
-	this->SetType(GUITYPE_GROUP);
+    CGUIElement::CGUIElement();
+    this->SetType(GUITYPE_GROUP);
 }
 
-bool	CGUIGroup::AddElement(CGUIElement* elem)
+bool CGUIGroup::AddElement(CGUIElement* elem)
 {
-	this->elements.AddElement(elem);
-	elem->SetOwner(this);
-	return true;
+    this->elements.AddElement(elem);
+    elem->SetOwner(this);
+    return true;
 }
 
-
-void		CGUIGroup::Render()
+void CGUIGroup::Render()
 {
-	CGUIElementsPoolStruct* pointer = this->elements.GetFirst();
-	while (pointer != 0)
-	{
-		if (pointer->element->IsVisible())
-			pointer->element->Render();
-		pointer = pointer->next;
-	}
-
+    CGUIElementsPoolStruct* pointer = this->elements.GetFirst();
+    while (pointer != 0) {
+        if (pointer->element->IsVisible())
+            pointer->element->Render();
+        pointer = pointer->next;
+    }
 }
 
-CGUIElement* CGUIGroup::OnHoverCheck(Point2D &point)
+CGUIElement* CGUIGroup::OnHoverCheck(Point2D& point)
 {
-	CGUIElementsPoolStruct* pointer = this->elements.GetFirst();
-	while (pointer != 0)
-	{
-		if (pointer->element->IsVisible())
-		{
-			CGUIElement* result = pointer->element->OnHoverCheck(point);
-			if (result != NULL)
-			{
-				return result;
-			}
-		}
-		pointer = pointer->next;
-	}
-	return 0;
+    CGUIElementsPoolStruct* pointer = this->elements.GetFirst();
+    while (pointer != 0) {
+        if (pointer->element->IsVisible()) {
+            CGUIElement* result = pointer->element->OnHoverCheck(point);
+            if (result != NULL) {
+                return result;
+            }
+        }
+        pointer = pointer->next;
+    }
+    return 0;
 }
 
-
-CGUIElementsPool*	CGUIGroup::GetElements()
-{
-	return &this->elements;
-}
+CGUIElementsPool* CGUIGroup::GetElements() { return &this->elements; }

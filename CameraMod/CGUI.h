@@ -11,63 +11,66 @@ class CGUI;
 #include "CGUIScrollbox.h"
 // objects
 
-#include "CGUILabel.h"
-#include "CGUIEditbox.h"
 #include "CGUIButton.h"
 #include "CGUICheckbox.h"
-#include "CGUITableList.h"
+#include "CGUIEditbox.h"
 #include "CGUIGroup.h"
+#include "CGUILabel.h"
+#include "CGUITableList.h"
 #include "CGUIWindow.h"
 
-class CGUI
-{
+class CGUI {
 private:
-	CGUIElementsPool*	elementsPool;
-	CGUIElementsPool*	windowsPool;
+    CGUIElementsPool* elementsPool;
+    CGUIElementsPool* windowsPool;
 
-	CGUIElement*		elementHover;
-	CGUIElement*		elementInput;
+    CGUIElement* elementHover;
+    CGUIElement* elementInput;
 
-	bool				isLeftClick;
+    bool isLeftClick;
 
-	bool				isInputActive;
+    bool isInputActive;
+
 public:
-	CGUI();
+    CGUI();
 
-	CGUIButton*		CreateButton(int x, int y,unsigned int width, unsigned int height, char* title);
-	CGUICheckbox*	CreateCheckbox(int x, int y, unsigned int width, unsigned int height, bool state);
-	CGUITableList*	CreateTableList(int x, int y, unsigned int width, unsigned int height);
-	CGUIEditbox*	CreateEditbox(int x, int y, unsigned int width, unsigned int height, char* text);
-	CGUIGroup*		CreateGroup(bool visible);
-	CGUILabel*		CreateLabel(int x, int y, char* text);
+    CGUIButton* CreateButton(int x, int y, unsigned int width,
+        unsigned int height, char* title);
+    CGUICheckbox* CreateCheckbox(int x, int y, unsigned int width,
+        unsigned int height, bool state);
+    CGUITableList* CreateTableList(int x, int y, unsigned int width,
+        unsigned int height);
+    CGUIEditbox* CreateEditbox(int x, int y, unsigned int width,
+        unsigned int height, char* text);
+    CGUIGroup* CreateGroup(bool visible);
+    CGUILabel* CreateLabel(int x, int y, char* text);
 
+    CGUIWindow* GUICreateWindow(int x, int y, unsigned int width,
+        unsigned int height, char* text);
 
-	CGUIWindow*		GUICreateWindow(int x, int y, unsigned int width, unsigned int height, char* text);
+    void DeleteElement(CGUIElement* elem);
 
-	void			DeleteElement(CGUIElement* elem);
+    CGUIElement* GetInputElement();
+    CGUIElement* GetHoverElement();
 
+    bool IsInputActive();
+    bool SetInputActive(bool state);
+    // Windows mng
+    void RenderWindows(CGUIElementsPoolStruct* win);
+    void ToTheTop(CGUIElement* element);
+    // callbacks
 
-	CGUIElement*	GetInputElement();
-	CGUIElement*	GetHoverElement();
+    void OnClick(CGUIElement* element);
+    void OnElementSelect(CGUIElement* element, int ID);
+    void OnElementChanged(CGUIElement* element);
 
-	bool			IsInputActive();
-	bool			SetInputActive(bool state);
-	// Windows mng
-	void RenderWindows(CGUIElementsPoolStruct* win);
-	void ToTheTop(CGUIElement* element);
-	// callbacks
+    // extern callbacks
+    void OnMouseMove(int x, int y);
+    void OnMouseButtons(unsigned short buttons);
+    void OnInput(unsigned short VK);
+    void OnRender();
 
-	void OnClick(CGUIElement* element);
-	void OnElementSelect(CGUIElement* element, int ID);
-	void OnElementChanged(CGUIElement* element);
-
-	// extern callbacks
-	void OnMouseMove(int x, int y);
-	void OnMouseButtons(unsigned short buttons);
-	void OnInput(unsigned short VK);
-	void OnRender();
-
-	char debug[500];
+    char debug[500];
 };
 
 #endif
