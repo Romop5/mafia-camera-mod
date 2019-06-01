@@ -12,6 +12,7 @@ class CImGUIAdaptor
                 void Win32NewFrame();
 		void CleanUP();
                 void Invalidate();
+                void updateMousePosition(Point2D position);
 	private:
                 Point2D screenSize;
 };

@@ -168,3 +168,9 @@ void CImGUIAdaptor::Invalidate()
 {
     ImGui_ImplDX9_InvalidateDeviceObjects();
 }
+
+void CImGUIAdaptor::updateMousePosition(Point2D position)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.MousePos = ImVec2((float)position.x, (float)position.y);
+}

@@ -124,6 +124,9 @@ void CGraphics::onEndScene()
 		pos.z = 0.0f;
 		this->DrawCubePoint(pos);
 		*/
+                // Update mouse in ImGui
+                Point2D mouse = this->GetMouseCoords();
+                adaptor.updateMousePosition(mouse);
                 adaptor.Render();
 }
 
