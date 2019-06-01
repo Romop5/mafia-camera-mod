@@ -9,7 +9,7 @@
 #include "tools.h"
 // include classes
 
-#include "CGUI.h"
+#include "gui/CGUI.h"
 #include "CGame.h"
 #include "CGraphics.h"
 #include "CHooks.h"

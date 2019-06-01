@@ -1,7 +1,7 @@
 #include "CGUI.h"
 #ifndef C_GUIELEMENT
 #define C_GUIELEMENT
-#include "structures.h"
+#include "../structures.h"
 
 enum GUIElementType {
     GUITYPE_DEFAULT,

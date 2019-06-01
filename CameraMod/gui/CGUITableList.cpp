@@ -1,5 +1,5 @@
 #include "CGUITableList.h"
-#include "CCore.h"
+#include "../CCore.h"
 
 extern CCore* core;
 

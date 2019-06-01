@@ -1,19 +1,23 @@
+# Disable linking libci
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:\"libci\" /SAFESEH:NO")
+# Turn off these CRT warnings
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
 add_library(CameraMod SHARED 
 	CameraMod.cpp
 	CGame.cpp
 	CGraphics.cpp
-	CGUI.cpp
-	CGUIButton.cpp
-	CGUICheckbox.cpp
-	CGUIEditbox.cpp
-	CGUIElement.cpp
-	CGUIElementsPool.cpp
-	CGUIGroup.cpp
-	CGUILabel.cpp
-	CGUIScrollbox.cpp
-	CGUITableList.cpp
-	CGUIWindow.cpp
+	gui/CGUI.cpp
+	gui/CGUIButton.cpp
+	gui/CGUICheckbox.cpp
+	gui/CGUIEditbox.cpp
+	gui/CGUIElement.cpp
+	gui/CGUIElementsPool.cpp
+	gui/CGUIGroup.cpp
+	gui/CGUILabel.cpp
+	gui/CGUIScrollbox.cpp
+	gui/CGUITableList.cpp
+	gui/CGUIWindow.cpp
 	CModControl.cpp
 	CRawInput.cpp
 	CHooks.cpp

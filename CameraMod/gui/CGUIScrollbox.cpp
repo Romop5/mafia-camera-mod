@@ -1,5 +1,5 @@
 #include "CGUIScrollbox.h"
-#include "CCore.h"
+#include "../CCore.h"
 #include "CGUI.h"
 
 extern CCore* core;

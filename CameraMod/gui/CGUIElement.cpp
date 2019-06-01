@@ -1,5 +1,5 @@
 //#include "CGUIElement.h"
-#include "CCore.h"
+#include "../CCore.h"
 //#include "CGUI.h"
 
 CGUIElement::CGUIElement()

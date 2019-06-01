@@ -1,5 +1,5 @@
 #include "CGUIButton.h"
-#include "CCore.h"
+#include "../CCore.h"
 #include <stdio.h>
 
 extern CCore* core;
