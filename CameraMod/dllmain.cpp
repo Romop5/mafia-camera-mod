@@ -18,16 +18,18 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
         MessageBox(NULL, "LOL", "WTF", MB_OK);
         CCore* coreInstance = new CCore();
         core = coreInstance;
-        core->getHook()->ApplyThem();
-        core->SetModule(hModule);
-        core->getModControl()->Init();
+
+        if(core->Initialize())
+        {
+            CLog::getStream() << "CameraMod initialized correctly !" << std::endl;
+        }
         break;
     }
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
         break;
     case DLL_PROCESS_DETACH:
-        core->getHook()->UnloadThem();
+        core->Unload();
         break;
     }
     return TRUE;

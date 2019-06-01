@@ -23,6 +23,7 @@ add_library(CameraMod SHARED
 	CHooks.cpp
 	CD3D9Accessor.cpp
 	CImGUIAdaptor.cpp
+        CCore.cpp
 	dllmain.cpp
 
 # Separate cd3dfont
@@ -33,8 +34,6 @@ add_library(CameraMod SHARED
 	../vendors/cd3dfont/d3dutil.h
 	../vendors/cd3dfont/dxutil.cpp
 	../vendors/cd3dfont/dxutil.h
-
-	windowsHack.cpp
 
 # RC for mouse.png
 	camera/camera.rc
@@ -55,6 +54,7 @@ target_include_directories(CameraMod PRIVATE ../vendors/ ../vendors/DirectX9SDK2
 target_include_directories(CameraMod PRIVATE ../vendors/d3d8to9/source)
 target_include_directories(CameraMod PRIVATE ../vendors/imgui)
 target_link_libraries(CameraMod PRIVATE imgui)
+target_link_libraries(CameraMod PRIVATE utilslib)
 
 target_link_libraries(CameraMod PRIVATE ${PROJECT_SOURCE_DIR}/vendors/DirectX9SDK2007/Lib/x86/d3dx8.lib)
 target_link_libraries(CameraMod PRIVATE winmm)

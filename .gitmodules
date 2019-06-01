@@ -1,0 +1,3 @@
+[submodule "vendors/utilslib"]
+	path = vendors/utilslib
+	url = https://github.com/Romop5/utilslib

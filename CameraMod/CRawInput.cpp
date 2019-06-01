@@ -59,5 +59,5 @@ void CRawInput::OnMouseTick(RAWMOUSE* mouse)
         core->getGUI()->OnMouseButtons(mouse->usButtonFlags);
     }
 
-    sprintf(this->debuf, "OnMouseTick %x", mouse->usButtonFlags);
+    //sprintf(this->debuf, "OnMouseTick %x", mouse->usButtonFlags);
 }

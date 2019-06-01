@@ -56,11 +56,16 @@ public:
     void SetModule(HMODULE dll) { this->p_DLL = dll; }
 
     HMODULE p_DLL;
+
+    bool Initialize();
+    bool Unload();
+
+    IDirect3DDevice8* m_originalD3DDriver;
 };
+
 void DetachIt(void* cor)
 {
     CCore* corePointer = (CCore*)cor;
     FreeLibraryAndExitThread(corePointer->p_DLL, 0);
 }
-
 #endif

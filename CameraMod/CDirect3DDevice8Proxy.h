@@ -1,24 +1,18 @@
-/*#include "../vendors/DirectX9SDK2007/Include/d3d8.h"
-#include "../vendors/dx8sdk/include/d3dx8.h"
-*/
-#include "CCore.h"
+#ifndef C_DIRECT3DDEVICE8PROXY
+#define C_DIRECT3DDEVICE8PROXY
+/* Author: Unknown
+ */
 #include "d3d8.h"
 #include "d3dx8.h"
 
-extern CCore* core;
-
 class CDirect3DDevice8Proxy : public IDirect3DDevice8 {
-private:
+protected:
     IDirect3DDevice8* p_Dev;
-    /*LPD3DXFONT			chatFont;
-  LPDIRECT3DTEXTURE8	pTexture;
-  LPD3DXSPRITE		sprite;*/
 public:
     IDirect3DDevice8* getProxy() const { return p_Dev; }
-    CDirect3DDevice8Proxy(IDirect3DDevice8* DID)
-        : p_Dev(DID)
+    CDirect3DDevice8Proxy()
+        : p_Dev(NULL)
     {
-        core->getGraphics()->SetDevice(this);
     }
 
     /*** IUnknown methods ***/
@@ -95,10 +89,7 @@ public:
     STDMETHOD(Reset)
     (D3DPRESENT_PARAMETERS* presentParam)
     {
-        core->getGraphics()->OnDeviceLost();
         HRESULT hr = p_Dev->Reset(presentParam);
-        if (SUCCEEDED(hr))
-            core->getGraphics()->OnDeviceReset();
         return hr;
     }
     STDMETHOD(Present)
@@ -218,30 +209,6 @@ public:
     STDMETHOD(EndScene)
     ()
     {
-
-        // render to certain part of screen
-
-        /*D3DVIEWPORT8 backup, newView;
-    D3DMATRIX	backupMatrix;
-
-    this->GetTransform(D3DTS_PROJECTION, &backupMatrix);
-    this->GetViewport(&backup);
-
-    // do our stuff
-    newView.X = 0;
-    newView.Y = 0;
-    newView.Width = 50;
-    newView.Height = 20;
-    newView.MinZ = 0.0f;
-    newView.MaxZ = 1.0f;
-    this->SetViewport(&newView);
-
-    this->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 40, 100), 1.0f, 0);
-
-    this->SetTransform(D3DTS_PROJECTION, &backupMatrix);
-    this->SetViewport(&backup);*/
-
-        core->getGraphics()->onEndScene();
         return p_Dev->EndScene();
     }
     STDMETHOD(Clear)
@@ -270,14 +237,6 @@ public:
     STDMETHOD(SetViewport)
     (const D3DVIEWPORT8* pViewport)
     {
-
-        /*this->viewportBackup.X = pViewport->X;
-    this->viewportBackup.Y = pViewport->Y;
-    this->viewportBackup.Width = pViewport->Width;
-    this->viewportBackup.Height = pViewport->Height;
-
-    this->viewportBackup.MinZ = pViewport->MinZ;
-    this->viewportBackup.MaxZ = pViewport->MaxZ;*/
         return p_Dev->SetViewport(pViewport);
     }
     STDMETHOD(GetViewport)
@@ -570,3 +529,4 @@ public:
     STDMETHOD(DeletePatch)
     (UINT Handle) { return p_Dev->DeletePatch(Handle); }
 };
+#endif

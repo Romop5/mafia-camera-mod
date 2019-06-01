@@ -9,6 +9,11 @@
 
 extern CCore* core;
 
+namespace GameOffsets
+{
+    const DWORD LS3D_D3D_DRIVER = 0x101C167C;
+};
+
 DWORD peekOriginal = NULL;
 char peekOriginalPatch[5];
 char peekOriginalPatchGamePhys[5];
@@ -146,45 +151,43 @@ _declspec(naked) void GameSpeed()
 // Apply all project hooks
 void	CHooks::ApplyThem()
 {
-	// hook for keyboard
-	peekOriginal = (DWORD)GetProcAddress(
-		GetModuleHandle(TEXT("user32.dll")),
-		"PeekMessageW");
-	InstallHook((void*)peekOriginal, myPeekMessage, peekOriginalPatch);
+    // Hook game's ProcessMessage routine -> needed for hooking keyboard
+    peekOriginal = (DWORD)GetProcAddress(
+            GetModuleHandle(TEXT("user32.dll")),
+            "PeekMessageW");
+    InstallHook((void*)peekOriginal, myPeekMessage, peekOriginalPatch);
 
-        //TODO: store and get width
-	HWND mafiaWindow = (HWND) *(DWORD*) 0x101C167C;
+    //TODO: store and get width
+    //HWND mafiaWindow = (HWND) *(DWORD*) 0x101C167C;
 
-	// hook for directx
-	//IDirect3DDevice8* pointer,*original;
-	original = (IDirect3DDevice8*) *(DWORD*) 0x101C167C;
-	pointer = new CDirect3DDevice8Proxy(original);
-	core->getGraphics()->SetDevice(pointer);
-	core->getGraphics()->Init();
-
-	*(DWORD*)0x101C167C = (DWORD)pointer;
-
-	// game physics
-
-	InstallHook((void*)0x005E1029, GamePhysics, peekOriginalPatchGamePhys);
-	InstallHook((void*)0x005E1058, GamePhysicsNPCS, peekOriginalPatchGamePhys2);
-	InstallHook((void*)0x005FFDC9, GameSpeed, peekOriginalPatchGameSpeed);
+    // game physics
+    InstallHook((void*)0x005E1029, GamePhysics, peekOriginalPatchGamePhys);
+    InstallHook((void*)0x005E1058, GamePhysicsNPCS, peekOriginalPatchGamePhys2);
+    InstallHook((void*)0x005FFDC9, GameSpeed, peekOriginalPatchGameSpeed);
 
 }
 
+///@Returns current D3D8 instance, used by LS3D engine
+IDirect3DDevice8* CHooks::getD3D8Driver()
+{
+    return (IDirect3DDevice8*) *(DWORD*) GameOffsets::LS3D_D3D_DRIVER;
+}
+
+///@brief Replaces D3D8 driver and returns the original one
+IDirect3DDevice8* CHooks::replaceDirectXDriver(IDirect3DDevice8* newDriver)
+{
+    auto oldDriverPtr = this->getD3D8Driver();
+    *(IDirect3DDevice8**) GameOffsets::LS3D_D3D_DRIVER = newDriver;
+    return oldDriverPtr;
+}
+
+
 void	CHooks::UnloadThem()
 {
-	*(DWORD*)0x101C167C = (DWORD)original;
-	Sleep(100);
+    Sleep(100);
 
-	UninstallHook(0x005E1029,peekOriginalPatchGamePhys);
-	UninstallHook(0x005E1058, peekOriginalPatchGamePhys2);
-	UninstallHook(0x005FFDC9, peekOriginalPatchGameSpeed);
-	UninstallHook(peekOriginal, peekOriginalPatch);
-	
-	core->getGraphics()->Unload();
-	core->getGame()->CameraUnlock();
-
-	
-
+    UninstallHook(0x005E1029,peekOriginalPatchGamePhys);
+    UninstallHook(0x005E1058, peekOriginalPatchGamePhys2);
+    UninstallHook(0x005FFDC9, peekOriginalPatchGameSpeed);
+    UninstallHook(peekOriginal, peekOriginalPatch);
 }

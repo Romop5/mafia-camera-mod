@@ -69,8 +69,7 @@ void CGraphics::Init()
 
     CLog::getStream() << "D3D8 Device: " << std::hex << this->device << std::dec
                       << std::endl;
-    auto d3d9Object = CD3D9Accessor::castFromD3D8(
-        reinterpret_cast<CDirect3DDevice8Proxy*>(this->device)->getProxy());
+    auto d3d9Object = CD3D9Accessor::castFromD3D8(this->device);
     CLog::getStream() << "D3D9 Device: " << std::hex << d3d9Object << std::dec
                       << std::endl;
 
@@ -145,13 +144,8 @@ void CGraphics::onEndScene()
     adaptor.Render();
 }
 
-void CGraphics::SetDevice(IDirect3DDevice8* device) { this->device = device; }
+void CGraphics::SetDevice(IDirect3DDevice8* device) { this->device = device; this->p_Dev = device; }
 IDirect3DDevice8* CGraphics::GetDevice() { return this->device; }
-
-void CGraphics::SetOriginalEndScene(void* address)
-{
-    this->originalEndScene = address;
-}
 
 void CGraphics::TextDraw(int x, int y, char* text, DWORD color)
 {

@@ -2,9 +2,8 @@
 #define C_GRAPHICS
 #include "../vendors/cd3dfont/d3dfont.h"
 #include "structures.h"
-//#include "../vendors/DirectX9SDK2007/Include/d3d8.h"
-//#include "../vendors/dx8sdk/include/d3dx8.h"
 
+#include "CDirect3DDevice8Proxy.h"
 #include "CImGUIAdaptor.hpp"
 #include "d3d8.h"
 #include "d3dx8.h"
@@ -19,10 +18,9 @@ struct RenderClip {
     D3DMATRIX projection;
 };
 
-class CGraphics {
+class CGraphics: public CDirect3DDevice8Proxy {
 private:
     IDirect3DDevice8* device;
-    void* originalEndScene;
     LPD3DXFONT g_font, g_mono;
     HFONT m_chatfontAPI;
 
@@ -38,10 +36,10 @@ public:
     CGraphics();
     void Init();
     void Unload();
+
     __declspec(noinline) void onEndScene();
     void SetDevice(IDirect3DDevice8* device);
     IDirect3DDevice8* GetDevice();
-    void SetOriginalEndScene(void* address);
 
     // callbacks
 
@@ -72,6 +70,16 @@ public:
         D3DCOLOR colorSec);
 
     Point2D GetScreenSize();
+
+    // Dx8 overrides
+    STDMETHOD(EndScene)
+    ()
+    {
+        // Call our callback
+        this->onEndScene();
+        // Call original
+        return CDirect3DDevice8Proxy::EndScene();
+    }
 };
 
 #endif
