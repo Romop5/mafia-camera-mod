@@ -1,5 +1,6 @@
 #ifndef C_GRAPHICS
 #define C_GRAPHICS
+#include <utilslib/callbacks.hpp>
 #include "../vendors/cd3dfont/d3dfont.h"
 #include "structures.h"
 
@@ -79,6 +80,8 @@ public:
         // Call original
         return CDirect3DDevice8Proxy::EndScene();
     }
+
+    utilslib::Callbacks<std::function<void()>> m_onRenderHandler;
  
 };
 

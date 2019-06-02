@@ -12,11 +12,7 @@ bool CCore::Initialize()
     this->getHook()->setInputMessageHandler(
             [&] (void* msg)->bool {
                 // Process input by our handlers
-                this->getRawInput()->ProcessMessage(reinterpret_cast<LPMSG>(msg));   
-                // block whole game input when mod is active
-                if(this->getModControl()->IsActive())		
-                    return false;
-                return true;
+                return this->getRawInput()->ProcessMessage(reinterpret_cast<LPMSG>(msg));   
             });
     // Apply keyboard hook etc.
     this->getHook()->ApplyThem();
@@ -30,12 +26,11 @@ bool CCore::Initialize()
 
     // Initialize graphics 
     this->getGraphics()->Init();
-    this->getModControl()->Init();
 
     // Register onPressKey callback
     this->getRawInput()->m_onKeyPressedHandlers.add(
-            [&] (USHORT pressedKey)->void {
-                this->getModControl()->OnVKKey(pressedKey); 
+            [&] (USHORT pressedKey)->bool {
+                return this->getModControl()->OnVKKey(pressedKey); 
             });
     // Register mouse move callback
     this->getRawInput()->m_onMouseMoveHandlers.add(

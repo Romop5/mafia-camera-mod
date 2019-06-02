@@ -44,29 +44,16 @@ void CGraphics::Unload()
 
 void CGraphics::onEndScene()
 {
-    D3DXVECTOR2 scaling;
-    scaling.x = 1.0f; // 1024
-    scaling.y = 1.0f; // 768
-
-    if (core->getModControl()->IsActive()) {
-        if (core->getModControl()->GetState() == CMOD_PICKING) {
-            Point2D mouse = this->GetMouseCoords();
-
-            D3DXVECTOR2 translation;
-            translation.x = (float)mouse.x;
-            translation.y = (float)mouse.y;
-
-            Sprite->Begin(); // For transparent images, set the flag value to 16.
-            Sprite->Draw(Texture, NULL, &scaling, NULL, 0.0, &translation,
-                D3DCOLOR_ARGB(255, 255, 255, 255));
-            Sprite->End();
-        }
-    }
-
     // Update mouse in ImGui
     Point2D mouse = this->GetMouseCoords();
     adaptor.updateMousePosition(mouse);
     adaptor.Render();
+
+    // call callbacks
+    for(auto callback: m_onRenderHandler)
+    {
+        callback();
+    }
 }
 
 void CGraphics::SetDevice(IDirect3DDevice8* device) { this->device = device; this->p_Dev = device; }
