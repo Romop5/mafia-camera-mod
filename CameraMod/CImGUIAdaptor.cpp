@@ -2,6 +2,8 @@
 #include "imgui.h"
 #include "imgui_impl_dx9.h"
 #include <windows.h>
+#include <vector>
+#include <tuple>
 
 void CImGUIAdaptor::Initialize(IDirect3DDevice9* device, Point2D size)
 {
@@ -144,6 +146,7 @@ void CImGUIAdaptor::Win32NewFrame()
     RECT rect;
     //::GetClientRect(g_hWnd, &rect);
     io.DisplaySize = ImVec2(this->screenSize.x, this->screenSize.y);
+    io.MouseDrawCursor = true;
 
     /*
   // Setup time step
@@ -188,12 +191,15 @@ void CImGUIAdaptor::updateMousePosition(Point2D position)
 
 void CImGUIAdaptor::updateButton(unsigned short state)
 {
+   std::vector<std::pair<unsigned short,unsigned short>> buttons = { {0, RI_MOUSE_LEFT_BUTTON_DOWN}, {1, RI_MOUSE_RIGHT_BUTTON_DOWN}};
    ImGuiIO& io = ImGui::GetIO();
-   if (state & RI_MOUSE_LEFT_BUTTON_DOWN) {
-        io.MouseDown[0] = true;
+   for(auto &pair: buttons)
+   {
+       auto id = pair.first;
+       auto flag = pair.second;
+       if(state & flag)
+           io.MouseDown[id] = true;
+       else
+           io.MouseDown[id] = false;
    }
-   if (state & RI_MOUSE_RIGHT_BUTTON_DOWN) {
-        io.MouseDown[1] = true;
-   }
-              
 }
