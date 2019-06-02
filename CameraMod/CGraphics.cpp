@@ -19,50 +19,6 @@ CGraphics::CGraphics()
 
 void CGraphics::Init()
 {
-
-    // D3DXCreateFontIndirect(device, &fontDesc, &g_font);
-    /*
-  m_chatfontAPI = CreateFont(20, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET,
-  OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, 0,
-  TEXT("arialbold"));  //arial bold, lucida console
-  D3DXCreateFont(this->GetDevice(), m_chatfontAPI, &g_font);
-
-  HFONT mono = CreateFont(15, 0, 0, 0, 0, 0, 0, 0, ANSI_CHARSET,
-  OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, 0, TEXT("Lucida
-  Console"));  //arial bold, lucida console D3DXCreateFont(this->GetDevice(),
-  mono, &g_mono);
-
-
-  //HRESULT DTEX = D3DXCreateTextureFromResourceA(this->GetDevice(),
-  GetModuleHandleA("CameraMod.dll"), MAKEINTRESOURCEA(IDB_BITMAP1), &Texture);
-
-  HRESULT DTEX = D3DXCreateTextureFromResourceEx(this->GetDevice(),
-  GetModuleHandleA("CameraMod.dll"), MAKEINTRESOURCEA(IDB_BITMAP1),
-  D3DX_DEFAULT, D3DX_DEFAULT, 0, D3DUSAGE_DYNAMIC, D3DFMT_UNKNOWN,
-  D3DPOOL_DEFAULT, D3DX_FILTER_LINEAR, D3DX_FILTER_LINEAR, D3DCOLOR_XRGB(0, 0,
-  0), NULL, NULL, &Texture); HRESULT DSPR = D3DXCreateSprite(this->GetDevice(),
-  &Sprite);
-
-  betterFont = new CD3DFont("Tahoma", 12);
-  betterFont->InitDeviceObjects(this->device);
-  betterFont->RestoreDeviceObjects();
-
-
-  BasicVertex SetvertexCube[] =
-  {
-          { 0.0f, 1.0f, 0.0f, 0xFFFF0000 }, // top corner
-          { 1.0f, -1.0f, -1.0f, 0xFF00FF00 }, // right, front
-          { -1.0f, -1.0f, -1.0f, 0xFF0000FF }, // left, front
-
-          { -1.0f, -1.0f, 1.0f, 0xFF00FF00 }, // back, left
-
-          { 1.0f, -1.0f, 1.0f, 0xFF0000FF }, // back, right
-          { 1.0f, -1.0f, -1.0f, 0xFF00FF00 }
-  };
-  memcpy(vertexCube, SetvertexCube, sizeof(SetvertexCube));	// copy to
-  static vertex array
-
-  */
     // Note: this is a hack and it requires d3d8to9 to be compiled using the same
     // compilator as CameraMode is due to the fact that C++ may not be binary
     // compatible when compiling classes
@@ -83,18 +39,12 @@ void CGraphics::Init()
 
 void CGraphics::Unload()
 {
-    this->Sprite->Release();
-    this->g_font->Release();
-    this->g_mono->Release();
-    this->Texture->Release();
-
     adaptor.CleanUP();
 }
 
 void CGraphics::onEndScene()
 {
     core->getModControl()->Render();
-
     D3DXVECTOR2 scaling;
     scaling.x = 1.0f; // 1024
     scaling.y = 1.0f; // 768
@@ -113,31 +63,7 @@ void CGraphics::onEndScene()
             Sprite->End();
         }
     }
-    /*char buff[10];
-  sprintf(buff, "%d", core->IsGamePhysicRunning());
-  this->TextDraw(700, 10, buff, 0xff00adef);
-  */
-    // this->FillARGB(100, 100, 100, 100, 0x30FFFFFF);
-    // this->FillARGBGradient(200, 100, 100, 100, 0x30FFFFFF, 0x30000000);
-    /*for (int i = 0; i < 1000; i++)
-  {
-          this->FillARGB(100, 100, 100, 100, 0x30FFFFFF);
-          //RECT rectA = { 20, 30, 1000, 1000 };
-          //g_mono->DrawTextA("test, realy test , just test for performance,
-  test, test, test", -1, &rectA, DT_LEFT, 0xffFFffFF);
-          //betterFont->DrawTextA(20, 30, 0xFF00ff00, "test, realy test , just
-  test for performance, test, test, test");
-  }*/
 
-    // betterFont->DrawTextA(500, 200, 0xff00adef, "Was ist das");
-    // betterFont->DrawTextA(500, 230, 0xff00adef, "Was ist
-    // das",D3DFONT_FILTERED);
-    /*Vector3D pos;
-  pos.x = 0.0f;
-  pos.y = 0.0f;
-  pos.z = 0.0f;
-  this->DrawCubePoint(pos);
-  */
     // Update mouse in ImGui
     Point2D mouse = this->GetMouseCoords();
     adaptor.updateMousePosition(mouse);
@@ -149,9 +75,6 @@ IDirect3DDevice8* CGraphics::GetDevice() { return this->device; }
 
 void CGraphics::TextDraw(int x, int y, char* text, DWORD color)
 {
-    // RECT recta = { x, y, x+1000, y+100 };
-    // g_font->DrawTextA(text, strlen(text), &recta, DT_LEFT | DT_SINGLELINE,
-    // color);
     if (betterFont)
         betterFont->DrawTextA(x, y, color, text, D3DFONT_FILTERED);
     // g_font->Begin();

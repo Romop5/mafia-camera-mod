@@ -7,17 +7,6 @@ add_library(CameraMod SHARED
 	CameraMod.cpp
 	CGame.cpp
 	CGraphics.cpp
-	gui/CGUI.cpp
-	gui/CGUIButton.cpp
-	gui/CGUICheckbox.cpp
-	gui/CGUIEditbox.cpp
-	gui/CGUIElement.cpp
-	gui/CGUIElementsPool.cpp
-	gui/CGUIGroup.cpp
-	gui/CGUILabel.cpp
-	gui/CGUIScrollbox.cpp
-	gui/CGUITableList.cpp
-	gui/CGUIWindow.cpp
 	CModControl.cpp
 	CRawInput.cpp
 	CHooks.cpp

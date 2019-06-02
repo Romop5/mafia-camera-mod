@@ -43,22 +43,7 @@ private:
     int playingTime;
     float playintSpeed;
 
-    CGUIButton* p_Test;
-    CGUITableList *listPoints, *listPaths;
-    CGUIEditbox* speedBox;
-    int pointID;
-
-    CGUIGroup *groupPoints, *groupPaths, *groupSettings, *groupAbout;
-    CGUIButton *butPoints, *butPaths, *butSettings, *butAbout;
-    CGUIButton *butPointsAddNew, *butPointsDelete;
-    CGUILabel *pointALab, *pointBLab;
-
-    CGUIButton *butPathsSwap, *butPathsDelete;
-    CGUIEditbox* editPathsSpeed;
-    CGUICheckbox* gameHasHUD;
-
 public:
-    CGUIEditbox* editSettingsSpeed;
     CModControl();
     bool IsActive();
     void OnVKKey(USHORT key);
@@ -76,10 +61,6 @@ public:
     void ToggleMod();
 
     void Init();
-
-    void onGUIClick(CGUIElement* elem);
-    void onGUISelectElement(CGUIElement* elem, int ID);
-    void onGUIElementChanged(CGUIElement* elem);
 
     CamPoint* GetPointID(int ID);
 };

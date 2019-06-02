@@ -112,9 +112,7 @@ void GetGameSpeed(unsigned int actualSpeed,unsigned int& newspeed)
 {
 
 	unsigned int desiredSpeed = 100;
-	if (core->getModControl()->editSettingsSpeed != NULL)
-		desiredSpeed = (unsigned int)atoi(core->getModControl()->editSettingsSpeed->GetInput());
-	//return (unsigned int) (actualSpeed*desiredSpeed/100);
+        desiredSpeed = actualSpeed;
 	newspeed = (actualSpeed * desiredSpeed / 100);
 }
 

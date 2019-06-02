@@ -15,7 +15,6 @@ CModControl::CModControl()
     this->playingTime = 1;
     this->playintSpeed = 100.0f;
 
-    this->pointID = 0;
 }
 
 bool CModControl::IsActive() { return this->p_bIsActive; }
@@ -35,7 +34,6 @@ void CModControl::OnVKKey(USHORT key)
         if (GetKeyState(VK_LSHIFT) && 0x8000)
             Camspeed = 5.0f;
 
-        core->getGUI()->OnInput(key);
         switch (key) {
         case VK_F2: {
             if (this->p_bIsActive) {
@@ -52,14 +50,8 @@ void CModControl::OnVKKey(USHORT key)
                 CamPoint point;
                 point.position = this->p_vectCamera;
                 point.rotation = this->p_vectCameraRot;
-                point.uniqueID = pointID;
                 this->points.push_back(point);
 
-                char buff[65];
-                sprintf(buff, "Point %d", pointID);
-                listPoints->AddElement(pointID, buff);
-
-                this->pointID++;
             }
         } break;
         case VK_F5: {
@@ -68,14 +60,11 @@ void CModControl::OnVKKey(USHORT key)
                     CamPath newpath;
                     newpath.pointA = this->pickedPoint;
                     newpath.pointB = this->pickedPointSecond;
-                    newpath.uniqueID = pointID;
                     newpath.lookAtPoint = -1;
                     newpath.speed = 100;
                     newpath.useLookAt = false;
                     this->paths.push_back(newpath);
 
-                    this->listPaths->AddElement(pointID, "Path");
-                    this->pointID++;
                 }
             }
         } break;
@@ -90,7 +79,6 @@ void CModControl::OnVKKey(USHORT key)
             if (this->p_bIsActive) {
                 this->paths.clear();
                 this->points.clear();
-                listPoints->Reset();
             }
         } break;
 
@@ -310,7 +298,6 @@ void CModControl::Render()
         }
 
         if (this->p_bControlState == CMOD_PICKING) {
-            core->getGUI()->OnRender();
         }
 
         if (this->p_bControlState == CMOD_PLAYER) {
@@ -405,258 +392,6 @@ void CModControl::ToggleMod()
 
 void CModControl::Init()
 {
-    CGUIElement* elem;
-    this->groupPoints = core->getGUI()->CreateGroup(true);
-    this->groupPaths = core->getGUI()->CreateGroup(false);
-    this->groupSettings = core->getGUI()->CreateGroup(false);
-    this->groupAbout = core->getGUI()->CreateGroup(false);
-
-    //----------------------------------- Groups
-    //---------------------------------------------------//
-    this->butPoints = core->getGUI()->CreateButton(20, 100, 60, 30, "Points");
-    this->butPoints->SetBackgroundState(false);
-
-    this->butPaths = core->getGUI()->CreateButton(80, 100, 60, 30, "Paths");
-    this->butPaths->SetBackgroundState(false);
-
-    this->butSettings = core->getGUI()->CreateButton(140, 100, 80, 30, "Settings");
-    this->butSettings->SetBackgroundState(false);
-
-    this->butAbout = core->getGUI()->CreateButton(210, 100, 80, 30, "About");
-    this->butAbout->SetBackgroundState(false);
-
-    //----------------------------------- Points
-    //---------------------------------------------------//
-    listPoints = core->getGUI()->CreateTableList(20, 150, 200, 300);
-    this->groupPoints->AddElement(this->listPoints);
-
-    this->butPointsAddNew = core->getGUI()->CreateButton(230, 150, 100, 25, "Add new");
-    this->butPointsAddNew->SetBackgroundColor(0xFF00adef);
-    this->groupPoints->AddElement(this->butPointsAddNew);
-
-    this->butPointsDelete = core->getGUI()->CreateButton(230, 180, 100, 25, "Delete point");
-    this->groupPoints->AddElement(this->butPointsDelete);
-
-    //------------------------------------ Paths
-    //-------------------------------------------------//
-    listPaths = core->getGUI()->CreateTableList(20, 150, 200, 300);
-    this->groupPaths->AddElement(this->listPaths);
-
-    elem = core->getGUI()->CreateLabel(230, 150, "Point A:");
-    this->groupPaths->AddElement(elem);
-
-    elem = core->getGUI()->CreateLabel(230, 180, "Point B:");
-    this->groupPaths->AddElement(elem);
-
-    pointALab = core->getGUI()->CreateLabel(330, 150, "0");
-    this->groupPaths->AddElement(pointALab);
-
-    pointBLab = core->getGUI()->CreateLabel(330, 180, "0");
-    this->groupPaths->AddElement(pointBLab);
-
-    butPathsSwap = core->getGUI()->CreateButton(230, 210, 100, 25, "Swap points");
-    this->groupPaths->AddElement(butPathsSwap);
-    butPathsSwap->SetBackgroundColor(0xFF00adef);
-
-    butPathsDelete = core->getGUI()->CreateButton(230, 240, 100, 25, "Delete path");
-    this->groupPaths->AddElement(butPathsDelete);
-
-    elem = core->getGUI()->CreateLabel(230, 270, "Duration:");
-    this->groupPaths->AddElement(elem);
-    elem = core->getGUI()->CreateLabel(230, 295, "(in frames)");
-    this->groupPaths->AddElement(elem);
-
-    editPathsSpeed = core->getGUI()->CreateEditbox(330, 270, 100, 25, "100");
-    this->groupPaths->AddElement(editPathsSpeed);
-
-    //------------------------------------ Settings
-    //-------------------------------------------------//
-
-    elem = core->getGUI()->CreateLabel(20, 150, "Game speed:");
-    this->groupSettings->AddElement(elem);
-    elem = core->getGUI()->CreateLabel(20, 180, "100 normal, less is slower");
-    this->groupSettings->AddElement(elem);
-
-    editSettingsSpeed = core->getGUI()->CreateEditbox(150, 150, 100, 25, "100");
-    this->groupSettings->AddElement(editSettingsSpeed);
-
-    elem = core->getGUI()->CreateLabel(20, 210, "HUD:");
-    this->groupSettings->AddElement(elem);
-    gameHasHUD = core->getGUI()->CreateCheckbox(150, 210, 25, 25, true);
-    this->groupSettings->AddElement(gameHasHUD);
-
-    //------------------------------------ About
-    //-------------------------------------------------//
-    elem = core->getGUI()->CreateLabel(
-        20, 150, "Romop5's camera mod - by Romop5 - THIS IS A PREVIEW VERSION");
-    this->groupAbout->AddElement(elem);
-    elem = core->getGUI()->CreateLabel(20, 180,
-        "Credits to IS for the best game ever.");
-    this->groupAbout->AddElement(elem);
-
-    elem = core->getGUI()->CreateLabel(20, 250, "http://lh-mp.eu");
-    this->groupAbout->AddElement(elem);
-    elem = core->getGUI()->CreateLabel(20, 280, "http://mafiascene.com");
-    this->groupAbout->AddElement(elem);
-    elem = core->getGUI()->CreateLabel(20, 310, "http://mafia.czech-games.net");
-    this->groupAbout->AddElement(elem);
-
-    // test
-    /*CGUIWindow* win = core->getGUI()->GUICreateWindow(100, 100, 300,
-  150,"Okienko"); elem = core->getGUI()->CreateButton(20, 20, 100, 25,
-  "Rapper"); win->AddElement(elem);
-  */
-
-    // win = core->getGUI()->GUICreateWindow(100, 300, 100, 100, "Ahoj moj");
-
-    /*position.x = 500;
-  position.y = 300;
-  this->p_Test = core->getGUI()->CreateButton(position, 150, 30, "Get high, So
-  high");
-
-  position.x = 20;
-  position.y = 150;
-  list = core->getGUI()->CreateTableList(position, 200, 300);
-  this->group->AddElement(this->list);
-
-  position.x = 700;
-  position.y = 150;
-  speedBox = core->getGUI()->CreateEditbox(position, 80, 25, "100");
-  this->group->AddElement(this->speedBox);
-
-  position.x = 700;
-  position.y = 170;
-  gamespeedBox = core->getGUI()->CreateEditbox(position, 80, 25, "100");
-  this->group->AddElement(this->gamespeedBox);*/
-}
-
-void CModControl::onGUIClick(CGUIElement* elem)
-{
-    if (elem == this->butPaths) {
-        this->groupPaths->SetVisible(true);
-        this->groupPoints->SetVisible(false);
-        this->groupSettings->SetVisible(false);
-        this->groupAbout->SetVisible(false);
-    }
-    if (elem == this->butPoints) {
-        this->groupPaths->SetVisible(false);
-        this->groupPoints->SetVisible(true);
-        this->groupSettings->SetVisible(false);
-        this->groupAbout->SetVisible(false);
-    }
-    if (elem == this->butSettings) {
-        this->groupPaths->SetVisible(false);
-        this->groupPoints->SetVisible(false);
-        this->groupSettings->SetVisible(true);
-        this->groupAbout->SetVisible(false);
-    }
-    if (elem == this->butAbout) {
-        this->groupPaths->SetVisible(false);
-        this->groupPoints->SetVisible(false);
-        this->groupSettings->SetVisible(false);
-        this->groupAbout->SetVisible(true);
-    }
-
-    // others
-    if (elem == this->butPointsAddNew) {
-    }
-
-    if (elem == this->butPointsDelete) {
-        int ID = this->listPoints->GetElementID(this->listPoints->GetSelectedID());
-
-        if (ID != -1) {
-            int size = this->points.size();
-            for (int i = 0; i < size; i++) {
-                if (this->points[i].uniqueID == ID) {
-                    this->points.erase(this->points.begin() + i);
-                    this->listPoints->DeleteElement(ID);
-                    break;
-                }
-            }
-        }
-    }
-    if (elem == this->butPathsSwap) {
-        int ID = this->listPaths->GetSelectedID();
-
-        if (ID != -1 && ID < this->paths.size()) {
-            int swapPoint = this->paths[ID].pointA;
-            this->paths[ID].pointA = this->paths[ID].pointB;
-            this->paths[ID].pointB = swapPoint;
-
-            char buff[12];
-            sprintf(buff, "%d", paths[ID].pointA);
-            pointALab->SetText(buff);
-
-            sprintf(buff, "%d", paths[ID].pointB);
-            pointBLab->SetText(buff);
-        }
-    }
-
-    if (elem == this->butPathsDelete) {
-        int ID = this->listPaths->GetSelectedID();
-
-        if (ID != -1 && ID < this->paths.size()) {
-            /*int size = this->points.size();
-      for (int i = 0; i < size; i++)
-      {
-              if (this->points[i].uniqueID == ID)
-              {
-                      this->points.erase(this->points.begin() + i);
-                      this->listPoints->DeleteElement(ID);
-                      break;
-              }
-      }*/
-            this->paths.erase(paths.begin() + ID);
-            this->listPaths->DeleteElementInOrder(ID);
-        }
-    }
-}
-
-void CModControl::onGUISelectElement(CGUIElement* elem, int ID)
-{
-    if (elem == listPoints) {
-        int pointID = listPoints->GetElementID(ID);
-        if (pointID != -1) {
-            int size = this->points.size();
-            for (int i = 0; i < size; i++) {
-                if (points[i].uniqueID == pointID) {
-                    this->p_vectCamera = points[i].position;
-                    this->p_vectCameraRot = points[i].rotation;
-                    this->UpdateCam();
-                    break;
-                }
-            }
-        }
-    }
-    if (elem == listPaths) {
-        if (ID < paths.size() && ID > -1) {
-            char buff[12];
-            sprintf(buff, "%d", paths[ID].pointA);
-            pointALab->SetText(buff);
-
-            sprintf(buff, "%d", paths[ID].pointB);
-            pointBLab->SetText(buff);
-
-            sprintf(buff, "%d", paths[ID].speed);
-            editPathsSpeed->SetInput(buff);
-        }
-    }
-}
-
-void CModControl::onGUIElementChanged(CGUIElement* elem)
-{
-    if (elem == editPathsSpeed) {
-        if (listPaths->GetSelectedID() != -1 && listPaths->GetSelectedID() < paths.size()) {
-            paths[listPaths->GetSelectedID()].speed = atoi(editPathsSpeed->GetInput());
-        }
-    }
-    if (elem == gameHasHUD) {
-        // core->getGame()->ToggleHUD(gameHasHUD->IsChecked());
-        if (gameHasHUD->IsChecked() != 1)
-            (*(byte*)0x006613D4) |= 1 << 0;
-        else
-            (*(byte*)0x006613D4) &= ~(1 << 0);
-    }
 }
 
 CamPoint* CModControl::GetPointID(int ID)

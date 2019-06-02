@@ -7,9 +7,7 @@
 #include <vector>
 
 #include "tools.h"
-// include classes
 
-#include "gui/CGUI.h"
 #include "CGame.h"
 #include "CGraphics.h"
 #include "CHooks.h"
@@ -26,7 +24,6 @@ private:
     CRawInput p_CRawinput;
     CGame p_CGame;
     CModControl p_CModControl;
-    CGUI p_CGUI;
 
     bool p_isGamePhys;
 
@@ -42,8 +39,6 @@ public:
     CGame* getGame() { return &this->p_CGame; }
 
     CModControl* getModControl() { return &this->p_CModControl; }
-
-    CGUI* getGUI() { return &this->p_CGUI; }
 
     void ModDetach()
     {
