@@ -1,5 +1,7 @@
 #ifndef C_IMGUIADAPTOR
 #define C_IMGUIADAPTOR
+#include <utilslib/callbacks.hpp>
+
 #include "structures.h"
 struct IDirect3DDevice9;
 
@@ -14,7 +16,9 @@ public:
     void Invalidate();
     void updateMousePosition(Point2D position);
     void updateButton(unsigned short state);
-
+    
+    // Register for content generators
+    utilslib::Callbacks<std::function<void()>> m_contentRenderers;
 private:
     Point2D screenSize;
 };

@@ -52,6 +52,13 @@ bool CCore::Initialize()
             [&] (unsigned short state)->void {
                 this->getGraphics()->getImGUIAdaptor().updateButton(state);
             });
+
+    // Register GUI content generator callback
+    this->getGraphics()->getImGUIAdaptor().m_contentRenderers.add(
+            [&] ()->void
+            {
+                this->getModControl()->Render();
+            });
     return true;
 }
 bool CCore::Unload()

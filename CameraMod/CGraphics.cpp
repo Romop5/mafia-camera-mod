@@ -44,7 +44,6 @@ void CGraphics::Unload()
 
 void CGraphics::onEndScene()
 {
-    core->getModControl()->Render();
     D3DXVECTOR2 scaling;
     scaling.x = 1.0f; // 1024
     scaling.y = 1.0f; // 768

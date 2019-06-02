@@ -16,7 +16,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
         DisableThreadLibraryCalls(hModule);
         utilslib::Logger::getLogger()->openAs("cameramod.log");
         utilslib::Logger::getInfo() << "CameraMod injected !" << std::endl;
-        MessageBox(NULL, "LOL", "WTF", MB_OK);
+        //MessageBox(NULL, "LOL", "WTF", MB_OK);
         CCore* coreInstance = new CCore();
         core = coreInstance;
 
