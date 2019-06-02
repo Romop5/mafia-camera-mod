@@ -1,10 +1,13 @@
 #ifndef C_HOOKS
 #define C_HOOKS
-
+#include <functional>
 struct IDirect3DDevice8;
+
+using MessageHandler_t = std::function<bool(void*)>;
 
 class CHooks {
 public:
+    void setInputMessageHandler(MessageHandler_t handler); 
     void ApplyThem();
     void UnloadThem();
 

@@ -3,9 +3,9 @@
 
 #define POINTER_64 __ptr64
 
-#include "CDirect3DDevice8Proxy.h"
-
+//#include "CDirect3DDevice8Proxy.h"
 #include "CCore.h"
+#include <functional>
 
 extern CCore* core;
 
@@ -14,42 +14,41 @@ namespace GameOffsets
     const DWORD LS3D_D3D_DRIVER = 0x101C167C;
 };
 
+MessageHandler_t userHandler;
+
 DWORD peekOriginal = NULL;
 char peekOriginalPatch[5];
 char peekOriginalPatchGamePhys[5];
 char peekOriginalPatchGamePhys2[5];
 char peekOriginalPatchGameSpeed[5];
-IDirect3DDevice8* pointer, *original;
 
 BOOL WINAPI myPeekMessage(
-	_Out_     LPMSG lpMsg,
-	_In_opt_  HWND hWnd,
-	_In_      UINT wMsgFilterMin,
-	_In_      UINT wMsgFilterMax,
-	_In_      UINT wRemoveMsg
-	)
+    _Out_     LPMSG lpMsg,
+    _In_opt_  HWND hWnd,
+    _In_      UINT wMsgFilterMin,
+    _In_      UINT wMsgFilterMax,
+    _In_      UINT wRemoveMsg
+    )
 {
-	UninstallHook(peekOriginal, peekOriginalPatch);
-	// call func
-	bool result = PeekMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg) == 1;
-	InstallHook((void*)peekOriginal, myPeekMessage, peekOriginalPatch);
+    // Enable original function & call it
+    UninstallHook(peekOriginal, peekOriginalPatch);
+    bool result = PeekMessageW(lpMsg, hWnd, wMsgFilterMin, wMsgFilterMax, wRemoveMsg) == 1;
+    // Restore our hook
+    InstallHook((void*)peekOriginal, myPeekMessage, peekOriginalPatch);
 
-	// do our code
-	if (result)
-	{
-		switch (lpMsg->message)
-		{
-		case WM_INPUT:
-		{
-			core->getRawInput()->ProcessMessage(lpMsg);
-			if (core->getModControl()->IsActive())		// block whole game input when mod is active
-				return false;
-		}
-		default:
-			break;
-		}
-	}
-	return result;
+    // do our code
+    if (result)
+    {
+        switch (lpMsg->message)
+        {
+            // WM_INPUT messages contains RawInput messages with key strokes & keyboard state
+            // See https://docs.microsoft.com/en-us/windows/desktop/inputdev/raw-input
+            case WM_INPUT:
+                return userHandler(lpMsg);
+            default: break;
+        }
+    }
+    return result;
 }
 
 //naked
@@ -114,17 +113,11 @@ _declspec(naked) void GamePhysicsNPCS()
 void GetGameSpeed(unsigned int actualSpeed,unsigned int& newspeed)
 {
 
-	/*unsigned int desiredSpeed = 100;
-	if (core->getModControl()->gamespeedBox != NULL)
-		desiredSpeed = (unsigned int)atoi(core->getModControl()->gamespeedBox->GetInput());
-	//return (unsigned int) (actualSpeed*desiredSpeed/100);
-	newspeed = (actualSpeed * desiredSpeed / 100);*/
 	unsigned int desiredSpeed = 100;
 	if (core->getModControl()->editSettingsSpeed != NULL)
 		desiredSpeed = (unsigned int)atoi(core->getModControl()->editSettingsSpeed->GetInput());
 	//return (unsigned int) (actualSpeed*desiredSpeed/100);
 	newspeed = (actualSpeed * desiredSpeed / 100);
-	//newspeed = actualSpeed;
 }
 
 _declspec(naked) void GameSpeed()
@@ -146,6 +139,11 @@ _declspec(naked) void GameSpeed()
 			push 0x005FFDCF
 			retn;
 	}
+}
+
+void CHooks::setInputMessageHandler(MessageHandler_t handler)
+{
+    userHandler = handler;
 }
 
 // Apply all project hooks
@@ -182,7 +180,7 @@ IDirect3DDevice8* CHooks::replaceDirectXDriver(IDirect3DDevice8* newDriver)
 }
 
 
-void	CHooks::UnloadThem()
+void CHooks::UnloadThem()
 {
     Sleep(100);
 

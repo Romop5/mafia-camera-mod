@@ -1,7 +1,7 @@
-#include "CCore.h"
+#include "CRawInput.h"
 
-extern CCore* core;
-// RAW Input process taken from MSDN, just google it
+// Processes WM_INPUT messages and calls onKey/mouse callbacks
+//https://docs.microsoft.com/en-us/windows/desktop/inputdev/raw-input
 void CRawInput::ProcessMessage(LPMSG message)
 {
     UINT dwSize;
@@ -20,23 +20,14 @@ void CRawInput::ProcessMessage(LPMSG message)
             if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 
                 if (!(raw->data.keyboard.Flags & RI_KEY_BREAK))
-                    this->OnVKKey(raw->data.keyboard.VKey);
+                {
+                    auto virtualKeyCode = raw->data.keyboard.VKey;
+                    // Call all registered onKeyPressed callbacks
+                    for(auto callback: this->m_onKeyPressedHandlers)
+                        callback(virtualKeyCode);
+                }
 
             } else if (raw->header.dwType == RIM_TYPEMOUSE) {
-                // hResult = StringCchPrintf(szTempOutput, STRSAFE_MAX_CCH, TEXT("Mouse:
-                // usFlags=%04x ulButtons=%04x usButtonFlags=%04x usButtonData=%04x
-                // ulRawButtons=%04x lLastX=%04x lLastY=%04x
-                // ulExtraInformation=%04x\r\n"),
-                /*	raw->data.mouse.usFlags,
-                raw->data.mouse.ulButtons,
-                raw->data.mouse.usButtonFlags,
-                raw->data.mouse.usButtonData,
-                raw->data.mouse.ulRawButtons,
-                raw->data.mouse.lLastX,
-                raw->data.mouse.lLastY,
-                raw->data.mouse.ulExtraInformation);
-                */
-
                 this->OnMouseTick(&raw->data.mouse);
             }
             delete[] lpb;
@@ -44,20 +35,15 @@ void CRawInput::ProcessMessage(LPMSG message)
     }
 }
 
-void CRawInput::OnVKKey(USHORT vk) { core->getModControl()->OnVKKey(vk); }
-
 void CRawInput::OnMouseTick(RAWMOUSE* mouse)
 {
-    this->x = mouse->lLastX;
-    this->y = mouse->lLastY;
+    auto x = mouse->lLastX;
+    auto y = mouse->lLastY;
+    // Call all registered mouse movement handlers
+    for(auto handler: this->m_onMouseMoveHandlers)
+        handler(x,y);
 
-    core->getModControl()->OnMouseMove(x, y);
-    core->getModControl()->OnMouseButtons(mouse->usButtonFlags);
-
-    if (core->getModControl()->GetState() == CMOD_PICKING) {
-        core->getGUI()->OnMouseMove(x, y);
-        core->getGUI()->OnMouseButtons(mouse->usButtonFlags);
-    }
-
-    //sprintf(this->debuf, "OnMouseTick %x", mouse->usButtonFlags);
+    // Call all registered mouse movement handlers
+    for(auto handler: this->m_onMouseButtonsUpdateHandlers)
+        handler(mouse->usButtonFlags);
 }
