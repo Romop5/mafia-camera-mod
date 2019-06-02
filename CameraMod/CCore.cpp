@@ -1,14 +1,21 @@
 #include "CCore.h"
+#include <utilslib/logger.hpp>
 
 bool CCore::Initialize()
 {
+    auto version = this->getGame()->GetGameVersion();
+    if(version != 384)
+    {
+        utilslib::Logger::getError() << "Expecting game version 384 (1.0), found " << version << std::endl;
+        return false;
+    }
     this->getHook()->setInputMessageHandler(
             [&] (void* msg)->bool {
+                // Process input by our handlers
+                this->getRawInput()->ProcessMessage(reinterpret_cast<LPMSG>(msg));   
                 // block whole game input when mod is active
                 if(this->getModControl()->IsActive())		
                     return false;
-                // Otherwise, delegate input to RawInput class
-                this->getRawInput()->ProcessMessage(reinterpret_cast<LPMSG>(msg));   
                 return true;
             });
     // Apply keyboard hook etc.
@@ -23,8 +30,6 @@ bool CCore::Initialize()
 
     // Initialize graphics 
     this->getGraphics()->Init();
-    
-    //this->SetModule(hModule);
     this->getModControl()->Init();
 
     // Register onPressKey callback

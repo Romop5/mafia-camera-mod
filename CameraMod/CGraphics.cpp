@@ -2,9 +2,9 @@
 #include "CD3D9Accessor.h"
 #include "CDirect3DDevice8Proxy.h"
 #include "CImGUIAdaptor.hpp"
-#include "CLog.hpp"
 #include "camera/resource.h"
 //#include "CGraphics.h"
+#include <utilslib/logger.hpp>
 
 extern CCore* core;
 #pragma comment(lib, "d3dx8.lib")
@@ -67,17 +67,17 @@ void CGraphics::Init()
     // compilator as CameraMode is due to the fact that C++ may not be binary
     // compatible when compiling classes
 
-    CLog::getStream() << "D3D8 Device: " << std::hex << this->device << std::dec
+    utilslib::Logger::getInfo() << "D3D8 Device: " << std::hex << this->device << std::dec
                       << std::endl;
     auto d3d9Object = CD3D9Accessor::castFromD3D8(this->device);
-    CLog::getStream() << "D3D9 Device: " << std::hex << d3d9Object << std::dec
+    utilslib::Logger::getInfo() << "D3D9 Device: " << std::hex << d3d9Object << std::dec
                       << std::endl;
 
     // auto size = this->GetScreenSize();
     // CLog::getStream() << "Size: " << size.x << " - " << size.y << std::endl;
-    CLog::getStream() << "Initializing ImGUI" << std::endl;
-    // TODO: fix size
-    Point2D point = { 800, 600 };
+    utilslib::Logger::getInfo() << "Initializing ImGUI" << std::endl;
+
+    Point2D point = { core->getGame()->getScreenWidth(), core->getGame()->getScreenHeight()};
     adaptor.Initialize(d3d9Object, point);
 }
 

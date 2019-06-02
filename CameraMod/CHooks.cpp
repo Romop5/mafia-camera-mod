@@ -6,6 +6,9 @@ extern CCore* core;
 
 namespace GameOffsets
 {
+    // LS3D_BASE is where ls3df.dll is usually loaded. However, this can vary due
+    // to address space randomization, so relative addresses are used below
+    const DWORD LS3D_BASE = 0x10000000;
     const DWORD LS3D_D3D_DRIVER = 0x101C167C;
 };
 
@@ -163,14 +166,20 @@ void	CHooks::ApplyThem()
 ///@Returns current D3D8 instance, used by LS3D engine
 IDirect3DDevice8* CHooks::getD3D8Driver()
 {
-    return (IDirect3DDevice8*) *(DWORD*) GameOffsets::LS3D_D3D_DRIVER;
+    auto loadedBase = GetModuleBaseAddress(TEXT("ls3df.dll"));
+    auto loadedAddress = GetAddressBasedOnOldModule(GameOffsets::LS3D_D3D_DRIVER, GameOffsets::LS3D_BASE, loadedBase);
+    return (IDirect3DDevice8*) *(DWORD*) loadedAddress;
 }
 
 ///@brief Replaces D3D8 driver and returns the original one
 IDirect3DDevice8* CHooks::replaceDirectXDriver(IDirect3DDevice8* newDriver)
 {
     auto oldDriverPtr = this->getD3D8Driver();
-    *(IDirect3DDevice8**) GameOffsets::LS3D_D3D_DRIVER = newDriver;
+
+    auto loadedBase = GetModuleBaseAddress(TEXT("ls3df.dll"));
+    auto loadedAddress = GetAddressBasedOnOldModule(GameOffsets::LS3D_D3D_DRIVER, GameOffsets::LS3D_BASE, loadedBase);
+
+    *(IDirect3DDevice8**) loadedAddress =  newDriver;
     return oldDriverPtr;
 }
 

@@ -17,6 +17,12 @@ public:
     Vector3D GetPlayerPosition();
     Vector3D GetPlayerRotation();
     void ToggleHUD(bool state);
+    int GetGameVersion();
+
+    bool isWindowed() const;
+
+    size_t getScreenWidth() const;
+    size_t getScreenHeight() const;
 };
 
 #endif

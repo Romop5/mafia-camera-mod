@@ -1,5 +1,12 @@
 #include "CCore.h"
-//#include "CGame.h"
+
+namespace GameOffsets
+{
+    // LS3D_BASE is where ls3df.dll is usually loaded. However, this can vary due
+    // to address space randomization, so relative addresses are used below
+    const DWORD LS3D_BASE = 0x10000000;
+};
+
 
 void CGame::SetCameraPos(Vector3D pos, float r1, float r2, float r3, float r4)
 {
@@ -110,4 +117,47 @@ void CGame::ToggleHUD(bool state)
         (*(byte*)0x006613D4) |= 1 << 0;
     else
         (*(byte*)0x006613D4) &= ~(1 << 0);
+}
+
+int CGame::GetGameVersion()
+{
+    // 180 - 385 - 1.00
+    if (*(DWORD*)0x005F99FE == 0x180)
+            return 384;
+    // 18B - 395 - 1.02
+    if (*(DWORD*)0x005BEC2E == 0x18B)
+            return 395;
+    // if we haven't detected any version
+    return 0;
+}
+
+bool CGame::isWindowed() const
+{
+    auto loadedBase = GetModuleBaseAddress(TEXT("ls3df.dll"));
+    auto loadedAddress = GetAddressBasedOnOldModule(0x101C127C, GameOffsets::LS3D_BASE, loadedBase);
+    return (bool) *(unsigned char*) loadedAddress;
+}
+
+size_t CGame::getScreenWidth() const
+{
+    auto loadedBase = GetModuleBaseAddress(TEXT("ls3df.dll"));
+    auto firstAddress = GetAddressBasedOnOldModule(0x101C156C, GameOffsets::LS3D_BASE, loadedBase);
+    auto secondAddress = GetAddressBasedOnOldModule(0x101C1560, GameOffsets::LS3D_BASE, loadedBase);
+    if(this->isWindowed())
+    {
+        return (size_t) (*(DWORD*) firstAddress);
+    }
+    return (size_t)(*(DWORD*) secondAddress);
+}
+
+size_t CGame::getScreenHeight() const
+{
+    auto loadedBase = GetModuleBaseAddress(TEXT("ls3df.dll"));
+    auto firstAddress = GetAddressBasedOnOldModule(0x101C1570, GameOffsets::LS3D_BASE, loadedBase);
+    auto secondAddress = GetAddressBasedOnOldModule(0x101C1564, GameOffsets::LS3D_BASE, loadedBase);
+    if(this->isWindowed())
+    {
+        return (size_t) (*(DWORD*) firstAddress);
+    }
+    return (size_t)(*(DWORD*) secondAddress);
 }

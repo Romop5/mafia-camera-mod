@@ -7,6 +7,7 @@
 
 #define POINTER_64 __ptr64
 #include <Windows.h>
+#include <psapi.h>
 
 // hook original function to call newfunc and copy original 5 bytes to patch
 // string
@@ -72,5 +73,21 @@ static char ConvertToASCII(unsigned short VK)
         return buff[0];
     }
     return NULL;
+}
+
+
+static DWORD GetModuleBaseAddress(LPCSTR moduleName)
+{
+    MODULEINFO info;
+    HMODULE h_Module = GetModuleHandle(moduleName);
+    bool status = GetModuleInformation(GetCurrentProcess(), h_Module, &info,sizeof(MODULEINFO));
+    if(status == 0)
+        return 0;
+    return reinterpret_cast<DWORD>(info.lpBaseOfDll);
+}
+
+static DWORD GetAddressBasedOnOldModule(DWORD address, DWORD oldModule, DWORD newModule)
+{
+    return (address-oldModule)+newModule;
 }
 #endif
