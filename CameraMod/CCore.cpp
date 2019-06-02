@@ -42,7 +42,11 @@ bool CCore::Initialize()
             [&] (unsigned short state)->void {
                 this->getModControl()->OnMouseButtons(state);
             });
- 
+    // Register mouse button callback for ImGUI
+    this->getRawInput()->m_onMouseButtonsUpdateHandlers.add(
+            [&] (unsigned short state)->void {
+                this->getGraphics()->getImGUIAdaptor().updateButton(state);
+            });
     return true;
 }
 bool CCore::Unload()

@@ -583,3 +583,4 @@ Point2D CGraphics::GetScreenSize()
     screen.y = rect.bottom;
     return screen;
 }
+

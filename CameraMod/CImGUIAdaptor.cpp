@@ -185,3 +185,15 @@ void CImGUIAdaptor::updateMousePosition(Point2D position)
     ImGuiIO& io = ImGui::GetIO();
     io.MousePos = ImVec2((float)position.x, (float)position.y);
 }
+
+void CImGUIAdaptor::updateButton(unsigned short state)
+{
+   ImGuiIO& io = ImGui::GetIO();
+   if (state & RI_MOUSE_LEFT_BUTTON_DOWN) {
+        io.MouseDown[0] = true;
+   }
+   if (state & RI_MOUSE_RIGHT_BUTTON_DOWN) {
+        io.MouseDown[1] = true;
+   }
+              
+}

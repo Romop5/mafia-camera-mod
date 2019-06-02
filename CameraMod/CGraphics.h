@@ -32,20 +32,21 @@ private:
     CD3DFont* betterFont;
     CImGUIAdaptor adaptor;
 
+    __declspec(noinline) void onEndScene();
+    // callbacks
+    void OnDeviceLost();
+    void OnDeviceReset();
+
+  
 public:
     CGraphics();
     void Init();
     void Unload();
 
-    __declspec(noinline) void onEndScene();
+    CImGUIAdaptor& getImGUIAdaptor() {return this->adaptor; }
+    
     void SetDevice(IDirect3DDevice8* device);
     IDirect3DDevice8* GetDevice();
-
-    // callbacks
-
-    void OnDeviceLost();
-    void OnDeviceReset();
-    // functions
 
     void TextDraw(int x, int y, char* text, DWORD color);
     int TextDrawLength(char* text);
@@ -57,7 +58,6 @@ public:
 
     RenderClip GetRenderBackup();
     void RestoreRenderBackup(RenderClip*);
-    // void		SetViewport(DWORD x, DWORD y, DWORD width, DWORD heigh);
     void SetViewport(RenderClip*, DWORD x, DWORD y, DWORD width, DWORD heigh);
 
     DWORD ColorPlusColor(DWORD, DWORD);
@@ -72,14 +72,14 @@ public:
     Point2D GetScreenSize();
 
     // Dx8 overrides
-    STDMETHOD(EndScene)
-    ()
+    STDMETHOD(EndScene)()
     {
         // Call our callback
         this->onEndScene();
         // Call original
         return CDirect3DDevice8Proxy::EndScene();
     }
+ 
 };
 
 #endif
