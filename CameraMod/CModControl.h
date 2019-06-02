@@ -1,17 +1,15 @@
-#include "CCore.h"
-
 #ifndef C_MODCONTROL
 #define C_MODCONTROL
+#include <vector>
+#include "CGenericMode.hpp"
+#include "CGame.h"
 
-enum ControlStates {
-    CMOD_WALKING,
-    CMOD_FREECAMERA, 
-};
 class CModControl {
 private:
-    ControlStates m_currentState;
+    std::vector<CGenericMode> m_modes;
 public:
     CModControl();
+    void InitializeModes(CGame& game);
     bool IsActive();
     bool OnVKKey(USHORT key);
     void OnMouseMove(int x, int y);

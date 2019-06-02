@@ -1,13 +1,20 @@
-#include "CCore.h"
 #include "imgui.h"
-
-extern CCore* core;
+#include "CModControl.h"
+#include "CFreecamera.hpp"
 
 CModControl::CModControl()
 {
 
 }
+void CModControl::InitializeModes(CGame& game)
+{
+    this->m_modes.push_back(CFreecamera());
 
+    // Set game to all of them
+    for(auto &mode: this->m_modes)
+        mode.setGameDriver(game);
+
+}
 bool CModControl::OnVKKey(USHORT key)
 {
     return true;

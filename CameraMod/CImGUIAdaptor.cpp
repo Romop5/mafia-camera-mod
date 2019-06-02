@@ -140,15 +140,17 @@ void CImGUIAdaptor::updateMousePosition(Point2D position)
 
 void CImGUIAdaptor::updateButton(unsigned short state)
 {
-   std::vector<std::pair<unsigned short,unsigned short>> buttons = { {0, RI_MOUSE_LEFT_BUTTON_DOWN}, {1, RI_MOUSE_RIGHT_BUTTON_DOWN}};
+   std::vector<std::tuple<unsigned short,unsigned short,unsigned short>> buttons = { {0, RI_MOUSE_LEFT_BUTTON_DOWN,RI_MOUSE_LEFT_BUTTON_UP}, {1, RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_UP}};
    ImGuiIO& io = ImGui::GetIO();
    for(auto &pair: buttons)
    {
-       auto id = pair.first;
-       auto flag = pair.second;
-       if(state & flag)
+       auto id = std::get<0>(pair);
+       auto flagDown = std::get<1>(pair);
+       auto flagUp = std::get<2>(pair);
+       if(state & flagDown)
            io.MouseDown[id] = true;
-       else
+
+       if(state & flagUp)
            io.MouseDown[id] = false;
    }
 }
