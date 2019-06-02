@@ -42,7 +42,8 @@ BOOL WINAPI myPeekMessage(
             // WM_INPUT messages contains RawInput messages with key strokes & keyboard state
             // See https://docs.microsoft.com/en-us/windows/desktop/inputdev/raw-input
             case WM_INPUT:
-                return userHandler(lpMsg);
+               return userHandler(lpMsg);
+                
             default: break;
         }
     }
@@ -111,9 +112,9 @@ _declspec(naked) void GamePhysicsNPCS()
 void GetGameSpeed(unsigned int actualSpeed,unsigned int& newspeed)
 {
 
-	unsigned int desiredSpeed = 100;
-        desiredSpeed = actualSpeed;
-	newspeed = (actualSpeed * desiredSpeed / 100);
+	//unsigned int desiredSpeed = 100;
+        //desiredSpeed = actualSpeed;
+	//newspeed = (actualSpeed * desiredSpeed / 100);
 }
 
 _declspec(naked) void GameSpeed()

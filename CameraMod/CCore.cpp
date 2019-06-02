@@ -27,6 +27,8 @@ bool CCore::Initialize()
     // Initialize graphics 
     this->getGraphics()->Init();
 
+    this->getModControl()->InitializeModes(this->getGame());
+
     // Register onPressKey callback
     this->getRawInput()->m_onKeyPressedHandlers.add(
             [&] (USHORT pressedKey)->bool {

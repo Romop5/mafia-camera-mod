@@ -1,3 +1,6 @@
 [submodule "vendors/utilslib"]
 	path = vendors/utilslib
 	url = https://github.com/Romop5/utilslib
+[submodule "vendors/glm"]
+	path = vendors/glm
+	url = https://github.com/g-truc/glm

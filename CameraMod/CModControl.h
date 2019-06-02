@@ -6,10 +6,12 @@
 
 class CModControl {
 private:
-    std::vector<CGenericMode> m_modes;
+    std::vector<CGenericMode*> m_modes;
+    size_t m_currentModeIndex;
+    CGenericMode* m_currentMode;
 public:
     CModControl();
-    void InitializeModes(CGame& game);
+    void InitializeModes(CGame* game);
     bool IsActive();
     bool OnVKKey(USHORT key);
     void OnMouseMove(int x, int y);
@@ -17,6 +19,8 @@ public:
     void Render();
 
     bool isFreeCam();
+
+    void switchToNextMode();
 
 };
 

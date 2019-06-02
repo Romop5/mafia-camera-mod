@@ -13,6 +13,7 @@ add_library(CameraMod SHARED
 	CD3D9Accessor.cpp
 	CImGUIAdaptor.cpp
         CCore.cpp
+        CFreecamera.cpp
 	dllmain.cpp
 
 # Separate cd3dfont
@@ -43,6 +44,7 @@ target_include_directories(CameraMod PRIVATE ../vendors/ ../vendors/DirectX9SDK2
 target_include_directories(CameraMod PRIVATE ../vendors/d3d8to9/source)
 target_include_directories(CameraMod PRIVATE ../vendors/imgui)
 target_link_libraries(CameraMod PRIVATE imgui)
+target_link_libraries(CameraMod PRIVATE glm)
 target_link_libraries(CameraMod PRIVATE utilslib)
 
 target_link_libraries(CameraMod PRIVATE ${PROJECT_SOURCE_DIR}/vendors/DirectX9SDK2007/Lib/x86/d3dx8.lib)
