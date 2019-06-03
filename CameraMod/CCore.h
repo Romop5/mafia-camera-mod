@@ -47,7 +47,7 @@ public:
 
         CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)DetachIt, this, 0,
             0); // hlavne vlakno
-            // FreeLibrary(this->p_DLL);
+        //FreeLibrary(this->p_DLL);
     }
 
     void SetModule(HMODULE dll) { this->p_DLL = dll; }

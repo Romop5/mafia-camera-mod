@@ -186,8 +186,6 @@ IDirect3DDevice8* CHooks::replaceDirectXDriver(IDirect3DDevice8* newDriver)
 
 void CHooks::UnloadThem()
 {
-    Sleep(100);
-
     UninstallHook(0x005E1029,peekOriginalPatchGamePhys);
     UninstallHook(0x005E1058, peekOriginalPatchGamePhys2);
     UninstallHook(0x005FFDC9, peekOriginalPatchGameSpeed);

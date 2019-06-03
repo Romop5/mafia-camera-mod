@@ -19,6 +19,7 @@ bool CCore::Initialize()
     this->getHook()->ApplyThem();
     // Replace D3D8 driver with our proxy to hook EndScene()
     m_originalD3DDriver = this->getHook()->getD3D8Driver();
+    utilslib::Logger::getInfo() << "[CCore] Original Driver: " << std::hex << m_originalD3DDriver << std::dec << std::endl;
 
     this->getGraphics()->SetDevice(m_originalD3DDriver);
 
@@ -43,6 +44,12 @@ bool CCore::Initialize()
     // Register onPressKey callback
     this->getRawInput()->m_onKeyPressedHandlers.add(
             [&] (USHORT pressedKey)->bool {
+                // Shutdown on ESC
+                if(pressedKey == VK_ESCAPE)
+                {
+                    this->getGame()->writeToConsole(CGame::COLOR_RED, "Shutting down");
+                    this->ModDetach();
+                    }
                 return this->getModControl()->OnVKKey(pressedKey); 
             });
     // Register mouse move callback
@@ -80,12 +87,12 @@ bool CCore::Initialize()
 }
 bool CCore::Unload()
 {
+    this->getGraphics()->Unload();
     // Restore original D3D8 driver
     this->getHook()->replaceDirectXDriver(m_originalD3DDriver);
 
     this->getHook()->UnloadThem();
 
-    this->getGraphics()->Unload();
     this->getGame()->CameraUnlock();
     return true;
 }

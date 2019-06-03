@@ -20,6 +20,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
         CCore* coreInstance = new CCore();
         core = coreInstance;
 
+
+        // TODO: refactor
+        core->p_DLL = hModule;
+
         if(core->Initialize())
         {
              utilslib::Logger::getInfo() << "CameraMod initialized correctly !" << std::endl;
@@ -30,6 +34,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
     case DLL_THREAD_DETACH:
         break;
     case DLL_PROCESS_DETACH:
+        core->getGame()->writeToConsole(CGame::COLOR_RED, "Unload it()");
         core->Unload();
         break;
     }
