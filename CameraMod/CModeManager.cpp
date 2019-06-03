@@ -16,6 +16,14 @@ void CModeManager::setCoreController(CCoreController controller)
     this->m_coreController = controller;
 }
 
+CModeManager::~CModeManager()
+{
+    if(this->m_currentMode)
+    {
+        this->m_currentMode->deactivate();
+    }
+}
+
 void CModeManager::InitializeModes(CGame* game)
 {
     utilslib::Logger::getInfo() << "CModeManager::InitializeModes" << std::endl;
@@ -26,6 +34,9 @@ void CModeManager::InitializeModes(CGame* game)
     CModeController controller;
     controller.m_blockInput = [&](bool should)->void {
         this->updateBlocking(should, BlockStatus::BLOCK_MODE);
+    };
+    controller.m_getScene = [&] ()->CScene& {
+        return this->m_scene;
     };
     
     // Set game to all of them
@@ -80,23 +91,6 @@ void CModeManager::Render()
 
     if(this->m_currentMode)
         this->m_currentMode->onRender();
-    static size_t counter = 0;
-    ImGui::Begin("Mod status!");                          // Create a window called "Hello, world!" and append into it.
-
-    ImGui::Text("This is some text: %d", m_currentModeIndex);
-    float f;
-    ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-
-    if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-        counter++;
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
-
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();
-
 }
 
 void CModeManager::switchToNextMode()
@@ -110,6 +104,20 @@ void CModeManager::switchToNextMode()
     this->m_modes[m_currentModeIndex]->activate();
     this->m_currentMode = this->m_modes[this->m_currentModeIndex];
 }
+
+void CModeManager::switchToMode(size_t id)
+{
+    // deactivate current mode
+    this->m_modes[m_currentModeIndex]->deactivate();
+    this->m_currentModeIndex = id;
+    if(m_currentModeIndex >= this->m_modes.size())
+        this->m_currentModeIndex = 0;
+    // Activate the new one
+    this->m_modes[m_currentModeIndex]->activate();
+    this->m_currentMode = this->m_modes[this->m_currentModeIndex];
+}
+
+
 
 void CModeManager::updateBlocking(bool shouldBlock, BlockStatus type)
 {

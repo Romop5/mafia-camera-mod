@@ -14,6 +14,7 @@ add_library(CameraMod SHARED
 	CImGUIAdaptor.cpp
         CCore.cpp
         CFreecamera.cpp
+        CScene.cpp
 	dllmain.cpp
 
 # Separate cd3dfont

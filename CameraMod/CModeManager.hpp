@@ -21,9 +21,11 @@ private:
 
     bool m_isGUIVisible;
 
+    CScene m_scene;
 
 public:
     CModeManager();
+    ~CModeManager();
     void setCoreController(const CCoreController controller);
     void InitializeModes(CGame* game);
 
@@ -36,6 +38,7 @@ public:
     bool isFreeCam();
 
     void switchToNextMode();
+    void switchToMode(size_t id);
     void updateBlocking(bool shouldBlock, BlockStatus type);
     
     void turnGUIstate(bool shouldBeOn);

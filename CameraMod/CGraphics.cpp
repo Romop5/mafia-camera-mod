@@ -47,7 +47,7 @@ void CGraphics::onEndScene()
     // Update mouse in ImGui
     //Point2D mouse = this->GetMouseCoords();
     //adaptor.updateMousePosition(mouse);
-    adaptor.Render();
+    //adaptor.Render();
 
     // call callbacks
     for(auto callback: m_onRenderHandler)

@@ -83,6 +83,13 @@ bool CCore::Initialize()
             {
                 this->getModControl()->Render();
             });
+
+    // Register DearImGUI render
+    this->getGraphics()->m_onRenderHandler.add(
+            [&] (void)->void  {
+                if(this->m_isGUIacceptingInput)
+                    this->getGraphics()->getImGUIAdaptor().Render();
+            });
     return true;
 }
 bool CCore::Unload()

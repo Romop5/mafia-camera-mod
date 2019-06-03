@@ -9,7 +9,7 @@
 class CFreecamera: public CGenericMode
 {
     public:
-        CFreecamera(): angleX(0), angleY(0) {}
+        CFreecamera(): angleX(0), angleY(0), m_cameraFlyingSpeed(1.0) {}
         virtual void onTick() {}
         virtual bool onVKKey(USHORT key);
         virtual void onMouseMove(int x, int y);
@@ -36,11 +36,48 @@ class CFreecamera: public CGenericMode
         virtual void onRender() override {
             static size_t counter = 0;
             ImGui::Begin("Freecamera helper");                          
-            ImGui::Button("Teleport camera to player");
+            ImGui::Text("Position: %f %f %f", this->position.x, this->position.y, this->position.z);                          
+            ImGui::Text("Rotation: %f %f %f", this->rotation.x, this->rotation.y, this->rotation.z);                          
+            ImGui::SliderFloat("Flying speed", &m_cameraFlyingSpeed, 1.0f, 10.0f, "ratio = %.3f");
+            if(ImGui::Button("Teleport camera to player"))
+            {
+                this->position = this->toGlm(m_gameController->GetPlayerPosition());
+                this->rotation = this->toGlm(m_gameController->GetPlayerRotation());
+                this->updateCamera();
+            }
+
+            if(ImGui::Button("Add camera point"))
+            {
+                this->m_modeController.m_getScene().addCameraPoint(this->position, this->rotation);
+            }
+
             ImGui::End();
+
+            ImGui::Begin("Camera points");                          
+            auto &points = this->m_modeController.m_getScene().getCameraPoints();
+
+            for(auto &cameraPoint: points)
+            {
+                if(ImGui::TreeNode(cameraPoint.m_name))
+                {
+                    auto &point = cameraPoint.m_point;
+                    ImGui::Text("Point: %f %f %f", point.x, point.y, point.z);                          
+                    if(ImGui::Button("Teleport camera"))
+                    {
+                        this->position = point;
+                        updateCamera();
+                    }
+                    ImGui::TreePop();
+
+                }
+            }
+            ImGui::End();
+
 
         };
     private:
+        float m_cameraFlyingSpeed;
+
         glm::vec3 position;
         glm::vec3 rotation;
 
