@@ -7,6 +7,7 @@
 CModeManager::CModeManager()
 {
     this->m_currentMode = NULL;
+    this->m_InputBlockingStatus = 0;
 }
 
 void CModeManager::setCoreController(CCoreController controller)
@@ -105,11 +106,12 @@ void CModeManager::updateBlocking(bool shouldBlock, BlockStatus type)
         this->m_InputBlockingStatus |= static_cast<size_t>(type);
     } else 
     {
-        this->m_InputBlockingStatus &= ~static_cast<size_t>(type);
+        this->m_InputBlockingStatus &= ~(static_cast<size_t>(type));
     }
     
     if(this->m_InputBlockingStatus == oldStatus)
         return;
     // update blocking if neccessary
     this->m_coreController.m_blockGameInput(this->m_InputBlockingStatus > 0); 
+    utilslib::Logger::getInfo() << "Input status: " << this->m_InputBlockingStatus << std::endl;
 }
