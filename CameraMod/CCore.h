@@ -11,7 +11,7 @@
 #include "CGame.h"
 #include "CGraphics.h"
 #include "CHooks.h"
-#include "CModControl.h"
+#include "CModeManager.hpp"
 #include "CRawInput.h"
 
 static void DetachIt(void* cor);
@@ -23,7 +23,7 @@ private:
     CGraphics p_CGraphics;
     CRawInput p_CRawinput;
     CGame p_CGame;
-    CModControl p_CModControl;
+    CModeManager p_CModeManager;
 
     bool p_isGamePhys;
 
@@ -38,7 +38,7 @@ public:
 
     CGame* getGame() { return &this->p_CGame; }
 
-    CModControl* getModControl() { return &this->p_CModControl; }
+    CModeManager* getModControl() { return &this->p_CModeManager; }
 
     void ModDetach()
     {

@@ -42,8 +42,9 @@ BOOL WINAPI myPeekMessage(
             // WM_INPUT messages contains RawInput messages with key strokes & keyboard state
             // See https://docs.microsoft.com/en-us/windows/desktop/inputdev/raw-input
             case WM_INPUT:
+                //Returning zero in WM_INPUT indicates that message has been processed a thus can be
+                //deleted
                return userHandler(lpMsg);
-                
             default: break;
         }
     }

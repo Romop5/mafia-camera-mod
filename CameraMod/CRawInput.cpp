@@ -4,7 +4,6 @@
 //https://docs.microsoft.com/en-us/windows/desktop/inputdev/raw-input
 bool CRawInput::ProcessMessage(LPMSG message)
 {
-    bool shouldBlockInput = false;
     UINT dwSize;
 
     GetRawInputData((HRAWINPUT)message->lParam, RID_INPUT, NULL, &dwSize,
@@ -25,7 +24,7 @@ bool CRawInput::ProcessMessage(LPMSG message)
                     auto virtualKeyCode = raw->data.keyboard.VKey;
                     // Call all registered onKeyPressed callbacks
                     for(auto callback: this->m_onKeyPressedHandlers)
-                        shouldBlockInput |= callback(virtualKeyCode);
+                        callback(virtualKeyCode);
                 }
 
             } else if (raw->header.dwType == RIM_TYPEMOUSE) {
@@ -34,7 +33,8 @@ bool CRawInput::ProcessMessage(LPMSG message)
             delete[] lpb;
         }
     }
-    return shouldBlockInput;
+    // Returning zero indicates that message has been processed -> see WM_INPUT
+    return !m_shouldBlockAllGameInputs;
 }
 
 void CRawInput::OnMouseTick(RAWMOUSE* mouse)

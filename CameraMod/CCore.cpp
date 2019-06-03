@@ -1,4 +1,5 @@
 #include "CCore.h"
+#include "CCoreController.hpp"
 #include <utilslib/logger.hpp>
 
 bool CCore::Initialize()
@@ -27,6 +28,17 @@ bool CCore::Initialize()
     // Initialize graphics 
     this->getGraphics()->Init();
 
+    // Create proxy object for manipulating with parts of mod
+    CCoreController controller;
+    controller.m_blockGameInput = [&] (bool shouldWe)->void { this->getRawInput()->shouldBlockInput(shouldWe); };
+    // TODO
+    //controller.m_blockGUIInput = NULL;
+    // TODO
+    //controller.m_hideGUI = NULL;
+    // Set controller to mod control
+    this->getModControl()->setCoreController(controller);
+
+
     this->getModControl()->InitializeModes(this->getGame());
 
     // Register onPressKey callback
@@ -38,6 +50,9 @@ bool CCore::Initialize()
     this->getRawInput()->m_onMouseMoveHandlers.add(
             [&] (LONG x, LONG y)->void {
                 this->getModControl()->OnMouseMove(x, y);
+
+                Point2D point = {x,y};
+                this->getGraphics()->getImGUIAdaptor().updateMousePosition(point);
             });
     // Register mouse button callback
     this->getRawInput()->m_onMouseButtonsUpdateHandlers.add(

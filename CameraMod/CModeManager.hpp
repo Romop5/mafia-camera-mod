@@ -2,16 +2,27 @@
 #define C_MODCONTROL
 #include <vector>
 #include "CGenericMode.hpp"
+#include "CCoreController.hpp"
 #include "CGame.h"
 
-class CModControl {
+enum BlockStatus:size_t
+{
+    BLOCK_GUI = 0b1,
+    BLOCK_MODE = 0b10, 
+};
+
+class CModeManager {
 private:
     std::vector<CGenericMode*> m_modes;
     size_t m_currentModeIndex;
     CGenericMode* m_currentMode;
+    CCoreController m_coreController;
+    size_t m_InputBlockingStatus;
 public:
-    CModControl();
+    CModeManager();
+    void setCoreController(const CCoreController controller);
     void InitializeModes(CGame* game);
+
     bool IsActive();
     bool OnVKKey(USHORT key);
     void OnMouseMove(int x, int y);
@@ -21,6 +32,7 @@ public:
     bool isFreeCam();
 
     void switchToNextMode();
+    void updateBlocking(bool shouldBlock, BlockStatus type);
 
 };
 

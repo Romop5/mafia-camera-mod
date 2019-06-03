@@ -7,7 +7,7 @@ add_library(CameraMod SHARED
 	CameraMod.cpp
 	CGame.cpp
 	CGraphics.cpp
-	CModControl.cpp
+        CModeManager.cpp
 	CRawInput.cpp
 	CHooks.cpp
 	CD3D9Accessor.cpp

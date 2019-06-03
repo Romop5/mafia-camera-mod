@@ -1,21 +1,37 @@
 #include "imgui.h"
-#include "CModControl.h"
+#include "CModeManager.hpp"
+#include "CModeController.hpp"
 #include "CFreecamera.hpp"
 #include <sstream>
 
-CModControl::CModControl()
+CModeManager::CModeManager()
 {
     this->m_currentMode = NULL;
 }
-void CModControl::InitializeModes(CGame* game)
+
+void CModeManager::setCoreController(CCoreController controller)
 {
-    utilslib::Logger::getInfo() << "CModControl::InitializeModes" << std::endl;
+    this->m_coreController = controller;
+}
+
+void CModeManager::InitializeModes(CGame* game)
+{
+    utilslib::Logger::getInfo() << "CModeManager::InitializeModes" << std::endl;
     this->m_modes.push_back(new CFreecamera());
     this->m_modes.push_back(new CGenericMode()); // Regular 1st person gameplay
 
+    // create controller
+    CModeController controller;
+    controller.m_blockInput = [&](bool should)->void {
+        this->updateBlocking(should, BlockStatus::BLOCK_MODE);
+    };
+    
     // Set game to all of them
     for(auto mode: this->m_modes)
+    {
         mode->setGameDriver(game);
+        mode->setModeController(controller);
+    }
 
     this->m_currentMode = m_modes[0];
     this->m_currentMode->activate();
@@ -23,7 +39,7 @@ void CModControl::InitializeModes(CGame* game)
     this->m_currentModeIndex = 0;
 
 }
-bool CModControl::OnVKKey(USHORT key)
+bool CModeManager::OnVKKey(USHORT key)
 {
     switch(key)
     {
@@ -31,23 +47,22 @@ bool CModControl::OnVKKey(USHORT key)
             this->switchToNextMode();
     }
     if(this->m_currentMode)
-        this->m_currentMode->onVKKey(key);
-    return true;
+    return this->m_currentMode->onVKKey(key);
 }
 
-void CModControl::OnMouseMove(int x, int y)
+void CModeManager::OnMouseMove(int x, int y)
 {
     if(this->m_currentMode)
         this->m_currentMode->onMouseMove(x,y);
 }
 
-void CModControl::OnMouseButtons(unsigned short buttons)
+void CModeManager::OnMouseButtons(unsigned short buttons)
 {
     if(this->m_currentMode)
         this->m_currentMode->onMouseButtons(buttons);
 }
 
-void CModControl::Render()
+void CModeManager::Render()
 {
     if(this->m_currentMode)
         this->m_currentMode->onRender();
@@ -70,7 +85,7 @@ void CModControl::Render()
 
 }
 
-void CModControl::switchToNextMode()
+void CModeManager::switchToNextMode()
 {
     // deactivate current mode
     this->m_modes[m_currentModeIndex]->deactivate();
@@ -80,4 +95,21 @@ void CModControl::switchToNextMode()
     // Activate the new one
     this->m_modes[m_currentModeIndex]->activate();
     this->m_currentMode = this->m_modes[this->m_currentModeIndex];
+}
+
+void CModeManager::updateBlocking(bool shouldBlock, BlockStatus type)
+{
+    auto oldStatus = this->m_InputBlockingStatus;
+    if(shouldBlock)
+    {
+        this->m_InputBlockingStatus |= static_cast<size_t>(type);
+    } else 
+    {
+        this->m_InputBlockingStatus &= ~static_cast<size_t>(type);
+    }
+    
+    if(this->m_InputBlockingStatus == oldStatus)
+        return;
+    // update blocking if neccessary
+    this->m_coreController.m_blockGameInput(this->m_InputBlockingStatus > 0); 
 }

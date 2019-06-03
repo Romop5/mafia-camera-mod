@@ -20,8 +20,13 @@ private:
 
     void OnMouseTick(RAWMOUSE* mouse);
 
+    bool m_shouldBlockAllGameInputs;
+
 public:
+    CRawInput(): m_shouldBlockAllGameInputs(false) {}
     bool ProcessMessage(LPMSG message);
+
+    void shouldBlockInput(bool should) { this->m_shouldBlockAllGameInputs = should; }
     utilslib::Callbacks<func_key_handler> m_onKeyPressedHandlers;
     utilslib::Callbacks<mouse_handler> m_onMouseMoveHandlers;
     utilslib::Callbacks<mouse_buttons_handler> m_onMouseButtonsUpdateHandlers;

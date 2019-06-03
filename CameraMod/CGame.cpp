@@ -161,3 +161,14 @@ size_t CGame::getScreenHeight() const
     }
     return (size_t)(*(DWORD*) secondAddress);
 }
+
+void CGame::writeToConsole(DWORD colour, const char* message)
+{
+    _asm {
+        push colour
+        push message
+        mov ecx, 0x00658330
+        mov eax, 0x0054BE80 
+        call eax
+    }
+}

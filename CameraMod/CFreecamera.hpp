@@ -19,9 +19,16 @@ class CFreecamera: public CGenericMode
             this->rotation = this->toGlm(m_gameController->GetPlayerRotation());
             updateCamera();
             utilslib::Logger::getInfo() << "activated FreeCamera" << std::endl;
+
+            // Block ingame input
+            this->m_modeController.m_blockInput(true);
+
+            this->m_gameController->writeToConsole(CGame::COLOR_RED, "Activated camera");
         }
         virtual void deactivate() override {
             this->m_gameController->CameraUnlock();
+            // Unblock ingame input
+            this->m_modeController.m_blockInput(false);
         }
         virtual void onRender() override {
             static size_t counter = 0;
