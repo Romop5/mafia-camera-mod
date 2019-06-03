@@ -8,6 +8,7 @@ CModeManager::CModeManager()
 {
     this->m_currentMode = NULL;
     this->m_InputBlockingStatus = 0;
+    this->m_isGUIVisible = false;
 }
 
 void CModeManager::setCoreController(CCoreController controller)
@@ -46,25 +47,37 @@ bool CModeManager::OnVKKey(USHORT key)
     {
         case VK_F1:
             this->switchToNextMode();
+        case VK_F2:
+            //this->m_isGUIVisible = !this->m_isGUIVisible;
+            this->turnGUIstate(!this->m_isGUIVisible);
     }
-    if(this->m_currentMode)
-    return this->m_currentMode->onVKKey(key);
+
+    if(!this->m_isGUIVisible)
+    {
+        if(this->m_currentMode)
+        return this->m_currentMode->onVKKey(key);
+    }
 }
 
 void CModeManager::OnMouseMove(int x, int y)
 {
-    if(this->m_currentMode)
-        this->m_currentMode->onMouseMove(x,y);
+    if(!this->m_isGUIVisible)
+        if(this->m_currentMode)
+            this->m_currentMode->onMouseMove(x,y);
 }
 
 void CModeManager::OnMouseButtons(unsigned short buttons)
 {
-    if(this->m_currentMode)
-        this->m_currentMode->onMouseButtons(buttons);
+    if(!this->m_isGUIVisible)
+        if(this->m_currentMode)
+            this->m_currentMode->onMouseButtons(buttons);
 }
 
 void CModeManager::Render()
 {
+    if(!this->m_isGUIVisible)
+        return;
+
     if(this->m_currentMode)
         this->m_currentMode->onRender();
     static size_t counter = 0;
@@ -114,4 +127,11 @@ void CModeManager::updateBlocking(bool shouldBlock, BlockStatus type)
     // update blocking if neccessary
     this->m_coreController.m_blockGameInput(this->m_InputBlockingStatus > 0); 
     utilslib::Logger::getInfo() << "Input status: " << this->m_InputBlockingStatus << std::endl;
+}
+
+void CModeManager::turnGUIstate(bool shouldBeOn)
+{
+    this->updateBlocking(shouldBeOn, BlockStatus::BLOCK_GUI);
+    this->m_isGUIVisible = shouldBeOn;
+    this->m_coreController.m_blockGUIInput(shouldBeOn);
 }

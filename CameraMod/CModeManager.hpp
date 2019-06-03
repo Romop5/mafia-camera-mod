@@ -18,6 +18,10 @@ private:
     CGenericMode* m_currentMode;
     CCoreController m_coreController;
     size_t m_InputBlockingStatus;
+
+    bool m_isGUIVisible;
+
+
 public:
     CModeManager();
     void setCoreController(const CCoreController controller);
@@ -33,7 +37,8 @@ public:
 
     void switchToNextMode();
     void updateBlocking(bool shouldBlock, BlockStatus type);
-
+    
+    void turnGUIstate(bool shouldBeOn);
 };
 
 #endif

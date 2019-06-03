@@ -113,7 +113,7 @@ Vector3D CGame::GetPlayerRotation()
 
 void CGame::ToggleHUD(bool state)
 {
-    if (state != 1)
+    if (state == 1)
         (*(byte*)0x006613D4) |= 1 << 0;
     else
         (*(byte*)0x006613D4) &= ~(1 << 0);

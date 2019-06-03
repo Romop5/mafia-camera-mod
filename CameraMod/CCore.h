@@ -27,8 +27,10 @@ private:
 
     bool p_isGamePhys;
 
+    bool m_isGUIacceptingInput;
+
 public:
-    CCore() { this->p_isGamePhys = true; }
+    CCore(): m_isGUIacceptingInput(false) { this->p_isGamePhys = true;}
     bool IsGamePhysicRunning() { return this->p_isGamePhys; }
     void SetGamePhysic(bool state) { this->p_isGamePhys = state; }
     CHooks* getHook() { return &this->p_CHook; }

@@ -22,13 +22,16 @@ class CFreecamera: public CGenericMode
 
             // Block ingame input
             this->m_modeController.m_blockInput(true);
-
             this->m_gameController->writeToConsole(CGame::COLOR_RED, "Activated camera");
+
+            this->m_gameController->ToggleHUD(true);
         }
         virtual void deactivate() override {
             this->m_gameController->CameraUnlock();
             // Unblock ingame input
             this->m_modeController.m_blockInput(false);
+            this->m_gameController->ToggleHUD(false);
+            this->m_gameController->writeToConsole(CGame::COLOR_RED, "Deactivated camera");
         }
         virtual void onRender() override {
             static size_t counter = 0;

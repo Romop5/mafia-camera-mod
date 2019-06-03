@@ -31,8 +31,7 @@ bool CCore::Initialize()
     // Create proxy object for manipulating with parts of mod
     CCoreController controller;
     controller.m_blockGameInput = [&] (bool shouldWe)->void { this->getRawInput()->shouldBlockInput(shouldWe); };
-    // TODO
-    //controller.m_blockGUIInput = NULL;
+    controller.m_blockGUIInput = [&] (bool shouldWe)->void { this->m_isGUIacceptingInput = shouldWe; };
     // TODO
     //controller.m_hideGUI = NULL;
     // Set controller to mod control
@@ -51,8 +50,11 @@ bool CCore::Initialize()
             [&] (LONG x, LONG y)->void {
                 this->getModControl()->OnMouseMove(x, y);
 
-                Point2D point = {x,y};
-                this->getGraphics()->getImGUIAdaptor().updateMousePosition(point);
+                if(this->m_isGUIacceptingInput)
+                {
+                    Point2D point = this->getGraphics()->GetMouseCoords();
+                    this->getGraphics()->getImGUIAdaptor().updateMousePosition(point);
+                }
             });
     // Register mouse button callback
     this->getRawInput()->m_onMouseButtonsUpdateHandlers.add(
@@ -62,7 +64,10 @@ bool CCore::Initialize()
     // Register mouse button callback for ImGUI
     this->getRawInput()->m_onMouseButtonsUpdateHandlers.add(
             [&] (unsigned short state)->void {
-                this->getGraphics()->getImGUIAdaptor().updateButton(state);
+                if(this->m_isGUIacceptingInput)
+                {
+                    this->getGraphics()->getImGUIAdaptor().updateButton(state);
+                }
             });
 
     // Register GUI content generator callback
