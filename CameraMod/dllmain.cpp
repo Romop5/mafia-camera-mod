@@ -40,3 +40,17 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
     }
     return TRUE;
 }
+
+extern "C" __declspec(dllexport) void storeUnloaderCallback(void (*callback)())
+{
+    if(core)
+    {
+        core->m_TriggerUnload = [callback] {
+            // Call provided unload function
+            callback();
+        };
+        utilslib::Logger::getInfo() << "Successfully installed unloader callback!" << std::endl;
+    } else {
+        utilslib::Logger::getInfo() << "Core is NULL, wtf" << std::endl;
+    }
+}

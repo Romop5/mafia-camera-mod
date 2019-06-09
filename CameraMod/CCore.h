@@ -28,6 +28,7 @@ private:
     bool p_isGamePhys;
 
     bool m_isGUIacceptingInput;
+    
 
 public:
     CCore(): m_isGUIacceptingInput(false) { this->p_isGamePhys = true;}
@@ -44,10 +45,19 @@ public:
 
     void ModDetach()
     {
-
-        CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)DetachIt, this, 0,
-            0); // hlavne vlakno
-        //FreeLibrary(this->p_DLL);
+        if(m_TriggerUnload != NULL)
+        {
+            // Trigger unload by calling our superior module's callback
+            m_TriggerUnload();
+            this->getGame()->writeToConsole(CGame::COLOR_RED, "Calling unload callback");
+        } else {
+            this->getGame()->writeToConsole(CGame::COLOR_RED, "Trying our hack");
+            // If not available, falling back to our unloading hack
+            // which basically starts up a new thread and deload us
+            // However, this can cause crashes when the main thread
+            // is inside this DLL code in the moment of unloading
+            CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)DetachIt, this, 0, 0);
+        }
     }
 
     void SetModule(HMODULE dll) { this->p_DLL = dll; }
@@ -58,6 +68,10 @@ public:
     bool Unload();
 
     IDirect3DDevice8* m_originalD3DDriver;
+
+    // This function is called by CCore when unloading is desired
+    // If not specified, skipped
+    std::function<void(void)> m_TriggerUnload;
 };
 
 void DetachIt(void* cor)

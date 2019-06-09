@@ -28,7 +28,8 @@ bool insertDll(DWORD procID, std::string dll);
 HMODULE InjectDLL(DWORD ProcessID, char* dllName);
 
 #define exe_name "game.exe"
-#define dll_name "CameraMod.dll"
+//#define dll_name "CameraMod.dll"
+#define dll_name "HotReloader.dll"
 
 
 int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -38,7 +39,7 @@ int WINAPI WinMain(HINSTANCE _hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
 	// Get the dll's full path name 
 	char buf[MAX_PATH] = { 0 };
-	GetFullPathName("CameraMod.dll", MAX_PATH, buf, NULL);
+	GetFullPathName(dll_name, MAX_PATH, buf, NULL);
 	printf(buf);
 	printf("\n");
 
