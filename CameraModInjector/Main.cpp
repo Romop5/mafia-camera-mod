@@ -23,10 +23,6 @@ char path[MAX_PATH];
 char exename[MAX_PATH];
 char dllname[MAX_PATH];
 
-bool insertDll(DWORD procID, std::string dll);
-
-HMODULE InjectDLL(DWORD ProcessID, char* dllName);
-
 #define exe_name "game.exe"
 //#define dll_name "CameraMod.dll"
 #define dll_name "HotReloader.dll"
@@ -89,128 +85,62 @@ bool IsGameRunning()
 		return false;
 	}
 }
-
-HMODULE InjectDLL(DWORD ProcessID, char* dllName)
-{
-	char buf[50] = { 0 };
-	HMODULE result = LoadLibrary(dllname);
-	if(result == NULL)
-	{
-		sprintf_s(buf, "Failed to load library: %d", GetLastError());
-		MessageBoxA(NULL, buf, "Loader", NULL);
-		return false;
-	}
-	HANDLE Proc;
-	HANDLE Thread;
-	LPVOID RemoteString, LoadLibAddy;
-	HMODULE hModule = NULL;
-	DWORD dwOut;
-
-	if (!ProcessID)
-		return false;
-	Proc = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_VM_WRITE | PROCESS_VM_OPERATION, 0, ProcessID);
-	//Proc = OpenProcess(PROCESS_ALL_ACCESS, 0, ProcessID);
-
-	if (!Proc)
-	{
-		sprintf_s(buf, "OpenProcess() failed: %d", GetLastError());
-		MessageBoxA(NULL, buf, "Loader", NULL);
-		return false;
-	}
-
-	LoadLibAddy = (LPVOID)GetProcAddress(GetModuleHandleA("kernel32.dll"), "LoadLibraryA");
-	if (!LoadLibAddy) {
-		sprintf_s(buf, "LoadLibrary GetModule failed");
-		MessageBoxA(NULL, buf, "Loader", NULL);
-		return false;
-	}
-
-
-	RemoteString = (LPVOID)VirtualAllocEx(Proc, NULL, strlen(dllName), MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	if (!RemoteString) {
-		sprintf_s(buf, "VirtualAllocEx failed");
-		MessageBoxA(NULL, buf, "Loader", NULL);
-		return false;
-	}
-
-	if (!WriteProcessMemory(Proc, (LPVOID)RemoteString, dllName, strlen(dllName), NULL)) {
-		sprintf_s(buf, "WriteProcessMemory failed");
-		MessageBoxA(NULL, buf, "Loader", NULL);
-		return false;
-	}
-
-	Thread = CreateRemoteThread(Proc, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibAddy, (LPVOID)RemoteString, NULL, NULL);
-	if (!Thread) {
-		sprintf_s(buf, "CreateRemoteThread failed: %d", GetLastError());
-		MessageBoxA(NULL, buf, "Loader", NULL);
-		return false;
-	}
-	else {
-		while (GetExitCodeThread(Thread, &dwOut)) {
-			if (dwOut != STILL_ACTIVE) {
-				hModule = (HMODULE)dwOut;
-				break;
-			}
-		}
-	}
-
-	CloseHandle(Thread);
-	CloseHandle(Proc);
-
-	return hModule;
-}
-
 #define MAXWAIT 10000
-
-bool insertDll(DWORD procID, std::string dll)
-{
-	//Find the address of the LoadLibrary api, luckily for us, it is loaded in the same address for every process
-	HMODULE hLocKernel32 = GetModuleHandle("Kernel32");
-	FARPROC hLocLoadLibrary = GetProcAddress(hLocKernel32, "LoadLibraryA");
-
-	//Adjust token privileges to open system processes
-	HANDLE hToken;
-	TOKEN_PRIVILEGES tkp;
-	if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
-	{
-		LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &tkp.Privileges[0].Luid);
-		tkp.PrivilegeCount = 1;
-		tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-		AdjustTokenPrivileges(hToken, 0, &tkp, sizeof(tkp), NULL, NULL);
-	}
-
-	//Open the process with all access
-	HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
-
-	//Allocate memory to hold the path to the Dll File in the process's memory
-	dll += '\0';
-	LPVOID hRemoteMem = VirtualAllocEx(hProc, NULL, dll.size(), MEM_COMMIT, PAGE_READWRITE);
-
-	//Write the path to the Dll File in the location just created
-	DWORD numBytesWritten;
-	WriteProcessMemory(hProc, hRemoteMem, dll.c_str(), dll.size(), &numBytesWritten);
-
-	//Create a remote thread that starts begins at the LoadLibrary function and is passed are memory pointer
-	HANDLE hRemoteThread = CreateRemoteThread(hProc, NULL, 0, (LPTHREAD_START_ROUTINE)hLocLoadLibrary, hRemoteMem, 0, NULL);
-
-	cout << hRemoteThread << endl;
-
-	//Wait for the thread to finish
-	bool res = false;
-	if (hRemoteThread)
-		res = (bool)WaitForSingleObject(hRemoteThread, MAXWAIT) != WAIT_TIMEOUT;
-
-	//Free the memory created on the other process
-	VirtualFreeEx(hProc, hRemoteMem, dll.size(), MEM_RELEASE);
-
-	//Release the handle to the other process
-	CloseHandle(hProc);
-
-	return res;
-}
-
 BOOL Inject(DWORD pID, const char * DLL_NAME)
 {
+        // TODO: refactor this mess
+        HMODULE dllModule = NULL;
+        // At first, detect if .DLL is already loaded
+        auto moduleSnapshop = CreateToolhelp32Snapshot( TH32CS_SNAPMODULE, pID);
+        MODULEENTRY32 entry;
+        bool status = Module32First(moduleSnapshop, &entry);
+        while(status != false)
+        {
+            if(strcmp(entry.szModule, dll_name) == 0)
+            {
+                dllModule = entry.hModule;
+                std::cout << "Found it: " << entry.szModule << std::endl;
+            }
+            status = Module32Next(moduleSnapshop, &entry);
+        }
+        CloseHandle(moduleSnapshop);
+        
+
+        //if(GetModuleHandle(dll_name) != NULL)
+        if(dllModule)
+        {
+            SetErrorMode(0);
+            // It seems like DLL must be reloaded in order to get address using GetProcAddress
+            dllModule = LoadLibrary(dll_name);
+            if(dllModule == NULL)
+            {
+                std::cout << "Error: " << GetLastError() << std::endl;
+                return false;
+            }
+            std::cout << "DLL is already there, trying to reload() - HMODULE: " << dllModule << std::endl;
+            // if .dll is already inject, trigger reload
+            using reloadFunction_t = void (*)(void);
+            LPVOID reloadFunction = (LPVOID) (GetProcAddress(dllModule, TEXT("reload")));
+            if(reloadFunction)
+            {
+
+                auto Proc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pID);
+                if (Proc)
+                {
+                    CreateRemoteThread(Proc, NULL, NULL, (LPTHREAD_START_ROUTINE)reloadFunction, NULL, NULL, NULL);
+                    std::cout << "reload() called" << std::endl;
+                }
+                CloseHandle(Proc);
+            }
+            else 
+            {
+                std::cout << "Last: err " << GetLastError() << std::endl;
+            }
+            return false;
+        } else {
+            std::cout << "No DLL found in process, injecting ..." << std::endl;
+        }
+	
 	HANDLE Proc;
 	HMODULE hLib;
 	char buf[50] = { 0 };

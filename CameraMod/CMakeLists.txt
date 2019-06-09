@@ -1,3 +1,11 @@
+add_library(imgui STATIC
+	../vendors/imgui/imgui.cpp
+	../vendors/imgui/imgui_demo.cpp
+	../vendors/imgui/imgui_draw.cpp
+	../vendors/imgui/imgui_widgets.cpp
+	)
+
+
 # Disable linking libci
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:\"libci\" /SAFESEH:NO")
 # Turn off these CRT warnings
@@ -32,13 +40,6 @@ add_library(CameraMod SHARED
 
 # imGui
 	imgui_impl_dx9.cpp
-	)
-
-add_library(imgui 
-	../vendors/imgui/imgui.cpp
-	../vendors/imgui/imgui_demo.cpp
-	../vendors/imgui/imgui_draw.cpp
-	../vendors/imgui/imgui_widgets.cpp
 	)
 
 target_include_directories(CameraMod PRIVATE ../vendors/ ../vendors/DirectX9SDK2007/Include)

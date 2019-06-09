@@ -2,6 +2,7 @@
 
 //#include <utilslib/logger.hpp>
 #include <Windows.h>
+#include <string>
 
 using onRenderCallGame_t =  void (__stdcall *)(void*);
 using onRenderCall_t =  void (__stdcall *)(void*, void*);
@@ -94,6 +95,15 @@ void on_tick()
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
     LPVOID lpReserved)
 {
+    char processName[255];
+    // Determine if we are in Game.exe
+    bool status = GetModuleFileName(NULL, processName, 255);
+    if(status)
+    {
+        std::string moduleName = processName;
+        if(moduleName.find("Game.exe") == std::string::npos)
+            return TRUE;
+    }
     switch (ul_reason_for_call) {
     case DLL_PROCESS_ATTACH: {
         // HACK: following code replaces LS3D's engine class method which is responsible for
@@ -125,7 +135,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
 
 extern "C" __declspec(dllexport) void reload()
 {
-    if(g_isLoaded == 
-
-    g_isLoaded = true;
+    // TODO: detect if its running
+    g_isLoaded = false;
 }
