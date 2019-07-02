@@ -95,7 +95,7 @@ void CImGUIAdaptor::Win32NewFrame()
     RECT rect;
     //::GetClientRect(g_hWnd, &rect);
     io.DisplaySize = ImVec2(this->screenSize.x, this->screenSize.y);
-    io.MouseDrawCursor = true;
+ //   io.MouseDrawCursor = true;
 
     /*
   // Setup time step
@@ -153,4 +153,10 @@ void CImGUIAdaptor::updateButton(unsigned short state)
        if(state & flagUp)
            io.MouseDown[id] = false;
    }
+}
+
+void CImGUIAdaptor::setMouseVisible(bool state)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.MouseDrawCursor = state;
 }

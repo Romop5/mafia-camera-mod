@@ -3,7 +3,6 @@
 #include "structures.h"
 #include "CGenericMode.hpp"
 #include <utilslib/logger.hpp>
-#include <glm/vec3.hpp> // glm::vec3
 #include <imgui.h>
 
 class CFreecamera: public CGenericMode
@@ -15,8 +14,8 @@ class CFreecamera: public CGenericMode
         virtual void onMouseMove(int x, int y);
 
         virtual void activate() override {
-            this->position = this->toGlm(m_gameController->GetPlayerPosition());
-            this->rotation = this->toGlm(m_gameController->GetPlayerRotation());
+            this->position = toGlm(m_gameController->GetPlayerPosition());
+            this->rotation = toGlm(m_gameController->GetPlayerRotation());
             updateCamera();
             utilslib::Logger::getInfo() << "activated FreeCamera" << std::endl;
 
@@ -41,8 +40,8 @@ class CFreecamera: public CGenericMode
             ImGui::SliderFloat("Flying speed", &m_cameraFlyingSpeed, 1.0f, 10.0f, "ratio = %.3f");
             if(ImGui::Button("Teleport camera to player"))
             {
-                this->position = this->toGlm(m_gameController->GetPlayerPosition());
-                this->rotation = this->toGlm(m_gameController->GetPlayerRotation());
+                this->position = toGlm(m_gameController->GetPlayerPosition());
+                this->rotation = toGlm(m_gameController->GetPlayerRotation());
                 this->updateCamera();
             }
 
@@ -225,21 +224,7 @@ class CFreecamera: public CGenericMode
 
         void updateCamera()
         {
-            m_gameController->SetCameraPos(this->toVec3D(position), rotation.x,rotation.y,rotation.z,0.0f);
-        }
-
-        glm::vec3 toGlm(Vector3D& vec)
-        {
-            return glm::vec3(vec.x,vec.y,vec.z);
-        }
-
-        Vector3D toVec3D(glm::vec3& vec)
-        {
-            Vector3D vector;
-            vector.x = vec[0];
-            vector.y = vec[1];
-            vector.z = vec[2];
-            return vector;
+            m_gameController->SetCameraPos(toVec3D(position), rotation.x,rotation.y,rotation.z,0.0f);
         }
 
 };

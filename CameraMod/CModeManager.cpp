@@ -2,6 +2,7 @@
 #include "CModeManager.hpp"
 #include "CModeController.hpp"
 #include "CFreecamera.hpp"
+#include "CRecorderMode.hpp"
 #include <sstream>
 
 CModeManager::CModeManager()
@@ -29,6 +30,7 @@ void CModeManager::InitializeModes(CGame* game)
     utilslib::Logger::getInfo() << "CModeManager::InitializeModes" << std::endl;
     this->m_modes.push_back(new CFreecamera());
     this->m_modes.push_back(new CGenericMode()); // Regular 1st person gameplay
+    this->m_modes.push_back(new CRecorderMode()); // Regular 1st person gameplay
 
     // create controller
     CModeController controller;
@@ -86,8 +88,8 @@ void CModeManager::OnMouseButtons(unsigned short buttons)
 
 void CModeManager::Render()
 {
-    if(!this->m_isGUIVisible)
-        return;
+    //if(!this->m_isGUIVisible)
+    //    return;
 
     if(this->m_currentMode)
         this->m_currentMode->onRender();

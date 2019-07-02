@@ -47,7 +47,7 @@ bool CCore::Initialize()
                 // Shutdown on ESC
                 if(pressedKey == VK_ESCAPE)
                 {
-                    this->getGame()->writeToConsole(CGame::COLOR_RED, "Shutting down");
+                    this->getGame()->writeToConsole(CGame::COLOR_RED, "Shutting down LOL");
                     this->ModDetach();
                     }
                 return this->getModControl()->OnVKKey(pressedKey); 
@@ -87,8 +87,10 @@ bool CCore::Initialize()
     // Register DearImGUI render
     this->getGraphics()->m_onRenderHandler.add(
             [&] (void)->void  {
-                if(this->m_isGUIacceptingInput)
-                    this->getGraphics()->getImGUIAdaptor().Render();
+	    	// Render in any case
+                //if(this->m_isGUIacceptingInput)
+		this->getGraphics()->getImGUIAdaptor().setMouseVisible(this->m_isGUIacceptingInput);
+                this->getGraphics()->getImGUIAdaptor().Render();
             });
     return true;
 }

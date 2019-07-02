@@ -99,6 +99,18 @@ Vector3D CGame::GetPlayerPosition()
     }
     return position;
 }
+
+void CGame::SetPlayerPosition(Vector3D newPosition)
+{
+    DWORD playerBase = this->GetPlayerBase();
+    if (playerBase) {
+        *(float*)(playerBase + 0x24) = newPosition.x;
+        *(float*)(playerBase + 0x28) = newPosition.y;
+        *(float*)(playerBase + 0x2C) = newPosition.z;
+    }
+}
+
+    
 Vector3D CGame::GetPlayerRotation()
 {
     DWORD playerBase = this->GetPlayerBase();

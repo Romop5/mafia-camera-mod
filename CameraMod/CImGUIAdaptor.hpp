@@ -17,6 +17,8 @@ public:
     void updateMousePosition(Point2D position);
     void updateButton(unsigned short state);
     
+    void setMouseVisible(bool state);
+    
     // Register for content generators
     utilslib::Callbacks<std::function<void()>> m_contentRenderers;
 private:

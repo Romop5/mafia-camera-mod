@@ -86,7 +86,7 @@ void on_tick()
 
     if(g_shouldUnload)
     {
-        FreeLibrary(g_cameraModule);
+        while(FreeLibrary(g_cameraModule));
         g_shouldUnload = false;
     }
 }

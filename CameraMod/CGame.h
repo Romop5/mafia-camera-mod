@@ -21,6 +21,7 @@ public:
     bool IsGameRunning();
     DWORD GetPlayerBase();
     Vector3D GetPlayerPosition();
+    void SetPlayerPosition(Vector3D newPosition);
     Vector3D GetPlayerRotation();
     void ToggleHUD(bool state);
     int GetGameVersion();
