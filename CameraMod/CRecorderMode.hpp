@@ -13,14 +13,23 @@ class CRecorderMode: public CGenericMode
         {
             auto& globalRecordingState = this->m_modeController.m_getScene().m_recordingState;
             glm::vec3 position = toGlm(this->m_gameController->GetPlayerPosition());
-            globalRecordingState.m_recordedPath.push_back(CPlayerMovementFrame(position));
+            glm::vec3 rotation = toGlm(this->m_gameController->GetPlayerRotation());
+            
+            bool isDucking = this->m_gameController->GetDucking();
+            globalRecordingState.m_recordedPath.push_back(CPlayerMovementFrame(position,rotation,isDucking));
         }
-        inline void startReplaying()
-        {
 
+        inline void playPlayerMovementTick()
+        {
+            auto& globalRecordingState = this->m_modeController.m_getScene().m_recordingState;
+            auto framePosition = globalRecordingState.getCurrentReplayFrame();
+            this->m_gameController->SetPlayerPosition(toVec3D(framePosition.position));
+            this->m_gameController->SetPlayerRotation(toVec3D(framePosition.rotation));
+            this->m_gameController->SetDucking(framePosition.isDucking);
         }
+
     public:
-        CRecorderMode(): {}
+        CRecorderMode() {}
         void setGameDriver(CGame* game) { this->m_gameController = game;}
         void setModeController(CModeController controller) {this->m_modeController = controller; }
 
@@ -36,8 +45,9 @@ class CRecorderMode: public CGenericMode
                     } else {
                         globalRecordingState.setRecordingState(CRecordingStateEnum::RECORDING);
                     }
+                    break;
                 case VK_BACK:
-                    globalRecordingState.setRecordingState(CRecordingStateEnum::);
+                    globalRecordingState.setRecordingState(CRecordingStateEnum::PLAYING);
             }
             return false;
         }
@@ -47,9 +57,16 @@ class CRecorderMode: public CGenericMode
         virtual void onRender() {
             auto& globalRecordingState = this->m_modeController.m_getScene().m_recordingState;
             // If recording is running, then record current position
-            if(globalRecordingState.m_isRecordingRunning)
+            //if(globalRecordingState.m_isRecordingRunning)
+
+            switch(globalRecordingState.getState())
             {
-                this->recordMovementTick();
+                case CRecordingStateEnum::RECORDING:
+                    this->recordMovementTick();
+                break;
+                case CRecordingStateEnum::PLAYING:
+                    this->playPlayerMovementTick();
+                break;
             }
             static bool shouldRenderOverlay = true;
             bool shouldBeMoveable = true;
@@ -66,13 +83,19 @@ class CRecorderMode: public CGenericMode
             ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
             if (ImGui::Begin("Example: Simple overlay", &shouldRenderOverlay, (shouldBeMoveable != -1 ? ImGuiWindowFlags_NoMove : 0) | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
             {
-                if(globalRecordingState.m_isRecordingRunning)
+                switch(globalRecordingState.getState())
                 {
-                    ImGui::Text("Recording is running");
-                    ImGui::Text("Frames: %d",globalRecordingState.m_recordedPath.size());
-                } else {
-                    ImGui::Text("Recording is not running");
+                    case CRecordingStateEnum::RECORDING:
+                        ImGui::Text("Recording is running");
+                        ImGui::Text("Frames: %d",globalRecordingState.m_recordedPath.size());
+                    break;
+                    case CRecordingStateEnum::PLAYING:
+                        ImGui::Text("Replaying");
+                    default:
+                        ImGui::Text("Recording is not running");
+                    break;
                 }
+
                 ImGui::Separator();
                 if (ImGui::IsMousePosValid())
                     ImGui::Text("Mouse Position: (%.1f,%.1f)", io.MousePos.x, io.MousePos.y);

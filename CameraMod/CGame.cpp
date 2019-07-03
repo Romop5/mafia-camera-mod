@@ -123,6 +123,28 @@ Vector3D CGame::GetPlayerRotation()
     return rotation;
 }
 
+void CGame::SetPlayerRotation(Vector3D rotation)
+{
+    DWORD playerBase = this->GetPlayerBase();
+    if (playerBase) {
+        *(float*)(playerBase + 0x30) = rotation.x;
+        *(float*)(playerBase + 0x34) = rotation.y;
+        *(float*)(playerBase + 0x38) = rotation.z;
+    }
+}
+
+void CGame::SetDucking(bool status)
+{
+    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
+    playerBase->isDucking = status;
+}
+
+bool CGame::GetDucking()
+{
+    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
+    return playerBase->isDucking;
+}
+
 void CGame::ToggleHUD(bool state)
 {
     if (state == 1)

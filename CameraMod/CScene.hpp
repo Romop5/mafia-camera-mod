@@ -35,7 +35,9 @@ class CPlayerMovementFrame
 {
     public:
     glm::vec3 position;
-    CPlayerMovementFrame(glm::vec3 pos): position(pos) {}
+    glm::vec3 rotation;
+    bool isDucking;
+    CPlayerMovementFrame(const glm::vec3 pos,const glm::vec3 rot, bool shouldDuck): position(pos), rotation(rot), isDucking(shouldDuck) {}
     inline std::string serialize() const 
     {
         std::stringstream ss;
@@ -94,10 +96,10 @@ class CRecordingState
             m_currentReplayPosition = 0;
         }
 
-        inline CPlayerMovementFrame& getCurrentReplayPosition() const
+        inline CPlayerMovementFrame& getCurrentReplayFrame()
         {
             // Wrap over
-            if(m_currentReplayPosition >= m_recordedPath.size())
+            if(++m_currentReplayPosition >= m_recordedPath.size())
                 m_currentReplayPosition = 0;
             return m_recordedPath[m_currentReplayPosition];
         }
