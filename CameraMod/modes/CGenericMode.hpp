@@ -1,8 +1,8 @@
 #ifndef CGENERIC_MODE_HPP
 #define CGENERIC_MODE_HPP
 #include "Windows.h"
-#include "CGame.h"
-#include "CModeController.hpp"
+#include "game/CGame.h"
+#include "modes/CModeController.hpp"
 #include <utilslib/logger.hpp>
 class CGenericMode
 {

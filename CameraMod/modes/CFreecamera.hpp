@@ -1,7 +1,7 @@
 #ifndef CFREECAMERA_HPP
 #define CFREECAMERA_HPP
-#include "structures.h"
-#include "CGenericMode.hpp"
+#include "common/structures.h"
+#include "modes/CGenericMode.hpp"
 #include <utilslib/logger.hpp>
 #include <imgui.h>
 

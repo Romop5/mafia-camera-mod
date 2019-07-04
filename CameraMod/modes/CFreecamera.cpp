@@ -1,4 +1,4 @@
-#include "CFreecamera.hpp"
+#include "modes/CFreecamera.hpp"
 #include <glm/glm.hpp> 
 #include <glm/gtx/transform.hpp>
 

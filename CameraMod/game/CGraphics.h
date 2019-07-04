@@ -1,11 +1,11 @@
 #ifndef C_GRAPHICS
 #define C_GRAPHICS
 #include <utilslib/callbacks.hpp>
-#include "../vendors/cd3dfont/d3dfont.h"
-#include "structures.h"
+#include "cd3dfont/d3dfont.h"
+#include "common/structures.h"
 
-#include "CDirect3DDevice8Proxy.h"
-#include "CImGUIAdaptor.hpp"
+#include "game/CDirect3DDevice8Proxy.h"
+#include "game/CImGUIAdaptor.hpp"
 #include "d3d8.h"
 #include "d3dx8.h"
 

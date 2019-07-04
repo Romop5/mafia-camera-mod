@@ -1,8 +1,7 @@
 #include "CCore.h"
-#include "CD3D9Accessor.h"
-#include "CDirect3DDevice8Proxy.h"
-#include "CImGUIAdaptor.hpp"
-#include "camera/resource.h"
+#include "game/CD3D9Accessor.h"
+#include "game/CDirect3DDevice8Proxy.h"
+#include "game/CImGUIAdaptor.hpp"
 //#include "CGraphics.h"
 #include <utilslib/logger.hpp>
 
@@ -157,11 +156,12 @@ void CGraphics::OnDeviceReset()
         this->g_mono->OnResetDevice();
     this->Sprite->OnResetDevice();
 
-    HRESULT DTEX = D3DXCreateTextureFromResourceEx(
+    /*HRESULT DTEX = D3DXCreateTextureFromResourceEx(
         this->GetDevice(), GetModuleHandleA("CameraMod.dll"),
         MAKEINTRESOURCEA(IDB_BITMAP1), D3DX_DEFAULT, D3DX_DEFAULT, 0,
         D3DUSAGE_DYNAMIC, D3DFMT_UNKNOWN, D3DPOOL_DEFAULT, D3DX_FILTER_LINEAR,
         D3DX_FILTER_LINEAR, D3DCOLOR_XRGB(0, 0, 0), NULL, NULL, &Texture);
+        */
 }
 
 RenderClip CGraphics::GetRenderBackup()

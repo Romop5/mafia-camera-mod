@@ -3,7 +3,7 @@
 #include <vector>
 #include "CGenericMode.hpp"
 #include "CCoreController.hpp"
-#include "CGame.h"
+#include "game/CGame.h"
 
 enum BlockStatus:size_t
 {

@@ -1,4 +1,4 @@
-#include "CRawInput.h"
+#include "game/CRawInput.h"
 
 // Processes WM_INPUT messages and calls onKey/mouse callbacks
 //https://docs.microsoft.com/en-us/windows/desktop/inputdev/raw-input

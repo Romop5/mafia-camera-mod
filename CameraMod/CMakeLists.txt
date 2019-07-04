@@ -12,17 +12,16 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:\"libc
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 add_library(CameraMod SHARED 
-	CameraMod.cpp
-	CGame.cpp
-	CGraphics.cpp
-        CModeManager.cpp
-	CRawInput.cpp
-	CHooks.cpp
-	CD3D9Accessor.cpp
-	CImGUIAdaptor.cpp
-        CCore.cpp
-        CFreecamera.cpp
-        CScene.cpp
+	CCore.cpp
+	CScene.cpp
+	game/CGame.cpp
+	game/CGraphics.cpp
+	game/CRawInput.cpp
+	game/CHooks.cpp
+	game/CD3D9Accessor.cpp
+	game/CImGUIAdaptor.cpp
+	modes/CFreecamera.cpp
+	modes/CModeManager.cpp
 	dllmain.cpp
 
 # Separate cd3dfont
@@ -34,13 +33,11 @@ add_library(CameraMod SHARED
 	../vendors/cd3dfont/dxutil.cpp
 	../vendors/cd3dfont/dxutil.h
 
-# RC for mouse.png
-	camera/camera.rc
-	list.rc
-
-# imGui
-	imgui_impl_dx9.cpp
+	# imGui
+	game/imgui_impl_dx9.cpp
 	)
+	
+target_include_directories(CameraMod PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(CameraMod PRIVATE ../vendors/ ../vendors/DirectX9SDK2007/Include)
 target_include_directories(CameraMod PRIVATE ../vendors/d3d8to9/source)

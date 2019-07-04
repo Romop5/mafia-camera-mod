@@ -2,7 +2,7 @@
 #define C_IMGUIADAPTOR
 #include <utilslib/callbacks.hpp>
 
-#include "structures.h"
+#include "common/structures.h"
 struct IDirect3DDevice9;
 
 

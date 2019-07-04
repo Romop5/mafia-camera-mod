@@ -1,8 +1,8 @@
 #include "imgui.h"
-#include "CModeManager.hpp"
-#include "CModeController.hpp"
-#include "CFreecamera.hpp"
-#include "CRecorderMode.hpp"
+#include "modes/CModeManager.hpp"
+#include "modes/CModeController.hpp"
+#include "modes/CFreecamera.hpp"
+#include "modes/CRecorderMode.hpp"
 #include <sstream>
 
 CModeManager::CModeManager()

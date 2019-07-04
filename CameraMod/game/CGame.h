@@ -2,7 +2,7 @@
 #define C_GAME
 
 #include "Windows.h"
-#include "structures.h"
+#include "common/structures.h"
 
 enum ObjectTypes
 {

@@ -1,7 +1,7 @@
 #ifndef CRECORDER_MODE_HPP
 #define CRECORDER_MODE_HPP
 #include "Windows.h"
-#include "CGame.h"
+#include "game/CGame.h"
 #include "CModeController.hpp"
 #include <utilslib/logger.hpp>
 

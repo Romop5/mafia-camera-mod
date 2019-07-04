@@ -1,4 +1,4 @@
-#include "CD3D9Accessor.h"
+#include "game/CD3D9Accessor.h"
 #include <d3d8to9.hpp>
 
 struct IDirect3DDevice8;

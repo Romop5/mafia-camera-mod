@@ -1,4 +1,4 @@
-#include "CImGUIAdaptor.hpp"
+#include "game/CImGUIAdaptor.hpp"
 #include "imgui.h"
 #include "imgui_impl_dx9.h"
 #include <windows.h>

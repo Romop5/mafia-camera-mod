@@ -6,13 +6,13 @@
 #include <stdio.h>
 #include <vector>
 
-#include "tools.h"
+#include "common/tools.h"
 
-#include "CGame.h"
-#include "CGraphics.h"
-#include "CHooks.h"
-#include "CModeManager.hpp"
-#include "CRawInput.h"
+#include "game/CGame.h"
+#include "game/CGraphics.h"
+#include "game/CHooks.h"
+#include "game/CRawInput.h"
+#include "modes/CModeManager.hpp"
 
 static void DetachIt(void* cor);
 
