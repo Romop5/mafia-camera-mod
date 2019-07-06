@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <sstream>
+#include "game/CGame.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Camera points + camera paths
@@ -36,8 +37,8 @@ class CPlayerMovementFrame
     public:
     glm::vec3 position;
     glm::vec3 rotation;
-    bool isDucking;
-    CPlayerMovementFrame(const glm::vec3 pos,const glm::vec3 rot, bool shouldDuck): position(pos), rotation(rot), isDucking(shouldDuck) {}
+    PED_State objectState;
+    CPlayerMovementFrame(const glm::vec3 pos,const glm::vec3 rot, PED_State state): position(pos), rotation(rot), objectState(state) {}
     inline std::string serialize() const 
     {
         std::stringstream ss;

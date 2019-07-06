@@ -14,9 +14,10 @@ class CRecorderMode: public CGenericMode
             auto& globalRecordingState = this->m_modeController.m_getScene().m_recordingState;
             glm::vec3 position = toGlm(this->m_gameController->GetPlayerPosition());
             glm::vec3 rotation = toGlm(this->m_gameController->GetPlayerRotation());
-            
-            bool isDucking = this->m_gameController->GetDucking();
-            globalRecordingState.m_recordedPath.push_back(CPlayerMovementFrame(position,rotation,isDucking));
+
+            PED_State& state = this->m_gameController->GetState();
+
+            globalRecordingState.m_recordedPath.push_back(CPlayerMovementFrame(position,rotation,state));
         }
 
         inline void playPlayerMovementTick()
@@ -25,7 +26,7 @@ class CRecorderMode: public CGenericMode
             auto framePosition = globalRecordingState.getCurrentReplayFrame();
             this->m_gameController->SetPlayerPosition(toVec3D(framePosition.position));
             this->m_gameController->SetPlayerRotation(toVec3D(framePosition.rotation));
-            this->m_gameController->SetDucking(framePosition.isDucking);
+            this->m_gameController->SetState(framePosition.objectState);
         }
 
     public:
@@ -45,9 +46,11 @@ class CRecorderMode: public CGenericMode
                     } else {
                         globalRecordingState.setRecordingState(CRecordingStateEnum::RECORDING);
                     }
+                    this->m_gameController->LockControls(false);
                     break;
                 case VK_BACK:
                     globalRecordingState.setRecordingState(CRecordingStateEnum::PLAYING);
+                    this->m_gameController->LockControls(true);
             }
             return false;
         }
@@ -119,6 +122,8 @@ class CRecorderMode: public CGenericMode
             utilslib::Logger::getInfo() << "activate() recorder mode" << std::endl;
             this->m_gameController->writeToConsole(CGame::COLOR_RED, "Activated recorder");
         }
-        virtual void deactivate() {}
+        virtual void deactivate() {
+            this->m_gameController->LockControls(false);
+        }
 };
 #endif

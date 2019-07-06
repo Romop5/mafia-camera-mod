@@ -206,3 +206,38 @@ void CGame::writeToConsole(DWORD colour, const char* message)
         call eax
     }
 }
+
+
+#define GAME_PED_COPY_STATE_ATTRIBUTE(dst,src, attribut)\
+    dst attribut = src attribut;
+void CGame::SetState(PED_State& state)
+{
+    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
+    GAME_PED_COPY_STATE_ATTRIBUTE(playerBase->, state., animState)
+    GAME_PED_COPY_STATE_ATTRIBUTE(playerBase->, state., isDucking)
+    GAME_PED_COPY_STATE_ATTRIBUTE(playerBase->, state., isAiming)
+    GAME_PED_COPY_STATE_ATTRIBUTE(playerBase->, state., isReloading)
+}
+
+PED_State& CGame::GetState()
+{
+    PED_State state;
+    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
+
+    GAME_PED_COPY_STATE_ATTRIBUTE(state., playerBase->, animState)
+    GAME_PED_COPY_STATE_ATTRIBUTE(state., playerBase->, isDucking)
+    GAME_PED_COPY_STATE_ATTRIBUTE(state., playerBase->, isAiming)
+    GAME_PED_COPY_STATE_ATTRIBUTE(state., playerBase->, isReloading)
+    return state;
+}
+#undef GAME_PED_COPY_STATE_ATTRIBUTE
+
+
+void CGame::LockControls(bool shouldLock)
+{
+    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
+    if(playerBase)
+    {
+        playerBase->isControlled = (shouldLock == true);
+    }
+}

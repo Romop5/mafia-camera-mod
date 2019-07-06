@@ -1,6 +1,8 @@
 #ifndef C_GAME
 #define C_GAME
 
+#include <vector>
+
 #include "Windows.h"
 #include "common/structures.h"
 
@@ -97,7 +99,18 @@ typedef struct _PED {
 	float		inCarRotation;		//	05F4-05F8
 	_pad(_unk8, 0x4C);
 	float		health;				//	0644-0648
+	_pad(_unk9, 0x492);
+	bool 		isControlled;		//  0ADA
 } PED;
+
+
+struct PED_State
+{
+	byte	animState;
+	bool	isDucking;
+	bool	isAiming;	
+	bool	isReloading;
+};
 
 
 class CGame {
@@ -134,6 +147,12 @@ public:
     size_t getScreenHeight() const;
 
     void writeToConsole(DWORD colour, const char* message);
+
+	void SetState(PED_State& state);
+	PED_State& GetState();
+
+	void LockControls(bool shouldLock);
+
 };
 
 #endif
