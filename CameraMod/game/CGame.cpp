@@ -86,66 +86,7 @@ bool CGame::IsGameRunning()
     return true;
 }
 
-DWORD CGame::GetPlayerBase() { return *(DWORD*)((*(DWORD*)0x6F9464) + 0xE4); }
-
-Vector3D CGame::GetPlayerPosition()
-{
-    DWORD playerBase = this->GetPlayerBase();
-    Vector3D position = { 0.0, 0.0, 0.0 };
-    if (playerBase) {
-        position.x = *(float*)(playerBase + 0x24);
-        position.y = *(float*)(playerBase + 0x28);
-        position.z = *(float*)(playerBase + 0x2C);
-    }
-    return position;
-}
-
-void CGame::SetPlayerPosition(Vector3D newPosition)
-{
-    DWORD playerBase = this->GetPlayerBase();
-    if (playerBase) {
-        *(float*)(playerBase + 0x24) = newPosition.x;
-        *(float*)(playerBase + 0x28) = newPosition.y;
-        *(float*)(playerBase + 0x2C) = newPosition.z;
-    }
-}
-
-    
-Vector3D CGame::GetPlayerRotation()
-{
-    DWORD playerBase = this->GetPlayerBase();
-    Vector3D rotation = { 0.0, 0.0, 0.0 };
-    if (playerBase) {
-        rotation.x = *(float*)(playerBase + 0x30);
-        rotation.y = *(float*)(playerBase + 0x34);
-        rotation.z = *(float*)(playerBase + 0x38);
-    }
-    return rotation;
-}
-
-void CGame::SetPlayerRotation(Vector3D rotation)
-{
-    DWORD playerBase = this->GetPlayerBase();
-    if (playerBase) {
-        *(float*)(playerBase + 0x30) = rotation.x;
-        *(float*)(playerBase + 0x34) = rotation.y;
-        *(float*)(playerBase + 0x38) = rotation.z;
-    }
-}
-
-void CGame::SetDucking(bool status)
-{
-    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
-    playerBase->isDucking = status;
-}
-
-bool CGame::GetDucking()
-{
-    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
-    return playerBase->isDucking;
-}
-
-void CGame::ToggleHUD(bool state)
+void CGame::internalToggleHUD(bool state)
 {
     if (state == 1)
         (*(byte*)0x006613D4) |= 1 << 0;
@@ -153,7 +94,7 @@ void CGame::ToggleHUD(bool state)
         (*(byte*)0x006613D4) &= ~(1 << 0);
 }
 
-int CGame::GetGameVersion()
+int CGame::GetGameVersion() const
 {
     // 180 - 385 - 1.00
     if (*(DWORD*)0x005F99FE == 0x180)
@@ -208,36 +149,124 @@ void CGame::writeToConsole(DWORD colour, const char* message)
 }
 
 
-#define GAME_PED_COPY_STATE_ATTRIBUTE(dst,src, attribut)\
-    dst attribut = src attribut;
-void CGame::SetState(PED_State& state)
-{
-    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
-    GAME_PED_COPY_STATE_ATTRIBUTE(playerBase->, state., animState)
-    GAME_PED_COPY_STATE_ATTRIBUTE(playerBase->, state., isDucking)
-    GAME_PED_COPY_STATE_ATTRIBUTE(playerBase->, state., isAiming)
-    GAME_PED_COPY_STATE_ATTRIBUTE(playerBase->, state., isReloading)
-}
-
-PED_State& CGame::GetState()
-{
-    PED_State state;
-    PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
-
-    GAME_PED_COPY_STATE_ATTRIBUTE(state., playerBase->, animState)
-    GAME_PED_COPY_STATE_ATTRIBUTE(state., playerBase->, isDucking)
-    GAME_PED_COPY_STATE_ATTRIBUTE(state., playerBase->, isAiming)
-    GAME_PED_COPY_STATE_ATTRIBUTE(state., playerBase->, isReloading)
-    return state;
-}
-#undef GAME_PED_COPY_STATE_ATTRIBUTE
-
-
-void CGame::LockControls(bool shouldLock)
+void CGame::internalLockControls(bool shouldLock)
 {
     PED* playerBase = reinterpret_cast<PED*>(this->GetPlayerBase());
     if(playerBase)
     {
         playerBase->isControlled = (shouldLock == true);
     }
+}
+
+///////////////////////////////////////////////////////////////////////////
+//IMPLEMENTATION CHuman
+///////////////////////////////////////////////////////////////////////////
+
+const std::string& CHuman::getName() const
+{
+    return this->toPED()->object.frame->frameName;
+}
+
+glm::mat4 CHuman::getTransform() const
+{
+    auto base = this->toPED();
+    glm::mat4 tmpTransform;
+    tmpTransform[0] = glm::vec4(toGlm(base->object.position),1.0);
+    tmpTransform[1] = glm::vec4(toGlm(base->object.rotation),1.0);
+    return tmpTransform;
+}
+
+void CHuman::setTransform(const glm::mat4& newTransform)
+{
+    glm::vec3 position = newTransform[0];
+    glm::vec3 rotation = newTransform[1];
+    auto base = this->toPED();
+    base->object.position = toVec3D(position);
+    base->object.rotation = toVec3D(rotation);
+}
+
+const std::string CHuman::dumpJSON() const
+{
+    return "{}";
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+//IMPLEMENTATION CGame
+///////////////////////////////////////////////////////////////////////////
+CGenericObject* CGame::getLocalPlayer()
+{
+    return (CHuman*) this->GetPlayerBase();
+}
+
+CGenericObject* CGame::getLocalPlayer() const
+{
+    return (CHuman*) this->GetPlayerBase();
+}
+
+void CGame::SetCameraTransform(const glm::mat4& transform)
+{
+    Vector3D rotation = toVec3D((glm::vec3) transform[1]);
+    this->SetCameraPos(toVec3D((glm::vec3) transform[0]), rotation); 
+}
+void CGame::UnlockCameraTransform()
+{
+    this->CameraUnlock();
+}
+const glm::mat4 CGame::GetCameraTransform() const
+{
+    if(this->getLocalPlayer())
+        return this->getLocalPlayer()->getTransform();
+    return glm::mat4();
+}
+
+void CGame::createObjectFromJSON(const std::string)
+{
+    throw std::exception("CGame::createObjectFromJSON - not implemented");
+}
+
+///////////////////////////////////////////////////////////////////////////
+// OPTIONAL METHODS (may be implemented by game)
+///////////////////////////////////////////////////////////////////////////
+void CGame::ToggleHUD(bool shouldBeVisible)
+{
+    this->internalToggleHUD(shouldBeVisible);
+}
+const std::string& CGame::GetVersionString() const
+{
+    char version[255];
+    sprintf(version, "Version %d", this->GetGameVersion());
+    return version;
+}
+void CGame::PrintDebugMessage(const std::string& message)
+{
+    this->writeToConsole(COLOR_RED, message.c_str());
+}
+
+/// Record object's state starting this moment
+void CGame::startRecording(CGenericObject& object)
+{
+    throw std::exception("CGame::createObjectFromJSON - not implemented");
+}
+void CGame::clearRecording(CGenericObject& object)
+{
+    throw std::exception("CGame::createObjectFromJSON - not implemented");
+}
+CGenericObjectRecording& CGame::saveRecording(CGenericObject& object)
+{
+    throw std::exception("CGame::createObjectFromJSON - not implemented");
+
+    CPlayerRecording silenceCompiler;
+    return silenceCompiler;
+
+}
+
+void CGame::LockControls(bool shouldBeLocked)
+{
+    this->internalLockControls(shouldBeLocked);
+}
+
+DWORD CGame::GetPlayerBase() const
+{
+    return *(DWORD*)((*(DWORD*)0x6F9464) + 0xE4);
 }

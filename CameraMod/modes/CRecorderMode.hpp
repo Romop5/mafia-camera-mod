@@ -12,21 +12,21 @@ class CRecorderMode: public CGenericMode
         inline void recordMovementTick()
         {
             auto& globalRecordingState = this->m_modeController.m_getScene().m_recordingState;
-            glm::vec3 position = toGlm(this->m_gameController->GetPlayerPosition());
-            glm::vec3 rotation = toGlm(this->m_gameController->GetPlayerRotation());
+            //glm::vec3 position = toGlm(this->m_gameController->GetPlayerPosition());
+            //glm::vec3 rotation = toGlm(this->m_gameController->GetPlayerRotation());
 
-            PED_State& state = this->m_gameController->GetState();
+            //PED_State& state = this->m_gameController->GetState();
 
-            globalRecordingState.m_recordedPath.push_back(CPlayerMovementFrame(position,rotation,state));
+           // globalRecordingState.m_recordedPath.push_back(CPlayerMovementFrame(position,rotation,state));
         }
 
         inline void playPlayerMovementTick()
         {
             auto& globalRecordingState = this->m_modeController.m_getScene().m_recordingState;
             auto framePosition = globalRecordingState.getCurrentReplayFrame();
-            this->m_gameController->SetPlayerPosition(toVec3D(framePosition.position));
-            this->m_gameController->SetPlayerRotation(toVec3D(framePosition.rotation));
-            this->m_gameController->SetState(framePosition.objectState);
+            //this->m_gameController->SetPlayerPosition(toVec3D(framePosition.position));
+            //this->m_gameController->SetPlayerRotation(toVec3D(framePosition.rotation));
+            //this->m_gameController->SetState(framePosition.objectState);
         }
 
     public:
@@ -120,7 +120,7 @@ class CRecorderMode: public CGenericMode
 
         virtual void activate() {
             utilslib::Logger::getInfo() << "activate() recorder mode" << std::endl;
-            this->m_gameController->writeToConsole(CGame::COLOR_RED, "Activated recorder");
+            this->m_gameController->PrintDebugMessage("Activated recorder");
         }
         virtual void deactivate() {
             this->m_gameController->LockControls(false);

@@ -4,12 +4,12 @@
 
 bool CCore::Initialize()
 {
-    auto version = this->getGame()->GetGameVersion();
+    /*auto version = this->getGame()->GetGameVersion();
     if(version != 384)
     {
         utilslib::Logger::getError() << "Expecting game version 384 (1.0), found " << version << std::endl;
         return false;
-    }
+    }*/
     this->getHook()->setInputMessageHandler(
             [&] (void* msg)->bool {
                 // Process input by our handlers
@@ -47,7 +47,7 @@ bool CCore::Initialize()
                 // Shutdown on ESC
                 if(pressedKey == VK_ESCAPE)
                 {
-                    this->getGame()->writeToConsole(CGame::COLOR_RED, "Shutting down LOL");
+                    this->getGame()->PrintDebugMessage("Shutting down LOL");
                     this->ModDetach();
                     }
                 return this->getModControl()->OnVKKey(pressedKey); 
@@ -101,7 +101,7 @@ bool CCore::Unload()
     this->getHook()->replaceDirectXDriver(m_originalD3DDriver);
 
     this->getHook()->UnloadThem();
-
-    this->getGame()->CameraUnlock();
+    this->getGame()->ToggleHUD(false);
+    this->getGame()->UnlockCameraTransform();
     return true;
 }

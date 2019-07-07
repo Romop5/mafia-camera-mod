@@ -6,6 +6,8 @@
 #include "Windows.h"
 #include "common/structures.h"
 
+#include "CGenericGame.hpp"
+
 enum ObjectTypes
 {
 	OBJECT_LOCALPLAYER = 0x2,
@@ -113,15 +115,43 @@ struct PED_State
 };
 
 
-class CGame {
-private:
-public:
+///////////////////////////////////////////////////////////////////////////
+// INTERFACES
+///////////////////////////////////////////////////////////////////////////
+class CPlayerRecording: public CGenericObjectRecording
+{
+    virtual const std::string dumpJSON() const
+	{
+		return "";
+	}
+    virtual void loadFromJSON(const std::string& json) {}
+};
 
+class CHuman: public CGenericObject
+{
+	private:
+	DWORD m_object;
+	PED* toPED() {return reinterpret_cast<PED*>(m_object);}
+	PED* toPED() const {return reinterpret_cast<PED*>(m_object);}
+
+	public:
+	virtual const std::string& getName() const override;
+    virtual const std::string& getType() { return "HUMAN";}
+
+    virtual glm::mat4 getTransform() const override; 
+    virtual void setTransform(const glm::mat4&) override;
+    virtual const std::string dumpJSON() const override;
+};
+
+
+class CGame: public CGenericGame {
+private:
     enum COLOR:DWORD 
     {
         COLOR_RED = 0x00FF0000,
         COLOR_WHITE = 0x00FFFFFF,
     };
+private:
     void SetCameraPos(Vector3D pos, float r1, float r2, float r3,
         float r4);
     void SetCameraPos(Vector3D pos, Vector3D rot);
@@ -129,30 +159,44 @@ public:
     void CameraUnlock();
 
     bool IsGameRunning();
-    DWORD GetPlayerBase();
-    Vector3D GetPlayerPosition();
-    void SetPlayerPosition(Vector3D newPosition);
-    Vector3D GetPlayerRotation();
-    void SetPlayerRotation(Vector3D rotation);
 
-    void ToggleHUD(bool state);
-    int GetGameVersion();
+    DWORD GetPlayerBase() const;
+
+    int GetGameVersion() const;
 
     bool isWindowed() const;
-
-    void CGame::SetDucking(bool status);
-    bool CGame::GetDucking();
 
     size_t getScreenWidth() const;
     size_t getScreenHeight() const;
 
     void writeToConsole(DWORD colour, const char* message);
 
-	void SetState(PED_State& state);
-	PED_State& GetState();
+	void internalLockControls(bool shouldLock);
+    void internalToggleHUD(bool shouldBeHidden);
 
-	void LockControls(bool shouldLock);
+public:
+    virtual CGenericObject* getLocalPlayer() override;
+    virtual CGenericObject* getLocalPlayer() const;
 
+    virtual void SetCameraTransform(const glm::mat4& transform) override;
+    virtual void UnlockCameraTransform() override;
+    virtual const glm::mat4 GetCameraTransform() const override;
+
+    virtual void createObjectFromJSON(const std::string) override;
+
+    virtual void LockControls(bool shouldBeLocked);
+
+    ///////////////////////////////////////////////////////////////////////////
+    // OPTIONAL METHODS (may be implemented by game)
+    ///////////////////////////////////////////////////////////////////////////
+    virtual void ToggleHUD(bool shouldBeVisible) override;
+    virtual const std::string& GetVersionString() const override;
+    virtual void PrintDebugMessage(const std::string& message) override;
+
+    /// Record object's state starting this moment
+    virtual void startRecording(CGenericObject& object) override;
+    virtual void clearRecording(CGenericObject& object) override;
+    virtual CGenericObjectRecording& saveRecording(CGenericObject& object) override;
 };
 
 #endif

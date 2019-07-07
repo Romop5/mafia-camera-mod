@@ -14,23 +14,24 @@ class CFreecamera: public CGenericMode
         virtual void onMouseMove(int x, int y);
 
         virtual void activate() override {
-            this->position = toGlm(m_gameController->GetPlayerPosition());
-            this->rotation = toGlm(m_gameController->GetPlayerRotation());
+            this->position = glm::vec3(m_gameController->GetCameraTransform()[0]);
+            this->rotation = glm::vec3(m_gameController->GetCameraTransform()[1]);
             updateCamera();
             utilslib::Logger::getInfo() << "activated FreeCamera" << std::endl;
 
             // Block ingame input
             this->m_modeController.m_blockInput(true);
-            this->m_gameController->writeToConsole(CGame::COLOR_RED, "Activated camera");
+            this->m_gameController->PrintDebugMessage("Activated camera");
 
             this->m_gameController->ToggleHUD(true);
         }
         virtual void deactivate() override {
-            this->m_gameController->CameraUnlock();
+            this->m_gameController->UnlockCameraTransform();
             // Unblock ingame input
             this->m_modeController.m_blockInput(false);
             this->m_gameController->ToggleHUD(false);
-            this->m_gameController->writeToConsole(CGame::COLOR_RED, "Deactivated camera");
+            this->m_gameController->PrintDebugMessage("Deactivated camera");
+            
         }
         virtual void onRender() override {
             static size_t counter = 0;
@@ -40,8 +41,10 @@ class CFreecamera: public CGenericMode
             ImGui::SliderFloat("Flying speed", &m_cameraFlyingSpeed, 1.0f, 10.0f, "ratio = %.3f");
             if(ImGui::Button("Teleport camera to player"))
             {
-                this->position = toGlm(m_gameController->GetPlayerPosition());
-                this->rotation = toGlm(m_gameController->GetPlayerRotation());
+                auto player = m_gameController->getLocalPlayer();
+                auto transform = player->getTransform();
+                this->position = glm::vec3(transform[0]);
+                this->rotation = glm::vec3(transform[1]);
                 this->updateCamera();
             }
 
@@ -224,7 +227,10 @@ class CFreecamera: public CGenericMode
 
         void updateCamera()
         {
-            m_gameController->SetCameraPos(toVec3D(position), rotation.x,rotation.y,rotation.z,0.0f);
+            glm::mat4 transform; 
+            transform[0] = glm::vec4(position,1.0);
+            transform[1] = glm::vec4(rotation,1.0);
+            m_gameController->SetCameraTransform(transform);
         }
 
 };

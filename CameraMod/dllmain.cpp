@@ -34,7 +34,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
     case DLL_THREAD_DETACH:
         break;
     case DLL_PROCESS_DETACH:
-        core->getGame()->writeToConsole(CGame::COLOR_RED, "Unload it()");
+        core->getGame()->PrintDebugMessage("Unload it()");
         core->Unload();
         break;
     }

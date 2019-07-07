@@ -49,9 +49,9 @@ public:
         {
             // Trigger unload by calling our superior module's callback
             m_TriggerUnload();
-            this->getGame()->writeToConsole(CGame::COLOR_RED, "Calling unload callback");
+            this->getGame()->PrintDebugMessage("Calling unload callback");
         } else {
-            this->getGame()->writeToConsole(CGame::COLOR_RED, "Trying our hack");
+            this->getGame()->PrintDebugMessage("Trying our hack");
             // If not available, falling back to our unloading hack
             // which basically starts up a new thread and deload us
             // However, this can cause crashes when the main thread

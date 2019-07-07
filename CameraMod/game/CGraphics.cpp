@@ -32,7 +32,13 @@ void CGraphics::Init()
     // CLog::getStream() << "Size: " << size.x << " - " << size.y << std::endl;
     utilslib::Logger::getInfo() << "Initializing ImGUI" << std::endl;
 
-    Point2D point = { core->getGame()->getScreenWidth(), core->getGame()->getScreenHeight()};
+    D3DDEVICE_CREATION_PARAMETERS cparams;
+    RECT rect;
+
+    device->GetCreationParameters(&cparams);
+    GetWindowRect(cparams.hFocusWindow, &rect);
+    Point2D point = {rect.right-rect.left, rect.bottom-rect.top};
+    //Point2D point = { core->getGame()->getScreenWidth(), core->getGame()->getScreenHeight()};
     adaptor.Initialize(d3d9Object, point);
 }
 
