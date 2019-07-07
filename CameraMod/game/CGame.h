@@ -120,6 +120,11 @@ struct PED_State
 ///////////////////////////////////////////////////////////////////////////
 class CPlayerRecording: public CGenericObjectRecording
 {
+	private:
+	std::vector<PED_State> m_Frames;
+	size_t m_currentReplayIndex;
+	public:
+	CPlayerRecording();
     virtual const std::string dumpJSON() const
 	{
 		return "";
@@ -197,6 +202,7 @@ public:
     virtual void startRecording(CGenericObject& object) override;
     virtual void clearRecording(CGenericObject& object) override;
     virtual CGenericObjectRecording& saveRecording(CGenericObject& object) override;
+    virtual  void playRecording(CGenericObject& object, CGenericObjectRecording& record) override;
 };
 
 #endif

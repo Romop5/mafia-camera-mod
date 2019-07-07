@@ -15,6 +15,7 @@ class CGenericObject
 class CGenericObjectRecording
 {
     public:
+    virtual ~CGenericObjectRecording() = default;
     virtual const std::string dumpJSON() const = 0;
     virtual void loadFromJSON(const std::string& json) = 0;
 };
@@ -28,6 +29,7 @@ class CGenericObjectRecording
 class CGenericGame
 {
     public:
+    virtual ~CGenericGame() = default;
     virtual CGenericObject* getLocalPlayer() = 0;
 
     virtual void SetCameraTransform(const glm::mat4& transform) = 0;
@@ -35,8 +37,12 @@ class CGenericGame
     virtual const glm::mat4 GetCameraTransform() const = 0;
 
     virtual void createObjectFromJSON(const std::string) = 0;
-
     virtual void LockControls(bool shouldBeLocked) = 0;
+
+    ///////////////////////////////////////////////////////////////////////////
+    // EVENTS
+    ///////////////////////////////////////////////////////////////////////////
+    virtual void onTick() = 0;
 
     ///////////////////////////////////////////////////////////////////////////
     // OPTIONAL METHODS (may be implemented by game)
@@ -49,4 +55,5 @@ class CGenericGame
     virtual void startRecording(CGenericObject& object) = 0;
     virtual void clearRecording(CGenericObject& object) = 0;
     virtual CGenericObjectRecording& saveRecording(CGenericObject& object) = 0;
+    virtual  void playRecording(CGenericObject& object, CGenericObjectRecording& record) = 0;
 };
