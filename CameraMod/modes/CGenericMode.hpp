@@ -1,13 +1,13 @@
 #ifndef CGENERIC_MODE_HPP
 #define CGENERIC_MODE_HPP
 #include "Windows.h"
-#include "game/CGame.h"
+#include "game/CGenericGame.hpp"
 #include "modes/CModeController.hpp"
 #include <utilslib/logger.hpp>
 class CGenericMode
 {
     protected:
-        CGame* m_gameController;
+        CGenericGame* m_gameController;
         CModeController m_modeController;
     public:
         CGenericMode(): m_gameController(NULL) {}

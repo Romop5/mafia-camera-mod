@@ -2,6 +2,7 @@
 #define C_GAME
 
 #include <vector>
+#include <map>
 
 #include "Windows.h"
 #include "common/structures.h"
@@ -108,6 +109,7 @@ typedef struct _PED {
 
 struct PED_State
 {
+	glm::mat4 transform;
 	byte	animState;
 	bool	isDucking;
 	bool	isAiming;	
@@ -118,21 +120,52 @@ struct PED_State
 ///////////////////////////////////////////////////////////////////////////
 // INTERFACES
 ///////////////////////////////////////////////////////////////////////////
+class CHuman;
+
 class CPlayerRecording: public CGenericObjectRecording
 {
 	private:
 	std::vector<PED_State> m_Frames;
 	size_t m_currentReplayIndex;
 	public:
-	CPlayerRecording();
+	CPlayerRecording(): m_currentReplayIndex(0) {}
     virtual const std::string dumpJSON() const
 	{
 		return "";
 	}
     virtual void loadFromJSON(const std::string& json) {}
+
+	void updateState(CHuman& human);
+	void recordState(CHuman& human);
 };
 
-class CHuman: public CGenericObject
+class CMafiaObject: public CGenericObject
+{
+	private:
+	/// Ingame object's address
+	DWORD m_mafiaAdress;
+	
+	///////////////////////////////////////////////////////
+	// RECORDING
+	public:
+	enum RecordingState
+	{
+		NONE,
+		RECORDING,
+		PLAYING	
+	};
+	private: 
+	std::unique_ptr<CPlayerRecording> m_recording;
+	RecordingState m_currentState;
+	///////////////////////////////////////////////////////
+	public:
+	CMafiaObject(): m_currentState(NONE) {}
+	DWORD getMafiaAddress() const { return m_mafiaAdress; }
+	void setMafiaAddress(const DWORD address) { m_mafiaAdress = address; }
+	friend class CGame;
+};
+
+class CHuman: public CMafiaObject
 {
 	private:
 	DWORD m_object;
@@ -146,9 +179,32 @@ class CHuman: public CGenericObject
     virtual glm::mat4 getTransform() const override; 
     virtual void setTransform(const glm::mat4&) override;
     virtual const std::string dumpJSON() const override;
+
+	void setState(const PED_State& state);
+	const PED_State getState() const;
 };
 
 
+/*class CGameObjectManager
+{
+	private:
+	std::map<DWORD, CMafiaObject> m_objects;
+
+	auto begin() { return m_objects.begin(); }
+	auto end() { return m_objects.begin(); }
+
+	bool hasObject(CMafiaObject& obj)
+	{
+		auto reference = m_objects.find(obj.getMafiaAddress());
+		return (reference != m_objects.end());
+	}
+
+	void addObject(CMafiaObject& obj)
+	{
+		m_objects[obj.getMafiaAddress()] = obj;
+	}
+};
+*/
 class CGame: public CGenericGame {
 private:
     enum COLOR:DWORD 
@@ -156,6 +212,8 @@ private:
         COLOR_RED = 0x00FF0000,
         COLOR_WHITE = 0x00FFFFFF,
     };
+
+//	CGameObjectManager m_objManager;
 private:
     void SetCameraPos(Vector3D pos, float r1, float r2, float r3,
         float r4);
@@ -180,6 +238,7 @@ private:
     void internalToggleHUD(bool shouldBeHidden);
 
 public:
+	virtual void onTick() override;
     virtual CGenericObject* getLocalPlayer() override;
     virtual CGenericObject* getLocalPlayer() const;
 
@@ -199,10 +258,10 @@ public:
     virtual void PrintDebugMessage(const std::string& message) override;
 
     /// Record object's state starting this moment
-    virtual void startRecording(CGenericObject& object) override;
-    virtual void clearRecording(CGenericObject& object) override;
-    virtual CGenericObjectRecording& saveRecording(CGenericObject& object) override;
-    virtual  void playRecording(CGenericObject& object, CGenericObjectRecording& record) override;
+    virtual void startRecording(CGenericObject* object) override;
+    virtual void clearRecording(CGenericObject* object) override;
+    virtual CGenericObjectRecording* saveRecording(CGenericObject* object) override;
+    virtual  void playRecording(CGenericObject* object, CGenericObjectRecording* record) override;
 };
 
 #endif

@@ -28,7 +28,7 @@ class CRecorderMode: public CGenericMode
             //this->m_gameController->SetPlayerRotation(toVec3D(framePosition.rotation));
             //this->m_gameController->SetState(framePosition.objectState);
         }
-
+        std::unique_ptr<CGenericObjectRecording> m_recording;
     public:
         CRecorderMode() {}
         void setGameDriver(CGame* game) { this->m_gameController = game;}
@@ -36,6 +36,7 @@ class CRecorderMode: public CGenericMode
 
         virtual bool onVKKey(USHORT key) {
             auto& globalRecordingState = this->m_modeController.m_getScene().m_recordingState;
+            auto player = this->m_gameController->getLocalPlayer();
             switch(key)
             {
                 // Enter
@@ -43,14 +44,19 @@ class CRecorderMode: public CGenericMode
                     if(globalRecordingState.isRunning())
                     {
                         globalRecordingState.setRecordingState(CRecordingStateEnum::IDLE);
+                        this->m_gameController->startRecording(player);
                     } else {
                         globalRecordingState.setRecordingState(CRecordingStateEnum::RECORDING);
+                        m_recording = std::unique_ptr<CGenericObjectRecording>(this->m_gameController->saveRecording(player));
                     }
                     this->m_gameController->LockControls(false);
                     break;
                 case VK_BACK:
                     globalRecordingState.setRecordingState(CRecordingStateEnum::PLAYING);
+                    this->m_gameController->playRecording(player,m_recording.get());
                     this->m_gameController->LockControls(true);
+                    this->m_gameController->PrintDebugMessage("Replay pressed");
+                    break;
             }
             return false;
         }
@@ -62,7 +68,7 @@ class CRecorderMode: public CGenericMode
             // If recording is running, then record current position
             //if(globalRecordingState.m_isRecordingRunning)
 
-            switch(globalRecordingState.getState())
+            /*switch(globalRecordingState.getState())
             {
                 case CRecordingStateEnum::RECORDING:
                     this->recordMovementTick();
@@ -70,7 +76,7 @@ class CRecorderMode: public CGenericMode
                 case CRecordingStateEnum::PLAYING:
                     this->playPlayerMovementTick();
                 break;
-            }
+            }*/
             static bool shouldRenderOverlay = true;
             bool shouldBeMoveable = true;
             static int corner = 0;

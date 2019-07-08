@@ -8,6 +8,22 @@ namespace GameOffsets
 };
 
 
+void CPlayerRecording::updateState(CHuman& human)
+{
+    if(m_currentReplayIndex >= m_Frames.size())
+    {
+        m_currentReplayIndex = 0;
+    }
+    auto currentFrame = m_Frames[m_currentReplayIndex++];
+    human.setState(currentFrame);
+}
+void CPlayerRecording::recordState(CHuman& human)
+{
+    auto state = human.getState();
+    m_Frames.push_back(state);
+}
+
+
 void CGame::SetCameraPos(Vector3D pos, float r1, float r2, float r3, float r4)
 {
     _asm {
@@ -191,6 +207,35 @@ const std::string CHuman::dumpJSON() const
 }
 
 
+void CHuman::setState(const PED_State& state)
+{
+    auto base = this->toPED();
+    if(base)
+    {
+        base->isAiming = state.isAiming;
+        base->isDucking = state.isDucking;
+        base->isReloading = state.isReloading;
+        base->animState = state.animState;
+        this->setTransform(state.transform);
+    }
+}
+
+const PED_State CHuman::getState() const
+{
+    auto base = this->toPED();
+    PED_State state;
+    if(base)
+    {
+        state.isAiming = base->isAiming;
+        state.isDucking = base->isDucking;
+        state.isReloading = base->isReloading;
+        state.animState = base->animState;
+        state.transform = this->getTransform();
+    }
+    return state;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////
 //IMPLEMENTATION CGame
 ///////////////////////////////////////////////////////////////////////////
@@ -244,21 +289,37 @@ void CGame::PrintDebugMessage(const std::string& message)
 }
 
 /// Record object's state starting this moment
-void CGame::startRecording(CGenericObject& object)
+void CGame::startRecording(CGenericObject* object)
 {
-    throw std::exception("CGame::createObjectFromJSON - not implemented");
-}
-void CGame::clearRecording(CGenericObject& object)
-{
-    throw std::exception("CGame::createObjectFromJSON - not implemented");
-}
-CGenericObjectRecording& CGame::saveRecording(CGenericObject& object)
-{
-    throw std::exception("CGame::createObjectFromJSON - not implemented");
+    //throw std::exception("CGame::createObjectFromJSON - not implemented");
 
-    CPlayerRecording silenceCompiler;
-    return silenceCompiler;
-
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(&object);
+    if(mafiaObject->m_currentState == CMafiaObject::RECORDING)
+    {
+        this->clearRecording(object);
+    }
+    // create a recording instance
+    mafiaObject->m_recording = std::make_unique<CPlayerRecording>();
+    mafiaObject->m_currentState = CMafiaObject::RECORDING;
+}
+void CGame::clearRecording(CGenericObject* object)
+{
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(&object);
+    mafiaObject->m_recording.reset();
+    mafiaObject->m_currentState = CMafiaObject::NONE;
+}
+CGenericObjectRecording* CGame::saveRecording(CGenericObject* object)
+{
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(&object);
+    mafiaObject->m_currentState = CMafiaObject::NONE;
+    return mafiaObject->m_recording.get();
+}
+void CGame::playRecording(CGenericObject* object, CGenericObjectRecording* record)
+{
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(&object);
+    auto mafiaRecording = reinterpret_cast<CPlayerRecording&>(record);
+    *mafiaObject->m_recording = mafiaRecording;
+    mafiaObject->m_currentState = CMafiaObject::PLAYING;
 }
 
 void CGame::LockControls(bool shouldBeLocked)
@@ -269,4 +330,24 @@ void CGame::LockControls(bool shouldBeLocked)
 DWORD CGame::GetPlayerBase() const
 {
     return *(DWORD*)((*(DWORD*)0x6F9464) + 0xE4);
+}
+
+
+void CGame::onTick()
+{
+    auto player = reinterpret_cast<CHuman*>(this->getLocalPlayer());
+    if(player && player->m_mafiaAdress)
+    {
+        switch(player->m_currentState)
+        {
+            case CMafiaObject::PLAYING:
+            {
+                player->m_recording->updateState(*player);
+            }
+            case CMafiaObject::RECORDING:
+            {
+                player->m_recording->recordState(*player);
+            }
+        }
+    }
 }

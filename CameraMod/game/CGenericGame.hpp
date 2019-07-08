@@ -1,3 +1,5 @@
+#ifndef CGENERIC_GAME_HPP
+#define CGENERIC_GAME_HPP
 #include <string>
 #include <glm/glm.hpp>
 
@@ -52,8 +54,9 @@ class CGenericGame
     virtual void PrintDebugMessage(const std::string& message) {}
 
     /// Record object's state starting this moment
-    virtual void startRecording(CGenericObject& object) = 0;
-    virtual void clearRecording(CGenericObject& object) = 0;
-    virtual CGenericObjectRecording& saveRecording(CGenericObject& object) = 0;
-    virtual  void playRecording(CGenericObject& object, CGenericObjectRecording& record) = 0;
+    virtual void startRecording(CGenericObject* object) = 0;
+    virtual void clearRecording(CGenericObject* object) = 0;
+    virtual CGenericObjectRecording* saveRecording(CGenericObject* object) = 0;
+    virtual  void playRecording(CGenericObject* object, CGenericObjectRecording* record) = 0;
 };
+#endif

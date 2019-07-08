@@ -92,6 +92,12 @@ bool CCore::Initialize()
 		this->getGraphics()->getImGUIAdaptor().setMouseVisible(this->m_isGUIacceptingInput);
                 this->getGraphics()->getImGUIAdaptor().Render();
             });
+    // Tick on game
+    this->getGraphics()->m_onRenderHandler.add(
+        [&] (void)->void {
+            this->getGame()->onTick();
+        }
+    );
     return true;
 }
 bool CCore::Unload()
