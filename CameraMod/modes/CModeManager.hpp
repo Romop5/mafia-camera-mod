@@ -1,6 +1,7 @@
 #ifndef C_MODCONTROL
 #define C_MODCONTROL
 #include <vector>
+#include <memory>
 #include "CGenericMode.hpp"
 #include "CCoreController.hpp"
 #include "game/CGame.h"
@@ -13,7 +14,7 @@ enum BlockStatus:size_t
 
 class CModeManager {
 private:
-    std::vector<CGenericMode*> m_modes;
+    std::vector<std::pair<CGenericMode*,std::string>> m_modes;
     size_t m_currentModeIndex;
     CGenericMode* m_currentMode;
     CCoreController m_coreController;
@@ -23,6 +24,8 @@ private:
 
     CScene m_scene;
 
+    void RenderMainMenu();
+    void AddMode(CGenericMode*, const std::string name = "Unknown mode");
 public:
     CModeManager();
     ~CModeManager();
@@ -42,6 +45,7 @@ public:
     void updateBlocking(bool shouldBlock, BlockStatus type);
     
     void turnGUIstate(bool shouldBeOn);
+
 };
 
 #endif
