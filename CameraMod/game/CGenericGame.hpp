@@ -1,6 +1,7 @@
 #ifndef CGENERIC_GAME_HPP
 #define CGENERIC_GAME_HPP
 #include <string>
+#include <vector>
 #include <glm/glm.hpp>
 
 class CGenericObject
@@ -22,6 +23,54 @@ class CGenericObjectRecording
     virtual void loadFromJSON(const std::string& json) = 0;
 };
 
+class CGenericGameSettingBase
+{
+    protected:
+    std::string m_name;
+    public:
+    const std::string getName() const { return this->m_name; }
+    virtual std::string getType() const = 0;
+};
+
+#define CAMERAMOD_NUMERIC_GAME_SETTING(param)\
+class CGenericGameSetting_##param: public CGenericGameSettingBase\
+{\
+    protected:\
+    param m_minimal;\
+    param m_maximal;\
+    param m_value;\
+    public:\
+    param getValue() const { return m_value; }\
+    bool setValue(const param val) {\
+        if(val < m_minimal || val > m_maximal)\
+            return false;\
+        m_value = val;\
+        return true;\
+    }\
+    virtual std::string getType() const override {\
+        return "" #param;\
+    }\
+};
+
+CAMERAMOD_NUMERIC_GAME_SETTING(int)
+CAMERAMOD_NUMERIC_GAME_SETTING(float)
+#undef CAMERAMOD_NUMERIC_GAME_SETTING
+
+class CGenericGameSetting_String: public CGenericGameSettingBase
+{
+    protected:
+    std::string m_value;
+    public:
+    const std::string getValue() const { return m_value; }
+    bool setValue(const std::string val) {
+        m_value = val;
+        return true;
+    }
+    virtual std::string getType() const override  {
+        return "string";
+    }
+};
+
 /**
  * @brief Describes a generic API that a game must implement
  * 
@@ -40,6 +89,8 @@ class CGenericGame
 
     virtual void createObjectFromJSON(const std::string) = 0;
     virtual void LockControls(bool shouldBeLocked) = 0;
+
+    virtual std::vector<std::unique_ptr<CGenericGameSettingBase>>& getSettings() = 0;
 
     ///////////////////////////////////////////////////////////////////////////
     // EVENTS

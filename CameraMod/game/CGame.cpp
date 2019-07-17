@@ -180,12 +180,17 @@ void CGame::internalLockControls(bool shouldLock)
 
 const std::string& CHuman::getName() const
 {
-    return this->toPED()->object.frame->frameName;
+    auto base = this->toPED();
+    if(base)
+        base->object.frame->frameName;
+    return "Unknown human";
 }
 
 glm::mat4 CHuman::getTransform() const
 {
     auto base = this->toPED();
+    if(!base)
+        return glm::mat4();
     glm::mat4 tmpTransform;
     tmpTransform[0] = glm::vec4(toGlm(base->object.position),1.0);
     tmpTransform[1] = glm::vec4(toGlm(base->object.rotation),1.0);
@@ -197,6 +202,8 @@ void CHuman::setTransform(const glm::mat4& newTransform)
     glm::vec3 position = newTransform[0];
     glm::vec3 rotation = newTransform[1];
     auto base = this->toPED();
+    if(!base)
+        return;
     base->object.position = toVec3D(position);
     base->object.rotation = toVec3D(rotation);
 }
@@ -241,12 +248,12 @@ const PED_State CHuman::getState() const
 ///////////////////////////////////////////////////////////////////////////
 CGenericObject* CGame::getLocalPlayer()
 {
-    return (CHuman*) this->GetPlayerBase();
+    return &m_localPlayer;
 }
 
-CGenericObject* CGame::getLocalPlayer() const
+const CGenericObject* CGame::getLocalPlayer() const
 {
-    return (CHuman*) this->GetPlayerBase();
+    return &m_localPlayer;
 }
 
 void CGame::SetCameraTransform(const glm::mat4& transform)
@@ -293,32 +300,34 @@ void CGame::startRecording(CGenericObject* object)
 {
     //throw std::exception("CGame::createObjectFromJSON - not implemented");
 
-    auto mafiaObject = reinterpret_cast<CMafiaObject*>(&object);
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(object);
     if(mafiaObject->m_currentState == CMafiaObject::RECORDING)
     {
         this->clearRecording(object);
     }
     // create a recording instance
-    mafiaObject->m_recording = std::make_unique<CPlayerRecording>();
+    mafiaObject->m_recording = CPlayerRecording();
     mafiaObject->m_currentState = CMafiaObject::RECORDING;
 }
 void CGame::clearRecording(CGenericObject* object)
 {
-    auto mafiaObject = reinterpret_cast<CMafiaObject*>(&object);
-    mafiaObject->m_recording.reset();
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(object);
+    mafiaObject->m_recording = CPlayerRecording();
     mafiaObject->m_currentState = CMafiaObject::NONE;
 }
 CGenericObjectRecording* CGame::saveRecording(CGenericObject* object)
 {
-    auto mafiaObject = reinterpret_cast<CMafiaObject*>(&object);
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(object);
     mafiaObject->m_currentState = CMafiaObject::NONE;
-    return mafiaObject->m_recording.get();
+    mafiaObject->m_recordings.push_front(mafiaObject->m_recording);
+    return &mafiaObject->m_recordings.front();
 }
+
 void CGame::playRecording(CGenericObject* object, CGenericObjectRecording* record)
 {
-    auto mafiaObject = reinterpret_cast<CMafiaObject*>(&object);
-    auto mafiaRecording = reinterpret_cast<CPlayerRecording&>(record);
-    *mafiaObject->m_recording = mafiaRecording;
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(object);
+    auto mafiaRecording = reinterpret_cast<CPlayerRecording*>(record);
+    mafiaObject->m_recording = *mafiaRecording;
     mafiaObject->m_currentState = CMafiaObject::PLAYING;
 }
 
@@ -342,12 +351,17 @@ void CGame::onTick()
         {
             case CMafiaObject::PLAYING:
             {
-                player->m_recording->updateState(*player);
+                player->m_recording.updateState(*player);
             }
             case CMafiaObject::RECORDING:
             {
-                player->m_recording->recordState(*player);
+                player->m_recording.recordState(*player);
             }
         }
     }
+}
+
+std::vector<std::unique_ptr<CGenericGameSettingBase>>& CGame::getSettings()
+{
+    return m_settings;
 }

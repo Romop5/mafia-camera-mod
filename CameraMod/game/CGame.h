@@ -2,6 +2,7 @@
 #define C_GAME
 
 #include <vector>
+#include <forward_list>
 #include <map>
 
 #include "Windows.h"
@@ -155,12 +156,13 @@ class CMafiaObject: public CGenericObject
 		PLAYING	
 	};
 	private: 
-	std::unique_ptr<CPlayerRecording> m_recording;
+	CPlayerRecording m_recording;
+	std::forward_list<CPlayerRecording> m_recordings;
 	RecordingState m_currentState;
 	///////////////////////////////////////////////////////
 	public:
 	CMafiaObject(): m_currentState(NONE) {}
-	DWORD getMafiaAddress() const { return m_mafiaAdress; }
+	virtual DWORD getMafiaAddress() const { return m_mafiaAdress; }
 	void setMafiaAddress(const DWORD address) { m_mafiaAdress = address; }
 	friend class CGame;
 };
@@ -168,13 +170,12 @@ class CMafiaObject: public CGenericObject
 class CHuman: public CMafiaObject
 {
 	private:
-	DWORD m_object;
-	PED* toPED() {return reinterpret_cast<PED*>(m_object);}
-	PED* toPED() const {return reinterpret_cast<PED*>(m_object);}
+	PED* toPED() {return reinterpret_cast<PED*>(getMafiaAddress());}
+	PED* toPED() const {return reinterpret_cast<PED*>(getMafiaAddress());}
 
 	public:
 	virtual const std::string& getName() const override;
-    virtual const std::string& getType() { return "HUMAN";}
+    virtual const std::string& getType() const override { return "HUMAN";}
 
     virtual glm::mat4 getTransform() const override; 
     virtual void setTransform(const glm::mat4&) override;
@@ -182,6 +183,15 @@ class CHuman: public CMafiaObject
 
 	void setState(const PED_State& state);
 	const PED_State getState() const;
+};
+
+class CLocalPlayer: public CHuman
+{
+	public:
+	virtual DWORD getMafiaAddress() const override 
+	{
+		return *(DWORD*)((*(DWORD*)0x6F9464) + 0xE4);
+	}
 };
 
 
@@ -237,10 +247,14 @@ private:
 	void internalLockControls(bool shouldLock);
     void internalToggleHUD(bool shouldBeHidden);
 
+	CLocalPlayer m_localPlayer;
+	
+    std::vector<std::unique_ptr<CGenericGameSettingBase>> m_settings;
+
 public:
 	virtual void onTick() override;
     virtual CGenericObject* getLocalPlayer() override;
-    virtual CGenericObject* getLocalPlayer() const;
+    virtual const CGenericObject* getLocalPlayer() const;
 
     virtual void SetCameraTransform(const glm::mat4& transform) override;
     virtual void UnlockCameraTransform() override;
@@ -249,6 +263,8 @@ public:
     virtual void createObjectFromJSON(const std::string) override;
 
     virtual void LockControls(bool shouldBeLocked);
+
+    virtual std::vector<std::unique_ptr<CGenericGameSettingBase>>& getSettings();
 
     ///////////////////////////////////////////////////////////////////////////
     // OPTIONAL METHODS (may be implemented by game)
