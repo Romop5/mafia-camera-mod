@@ -28,6 +28,18 @@ class CCameraTrack
         std::vector<CCameraPoint*>& getPoints() { return this->m_trackPoints; }
 };
 
+class CCameraManager
+{
+    private:
+        std::vector<CCameraPoint> m_points;
+        std::vector<CCameraTrack> m_tracks;
+    public:
+
+    void addCameraPoint(glm::vec3 position, glm::vec3 m_rotation);
+    std::vector<CCameraPoint>& getCameraPoints() { return this->m_points; }
+    std::vector<CCameraTrack>& getCameraTracks() { return this->m_tracks; }
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // Recording player movement
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,19 +118,18 @@ class CRecordingState
         }
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+// CScene interface
+///////////////////////////////////////////////////////////////////////////////
+
 class CScene
 {
-    private:
-        std::vector<CCameraPoint> m_points;
-        std::vector<CCameraTrack> m_tracks;
     public:
     void save(const std::string path) {}
     void load(const std::string path) {}
 
-    void addCameraPoint(glm::vec3 position, glm::vec3 m_rotation);
-    std::vector<CCameraPoint>& getCameraPoints() { return this->m_points; }
-    std::vector<CCameraTrack>& getCameraTracks() { return this->m_tracks; }
-
     CRecordingState m_recordingState;
+    CCameraManager m_cameraManager;
 };
 #endif

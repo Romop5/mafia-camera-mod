@@ -1,0 +1,6 @@
+#include "version.hpp"
+
+std::string getVersionString()
+{
+    return "@MAFIA_BUILD_TIME@";
+}

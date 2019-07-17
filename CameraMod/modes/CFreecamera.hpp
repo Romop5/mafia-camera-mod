@@ -50,7 +50,7 @@ class CFreecamera: public CGenericMode
 
             if(ImGui::Button("Add camera point"))
             {
-                this->m_modeController.m_getScene().addCameraPoint(this->position, this->rotation);
+                this->m_modeController.m_getScene().m_cameraManager.addCameraPoint(this->position, this->rotation);
             }
 
             ImGui::End();
@@ -90,7 +90,7 @@ class CFreecamera: public CGenericMode
                 ImGui::BeginChild("left pane", ImVec2(50, 0), true);
 
                 size_t i = 0;
-                auto &points = this->m_modeController.m_getScene().getCameraPoints();
+                auto &points = this->m_modeController.m_getScene().m_cameraManager.getCameraPoints();
                 for(auto &cameraPoint: points)
                 {
                     char label[128];
@@ -123,7 +123,7 @@ class CFreecamera: public CGenericMode
                                     }
 
                                     size_t selectedTrack = 0;
-                                    auto &tracks = this->m_modeController.m_getScene().getCameraTracks();
+                                    auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
                                      if (ImGui::BeginCombo("combo 1", "wat", 0)) // The second parameter is the label previewed before opening the combo.
                                      {
                                         size_t id = 0;
@@ -168,7 +168,7 @@ class CFreecamera: public CGenericMode
                 ImGui::BeginChild("left pane", ImVec2(50, 0), true);
 
                 size_t i = 0;
-                auto &tracks = this->m_modeController.m_getScene().getCameraTracks();
+                auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
                 for(auto &track: tracks)
                 {
                     char label[128];

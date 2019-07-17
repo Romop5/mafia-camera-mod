@@ -3,6 +3,7 @@
 #include "modes/CModeController.hpp"
 #include "modes/CFreecamera.hpp"
 #include "modes/CRecorderMode.hpp"
+#include "modes/CAbout.hpp"
 #include <sstream>
 
 CModeManager::CModeManager()
@@ -28,9 +29,10 @@ CModeManager::~CModeManager()
 void CModeManager::InitializeModes(CGame* game)
 {
     utilslib::Logger::getInfo() << "CModeManager::InitializeModes" << std::endl;
-    this->m_modes.push_back(new CFreecamera());
-    this->m_modes.push_back(new CGenericMode()); // Regular 1st person gameplay
-    this->m_modes.push_back(new CRecorderMode()); // Regular 1st person gameplay
+    AddMode(new CAbout(), "About"); // About
+    AddMode(new CFreecamera(), "Free camera");
+    AddMode(new CGenericMode(), "Regular game"); // Regular 1st person gameplay
+    AddMode(new CRecorderMode(), "Recorder"); // Regular 1st person gameplay
 
     // create controller
     CModeController controller;
@@ -44,15 +46,20 @@ void CModeManager::InitializeModes(CGame* game)
     // Set game to all of them
     for(auto mode: this->m_modes)
     {
-        mode->setGameDriver(game);
-        mode->setModeController(controller);
+        mode.first->setGameDriver(game);
+        mode.first->setModeController(controller);
     }
 
-    this->m_currentMode = m_modes[0];
+    this->m_currentMode = m_modes[0].first;
     this->m_currentMode->activate();
 
     this->m_currentModeIndex = 0;
 
+}
+
+void CModeManager::AddMode(CGenericMode* mode, const std::string name)
+{
+     this->m_modes.push_back(std::make_pair(mode,name));
 }
 bool CModeManager::OnVKKey(USHORT key)
 {
@@ -86,10 +93,40 @@ void CModeManager::OnMouseButtons(unsigned short buttons)
             this->m_currentMode->onMouseButtons(buttons);
 }
 
+void CModeManager::RenderMainMenu()
+{
+    ImGui::BeginMainMenuBar();
+    if (ImGui::BeginMenu("File"))
+    {
+        for(size_t i = 0; i < m_modes.size(); i++)
+        {
+            auto& item = m_modes[i];
+            if (ImGui::MenuItem(item.second.c_str(), "")) 
+            {
+                this->switchToMode(i);
+            }
+        }
+        ImGui::EndMenu();
+    }
+    if (ImGui::BeginMenu("Edit"))
+    {
+        if (ImGui::MenuItem("Undo", "CTRL+Z")) {}
+        if (ImGui::MenuItem("Redo", "CTRL+Y", false, false)) {}  // Disabled item
+        ImGui::Separator();
+        if (ImGui::MenuItem("Cut", "CTRL+X")) {}
+        if (ImGui::MenuItem("Copy", "CTRL+C")) {}
+        if (ImGui::MenuItem("Paste", "CTRL+V")) {}
+        ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+
+}
 void CModeManager::Render()
 {
-    //if(!this->m_isGUIVisible)
-    //    return;
+    if(this->m_isGUIVisible)
+    {
+        this->RenderMainMenu();
+    }
 
     if(this->m_currentMode)
         this->m_currentMode->onRender();
@@ -98,25 +135,25 @@ void CModeManager::Render()
 void CModeManager::switchToNextMode()
 {
     // deactivate current mode
-    this->m_modes[m_currentModeIndex]->deactivate();
+    this->m_modes[m_currentModeIndex].first->deactivate();
     this->m_currentModeIndex++;
     if(m_currentModeIndex >= this->m_modes.size())
         this->m_currentModeIndex = 0;
     // Activate the new one
-    this->m_modes[m_currentModeIndex]->activate();
-    this->m_currentMode = this->m_modes[this->m_currentModeIndex];
+    this->m_modes[m_currentModeIndex].first->activate();
+    this->m_currentMode = this->m_modes[this->m_currentModeIndex].first;
 }
 
 void CModeManager::switchToMode(size_t id)
 {
     // deactivate current mode
-    this->m_modes[m_currentModeIndex]->deactivate();
+    this->m_modes[m_currentModeIndex].first->deactivate();
     this->m_currentModeIndex = id;
     if(m_currentModeIndex >= this->m_modes.size())
         this->m_currentModeIndex = 0;
     // Activate the new one
-    this->m_modes[m_currentModeIndex]->activate();
-    this->m_currentMode = this->m_modes[this->m_currentModeIndex];
+    this->m_modes[m_currentModeIndex].first->activate();
+    this->m_currentMode = this->m_modes[this->m_currentModeIndex].first;
 }
 
 

@@ -11,6 +11,25 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:\"libc
 # Turn off these CRT warnings
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
+#set(FOO "Some text to show up in json_file.json")
+#set(BAR "More text")
+configure_file(version.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/version.cmake @ONLY)
+
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
+ OUTPUT fileWillNeverExist.txt
+  COMMAND ${CMAKE_COMMAND} -P
+    ${CMAKE_CURRENT_BINARY_DIR}/version.cmake
+  DEPENDS
+    ${CMAKE_CURRENT_BINARY_DIR}/version.cmake
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake
+  COMMENT "Setting up C++ unit with version information"
+  VERBATIM)
+
+add_custom_target(configure_version ALL
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/version.cmake)
+
+
 add_library(CameraMod SHARED 
 	CCore.cpp
 	CScene.cpp
@@ -22,6 +41,7 @@ add_library(CameraMod SHARED
 	game/CImGUIAdaptor.cpp
 	modes/CFreecamera.cpp
 	modes/CModeManager.cpp
+	${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 	dllmain.cpp
 
 # Separate cd3dfont
@@ -36,7 +56,7 @@ add_library(CameraMod SHARED
 	# imGui
 	game/imgui_impl_dx9.cpp
 	)
-	
+add_dependencies(CameraMod configure_version)
 target_include_directories(CameraMod PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(CameraMod PRIVATE ../vendors/ ../vendors/DirectX9SDK2007/Include)
