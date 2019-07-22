@@ -1,4 +1,5 @@
 #include "game/CRawInput.h"
+#include "utilslib/logger.hpp"
 
 // Processes WM_INPUT messages and calls onKey/mouse callbacks
 //https://docs.microsoft.com/en-us/windows/desktop/inputdev/raw-input
@@ -19,14 +20,17 @@ bool CRawInput::ProcessMessage(LPMSG message)
 
             if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 
-                bool isKeyDown = raw->data.keyboard.Flags & RI_KEY_MAKE;
-                if (raw->data.keyboard.Flags & (RI_KEY_BREAK | RI_KEY_MAKE))
-                {
-                    auto virtualKeyCode = raw->data.keyboard.VKey;
+                auto virtualKeyCode = raw->data.keyboard.VKey;
+                bool isKeyDown = !(raw->data.keyboard.Flags > 0);
+                //if (raw->data.keyboard.Flags & (RI_KEY_BREAK | RI_KEY_MAKE))
+                //{
                     // Call all registered onKeyPressed callbacks
                     for(auto callback: this->m_onKeyPressedHandlers)
                         callback(virtualKeyCode,isKeyDown);
-                }
+                    
+                //}
+                
+                utilslib::Logger::getInfo() << "RawpInput " << std::hex << virtualKeyCode << " - " <<  raw->data.keyboard.Flags << " " << isKeyDown << std::endl;
 
             } else if (raw->header.dwType == RIM_TYPEMOUSE) {
                 this->OnMouseTick(&raw->data.mouse);

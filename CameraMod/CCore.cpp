@@ -54,7 +54,9 @@ bool CCore::Initialize()
                 {
                     this->getGraphics()->getImGUIAdaptor().updateKey(pressedKey, isKeyDown);
                 }
-                return this->getModControl()->OnVKKey(pressedKey); 
+                if(isKeyDown)
+                    return this->getModControl()->OnVKKey(pressedKey); 
+                return true;
             });
     // Register mouse move callback
     this->getRawInput()->m_onMouseMoveHandlers.add(

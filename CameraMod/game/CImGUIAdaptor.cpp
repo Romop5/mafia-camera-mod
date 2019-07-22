@@ -75,6 +75,7 @@ bool CImGUIAdaptor::SetUpIO()
     io.KeyMap[ImGuiKey_Space] = VK_SPACE;
     io.KeyMap[ImGuiKey_Enter] = VK_RETURN;
     io.KeyMap[ImGuiKey_Escape] = VK_ESCAPE;
+    
     io.KeyMap[ImGuiKey_A] = 'A';
     io.KeyMap[ImGuiKey_C] = 'C';
     io.KeyMap[ImGuiKey_V] = 'V';
@@ -143,7 +144,15 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.KeysDown[keycode] = isDown;
-    utilslib::Logger::getInfo() << "[ImGUI Hook] key: " << std::hex << keycode << " status: " << isDown << std::endl;
+    if(isDown)
+    {
+        if(keycode >= 0x41 && keycode <= 0x5A)
+        {
+            // Append character
+            io.AddInputCharacter(keycode-0x41+'A');
+        }
+    }
+    //utilslib::Logger::getInfo() << "[ImGUI Hook] key: " << std::hex << keycode << " status: " << isDown << std::endl;
 }
 void CImGUIAdaptor::updateButton(unsigned short state)
 {
