@@ -19,12 +19,13 @@ bool CRawInput::ProcessMessage(LPMSG message)
 
             if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 
-                if (!(raw->data.keyboard.Flags & RI_KEY_BREAK))
+                bool isKeyDown = raw->data.keyboard.Flags & RI_KEY_MAKE;
+                if (raw->data.keyboard.Flags & (RI_KEY_BREAK | RI_KEY_MAKE))
                 {
                     auto virtualKeyCode = raw->data.keyboard.VKey;
                     // Call all registered onKeyPressed callbacks
                     for(auto callback: this->m_onKeyPressedHandlers)
-                        callback(virtualKeyCode);
+                        callback(virtualKeyCode,isKeyDown);
                 }
 
             } else if (raw->header.dwType == RIM_TYPEMOUSE) {

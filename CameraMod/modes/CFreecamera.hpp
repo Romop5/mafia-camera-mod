@@ -33,6 +33,7 @@ class CFreecamera: public CGenericMode
             this->m_gameController->PrintDebugMessage("Deactivated camera");
             
         }
+
         virtual void onRender() override {
             static size_t counter = 0;
             ImGui::Begin("Freecamera helper");                          
@@ -51,6 +52,10 @@ class CFreecamera: public CGenericMode
             if(ImGui::Button("Add camera point"))
             {
                 this->m_modeController.m_getScene().m_cameraManager.addCameraPoint(this->position, this->rotation);
+            }
+            if(ImGui::Button("Add track"))
+            {
+                this->m_modeController.m_getScene().m_cameraManager.addNewTrack();
             }
 
             ImGui::End();
@@ -85,76 +90,11 @@ class CFreecamera: public CGenericMode
             bool p_open = true;
             if (ImGui::Begin("Camera Points", &p_open, ImGuiWindowFlags_MenuBar))
             {
-                // left
-                static int selected = 0;
-                ImGui::BeginChild("left pane", ImVec2(50, 0), true);
-
-                size_t i = 0;
                 auto &points = this->m_modeController.m_getScene().m_cameraManager.getCameraPoints();
-                for(auto &cameraPoint: points)
-                {
-                    char label[128];
-                    sprintf(label, "%d", i);
-                    if (ImGui::Selectable(label, selected == i))
-                        selected = i;
-                    i++;
-                }
-                ImGui::EndChild();
-                ImGui::SameLine();
-
-                // right
-                ImGui::BeginGroup();
-                    ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-                        //ImGui::Text("MyObject: %d", selected);
-                        //ImGui::Separator();
-                        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-                        {
-                            if (ImGui::BeginTabItem("Description"))
-                            {
-                                if(points.size() > 0)
-                                {
-                                    auto &cameraPoint = points[selected];
-                                    auto &point = cameraPoint.m_point;
-                                    ImGui::Text("Point: %f %f %f", point.x, point.y, point.z);                          
-                                    if(ImGui::Button("Teleport camera"))
-                                    {
-                                        this->position = point;
-                                        updateCamera();
-                                    }
-
-                                    size_t selectedTrack = 0;
-                                    auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
-                                     if (ImGui::BeginCombo("combo 1", "wat", 0)) // The second parameter is the label previewed before opening the combo.
-                                     {
-                                        size_t id = 0;
-                                        for(auto &track: tracks)
-                                        {
-                                            bool is_selected = (id == selectedTrack);
-                                            if (ImGui::Selectable(track.m_name.c_str(), is_selected))
-                                                selectedTrack = id;
-                                            if (is_selected)
-                                                ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
-                                            id++;
-                                        }
-                                        ImGui::EndCombo();
-                                     }
-                                    if(ImGui::Button("Add point to track:"))
-                                    {
-                                        tracks[selectedTrack].addPoint(&cameraPoint);
-                                    }
-                                }
-
-                                ImGui::EndTabItem();
-                            }
-                            if (ImGui::BeginTabItem("Details"))
-                            {
-                                ImGui::Text("ID: 0123456789");
-                                ImGui::EndTabItem();
-                            }
-                            ImGui::EndTabBar();
-                        }
-                    ImGui::EndChild();
-                ImGui::EndGroup();
+                static size_t selectedPoint = 0;
+                if(selectedPoint >= points.size())
+                    selectedPoint = 0;
+                this->renderPointsManager(points,selectedPoint);
             }
             ImGui::End();
 
@@ -163,60 +103,14 @@ class CFreecamera: public CGenericMode
             bool p_Pathopen = true;
             if (ImGui::Begin("Camera paths", &p_Pathopen, ImGuiWindowFlags_MenuBar))
             {
-                // left
-                static int selected = 0;
-                ImGui::BeginChild("left pane", ImVec2(50, 0), true);
-
-                size_t i = 0;
-                auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
-                for(auto &track: tracks)
-                {
-                    char label[128];
-                    sprintf(label, "%d", i);
-                    if (ImGui::Selectable(label, selected == i))
-                        selected = i;
-                    i++;
-                }
-                ImGui::EndChild();
-                ImGui::SameLine();
-
-                // right
-                ImGui::BeginGroup();
-                    ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-                        //ImGui::Text("MyObject: %d", selected);
-                        //ImGui::Separator();
-                        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-                        {
-                            if (ImGui::BeginTabItem("Description"))
-                            {
-                                if(tracks.size() > 0)
-                                {
-                                    auto cameraTrack = tracks[selected];
-                                    char cameraTrackName[255];
-                                    ImGui::InputText("Name: ", cameraTrackName, IM_ARRAYSIZE(cameraTrackName));
-                                    char numberOfPoints[255];
-                                    sprintf(numberOfPoints, "Points: %d", cameraTrack.getPoints().size());
-                                    ImGui::Text(numberOfPoints);
-                                }
-
-                                ImGui::EndTabItem();
-                            }
-                            if (ImGui::BeginTabItem("Details"))
-                            {
-                                ImGui::Text("ID: 0123456789");
-                                ImGui::EndTabItem();
-                            }
-                            ImGui::EndTabBar();
-                        }
-                    ImGui::EndChild();
-                ImGui::EndGroup();
+                this->renderTrackManager();
             }
             ImGui::End();
-
-
-
         };
     private:
+        void renderPointsManager(CameraPointVector_t& points,size_t& index);
+        void renderTrackManager();
+
         float m_cameraFlyingSpeed;
 
         glm::vec3 position;

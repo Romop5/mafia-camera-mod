@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <vector>
 #include <tuple>
+#include "utilslib/logger.hpp"
 
 void CImGUIAdaptor::Initialize(IDirect3DDevice9* device, Point2D size)
 {
@@ -138,6 +139,12 @@ void CImGUIAdaptor::updateMousePosition(Point2D position)
     io.MousePos = ImVec2((float)position.x, (float)position.y);
 }
 
+void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.KeysDown[keycode] = isDown;
+    utilslib::Logger::getInfo() << "[ImGUI Hook] key: " << std::hex << keycode << " status: " << isDown << std::endl;
+}
 void CImGUIAdaptor::updateButton(unsigned short state)
 {
    std::vector<std::tuple<unsigned short,unsigned short,unsigned short>> buttons = { {0, RI_MOUSE_LEFT_BUTTON_DOWN,RI_MOUSE_LEFT_BUTTON_UP}, {1, RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_UP}};

@@ -16,13 +16,20 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 configure_file(version.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/version.cmake @ONLY)
 
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
- OUTPUT fileWillNeverExist.txt
+  
+# Dummy output which is never actually produced. Anything that depends on
+# this will always be rebuilt.
+add_custom_command(
+    OUTPUT always_rebuild
+    COMMAND cmake -E echo
+	)
+	
+add_custom_command(TARGET configure_version 
+	#OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
   COMMAND ${CMAKE_COMMAND} -P
-    ${CMAKE_CURRENT_BINARY_DIR}/version.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/version.cmake
   DEPENDS
-    ${CMAKE_CURRENT_BINARY_DIR}/version.cmake
-    ${CMAKE_CURRENT_SOURCE_DIR}/version.cmake
+  	always_rebuild
   COMMENT "Setting up C++ unit with version information"
   VERBATIM)
 

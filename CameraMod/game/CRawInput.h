@@ -5,7 +5,7 @@
 #include <Windows.h>
 
 // Virtual Key (VK) handler type
-using func_key_handler = std::function<bool(unsigned short)>;
+using func_key_handler = std::function<bool(unsigned short,bool)>;
 
 // Mouse movement handler type
 using mouse_handler = std::function<void(long, long)>;

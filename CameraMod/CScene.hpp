@@ -18,14 +18,16 @@ class CCameraPoint
 
 };
 
+using CameraPointVector_t = std::vector<CCameraPoint>;
+
 class CCameraTrack
 {
     public:
         CCameraTrack(): m_name("CamTrack") {}
         std::string m_name;
-        std::vector<CCameraPoint*> m_trackPoints; 
-        void addPoint(CCameraPoint* m_point) { this->m_trackPoints.push_back(m_point); }
-        std::vector<CCameraPoint*>& getPoints() { return this->m_trackPoints; }
+        std::vector<CCameraPoint> m_trackPoints; 
+        void addPoint(CCameraPoint* m_point) { this->m_trackPoints.push_back(*m_point); }
+        std::vector<CCameraPoint>& getPoints() { return this->m_trackPoints; }
 };
 
 class CCameraManager
@@ -36,6 +38,7 @@ class CCameraManager
     public:
 
     void addCameraPoint(glm::vec3 position, glm::vec3 m_rotation);
+    void addNewTrack();
     std::vector<CCameraPoint>& getCameraPoints() { return this->m_points; }
     std::vector<CCameraTrack>& getCameraTracks() { return this->m_tracks; }
 };

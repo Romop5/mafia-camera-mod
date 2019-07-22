@@ -45,3 +45,131 @@ void CFreecamera::onMouseMove(int x, int y)
     this->rotation = glm::vec3(cos(this->angleY)*sin(this->angleX), sin(this->angleY), cos(this->angleX)*cos(this->angleY));
     updateCamera();
 }
+
+void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
+{
+    if(points.size() == 0)
+    {
+        ImGui::Text("No camera points available");
+        return;
+    }
+    ImGui::BeginChild("left pane", ImVec2(50, 0), true);
+
+    size_t i = 0;
+    for(auto &cameraPoint: points)
+    {
+        char label[128];
+        sprintf(label, "ID %d", i);
+        if (ImGui::Selectable(label, index == i))
+            index = i;
+        i++;
+    }
+    ImGui::EndChild();
+    ImGui::SameLine();
+
+    // right
+    ImGui::BeginGroup();
+        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+            if(points.size() > 0)
+            {
+                auto &cameraPoint = points[index];
+                auto &point = cameraPoint.m_point;
+                auto &rotation = cameraPoint.m_rotation;
+                ImGui::Text("Point: %f %f %f", point.x, point.y, point.z);                          
+                if(ImGui::Button("Teleport camera to point"))
+                {
+                    this->position = point;
+                    this->rotation = rotation;
+                    updateCamera();
+                }
+
+                size_t indexTrack = 0;
+                auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
+                    if (ImGui::BeginCombo("combo 1", "No track index", 0)) // The second parameter is the label previewed before opening the combo.
+                    {
+                    size_t id = 0;
+                    for(auto &track: tracks)
+                    {
+                        bool is_index = (id == indexTrack);
+                        if (ImGui::Selectable(track.m_name.c_str(), is_index))
+                            indexTrack = id;
+                        if (is_index)
+                            ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+                        id++;
+                    }
+                    ImGui::EndCombo();
+                    }
+                if(ImGui::Button("Add point to track:"))
+                {
+                    tracks[indexTrack].addPoint(&cameraPoint);
+                }
+                if(ImGui::Button("Delete point"))
+                {
+                    points.erase(points.begin()+index);
+                    index = 0;
+                }
+            }
+        ImGui::EndChild();
+    ImGui::EndGroup();
+}
+
+
+void CFreecamera::renderTrackManager()
+{
+    auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
+    if(tracks.size() == 0)
+    {
+        ImGui::Text("No camera tracks available");
+        return;
+    }
+
+    // Input strings
+    static char inputCameraTrackName[255];
+    static int index = 0;
+    ImGui::BeginChild("left pane", ImVec2(50, 0), true);
+
+    size_t i = 0;
+    for(auto &track: tracks)
+    {
+        char label[128];
+        sprintf(label, "%d", i);
+        if (ImGui::Selectable(label, index == i))
+            index = i;
+            sprintf(inputCameraTrackName, "Default");
+        i++;
+    }
+    ImGui::EndChild();
+    ImGui::SameLine();
+
+    // right
+    ImGui::BeginGroup();
+        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+            if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+            {
+                if (ImGui::BeginTabItem("Description"))
+                {
+                    if(tracks.size() > 0)
+                    {
+                        auto& cameraTrack = tracks[index];
+                        
+                        ImGui::InputText("Name: ", inputCameraTrackName, IM_ARRAYSIZE(inputCameraTrackName));
+                        ImGui::Text("Points: %d", cameraTrack.getPoints().size());
+                    }
+
+                    ImGui::EndTabItem();
+                }
+                if (ImGui::BeginTabItem("Points"))
+                {
+                    ImGui::Text("ID: 0123456789");
+                    auto& cameraTrack = tracks[index];
+                    static size_t pointIndex = 0;
+                    if(cameraTrack.getPoints().size() <= pointIndex)
+                        pointIndex = 0;
+                    this->renderPointsManager(cameraTrack.getPoints(),pointIndex);
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
+            }
+        ImGui::EndChild();
+    ImGui::EndGroup();
+}

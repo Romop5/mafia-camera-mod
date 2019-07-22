@@ -43,13 +43,17 @@ bool CCore::Initialize()
 
     // Register onPressKey callback
     this->getRawInput()->m_onKeyPressedHandlers.add(
-            [&] (USHORT pressedKey)->bool {
+            [&] (USHORT pressedKey, bool isKeyDown = true)->bool {
                 // Shutdown on ESC
                 if(pressedKey == VK_ESCAPE)
                 {
                     this->getGame()->PrintDebugMessage("Shutting down LOL");
                     this->ModDetach();
                     }
+                if(this->m_isGUIacceptingInput)
+                {
+                    this->getGraphics()->getImGUIAdaptor().updateKey(pressedKey, isKeyDown);
+                }
                 return this->getModControl()->OnVKKey(pressedKey); 
             });
     // Register mouse move callback
