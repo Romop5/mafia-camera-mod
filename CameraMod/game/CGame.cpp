@@ -10,17 +10,22 @@ namespace GameOffsets
 
 void CPlayerRecording::updateState(CHuman& human)
 {
-    if(m_currentReplayIndex >= m_Frames.size())
+    if(m_state.m_currentReplayIndex >= m_state.m_Frames.size())
     {
-        m_currentReplayIndex = 0;
+        m_state.m_currentReplayIndex = 0;
     }
-    auto currentFrame = m_Frames[m_currentReplayIndex++];
-    human.setState(currentFrame);
+    if(m_state.m_Frames.size() > 0)
+    {
+        auto currentFrame = m_state.m_Frames[m_state.m_currentReplayIndex++];
+        human.setState(currentFrame);
+    } 
+    m_state.m_isRecording = false;
 }
 void CPlayerRecording::recordState(CHuman& human)
 {
     auto state = human.getState();
-    m_Frames.push_back(state);
+    m_state.m_Frames.push_back(state);
+    m_state.m_isRecording = true;
 }
 
 
@@ -329,6 +334,12 @@ void CGame::playRecording(CGenericObject* object, CGenericObjectRecording* recor
     auto mafiaRecording = reinterpret_cast<CPlayerRecording*>(record);
     mafiaObject->m_recording = *mafiaRecording;
     mafiaObject->m_currentState = CMafiaObject::PLAYING;
+}
+
+CGenericRecordingInfo* CGame::getRecordingInfo(CGenericObject* object)
+{
+    auto mafiaObject = reinterpret_cast<CMafiaObject*>(object);
+    return mafiaObject->m_recording.getInfo();
 }
 
 void CGame::LockControls(bool shouldBeLocked)

@@ -123,21 +123,55 @@ struct PED_State
 ///////////////////////////////////////////////////////////////////////////
 class CHuman;
 
+class CMafiaRecordingInfo: public CGenericRecordingInfo
+{
+	private:
+	size_t m_currentReplayIndex;
+	std::vector<PED_State> m_Frames;
+	bool m_isRecording;
+
+	public:
+	CMafiaRecordingInfo(): m_currentReplayIndex(0),m_isRecording(true) {}
+	// PUBLIC API
+    virtual bool IsRecording() const override 
+	{
+		return m_isRecording;	
+	}
+    virtual bool IsReplaying() const override { return !this->IsRecording(); }
+
+    virtual size_t getFramesCount() const override
+	{
+		return m_Frames.size();
+	}
+    virtual size_t getEventsCount() const override
+	{
+		return 0;
+	}
+    virtual size_t getCurrentFrameIndex() const override
+	{
+		return m_currentReplayIndex;
+	}
+	friend class CPlayerRecording;
+};
+
 class CPlayerRecording: public CGenericObjectRecording
 {
 	private:
-	std::vector<PED_State> m_Frames;
-	size_t m_currentReplayIndex;
+	CMafiaRecordingInfo m_state;
 	public:
-	CPlayerRecording(): m_currentReplayIndex(0) {}
+	CPlayerRecording() {}
+
+	// PUBLIC API
     virtual const std::string dumpJSON() const
 	{
 		return "";
 	}
     virtual void loadFromJSON(const std::string& json) {}
 
+	// INTERNAL API
 	void updateState(CHuman& human);
 	void recordState(CHuman& human);
+	CMafiaRecordingInfo* getInfo() { return &m_state; }
 };
 
 class CMafiaObject: public CGenericObject
@@ -165,6 +199,7 @@ class CMafiaObject: public CGenericObject
 	virtual DWORD getMafiaAddress() const { return m_mafiaAdress; }
 	void setMafiaAddress(const DWORD address) { m_mafiaAdress = address; }
 	friend class CGame;
+	friend class CMafiaRecordingInfo;
 };
 
 class CHuman: public CMafiaObject
@@ -193,7 +228,6 @@ class CLocalPlayer: public CHuman
 		return *(DWORD*)((*(DWORD*)0x6F9464) + 0xE4);
 	}
 };
-
 
 /*class CGameObjectManager
 {
@@ -277,7 +311,8 @@ public:
     virtual void startRecording(CGenericObject* object) override;
     virtual void clearRecording(CGenericObject* object) override;
     virtual CGenericObjectRecording* saveRecording(CGenericObject* object) override;
-    virtual  void playRecording(CGenericObject* object, CGenericObjectRecording* record) override;
+    virtual void playRecording(CGenericObject* object, CGenericObjectRecording* record) override;
+    virtual CGenericRecordingInfo* getRecordingInfo(CGenericObject* object) override;
 };
 
 #endif

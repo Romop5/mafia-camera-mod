@@ -70,6 +70,20 @@ class CGenericGameSetting_String: public CGenericGameSettingBase
         return "string";
     }
 };
+/**
+ * @brief Describes object's record
+ * 
+ * Allows to query recording status.
+ */
+class CGenericRecordingInfo
+{
+    public:
+    virtual bool IsRecording() const = 0;
+    virtual bool IsReplaying() const = 0;
+    virtual size_t getFramesCount() const = 0;
+    virtual size_t getEventsCount() const = 0;
+    virtual size_t getCurrentFrameIndex() const = 0;
+};
 
 /**
  * @brief Describes a generic API that a game must implement
@@ -109,5 +123,6 @@ class CGenericGame
     virtual void clearRecording(CGenericObject* object) = 0;
     virtual CGenericObjectRecording* saveRecording(CGenericObject* object) = 0;
     virtual  void playRecording(CGenericObject* object, CGenericObjectRecording* record) = 0;
+    virtual CGenericRecordingInfo* getRecordingInfo(CGenericObject* object) = 0;
 };
 #endif

@@ -28,9 +28,9 @@ class CRecorderMode: public CGenericMode
             //this->m_gameController->SetPlayerRotation(toVec3D(framePosition.rotation));
             //this->m_gameController->SetState(framePosition.objectState);
         }
-        std::unique_ptr<CGenericObjectRecording> m_recording;
+       CGenericObjectRecording* m_recording;
     public:
-        CRecorderMode() {}
+        CRecorderMode(): m_recording(nullptr) {}
         void setGameDriver(CGame* game) { this->m_gameController = game;}
         void setModeController(CModeController controller) {this->m_modeController = controller; }
 
@@ -44,16 +44,16 @@ class CRecorderMode: public CGenericMode
                     if(globalRecordingState.isRunning())
                     {
                         globalRecordingState.setRecordingState(CRecordingStateEnum::IDLE);
-                        this->m_gameController->startRecording(player);
+                        m_recording = this->m_gameController->saveRecording(player);
                     } else {
                         globalRecordingState.setRecordingState(CRecordingStateEnum::RECORDING);
-                        m_recording = std::unique_ptr<CGenericObjectRecording>(this->m_gameController->saveRecording(player));
+                        this->m_gameController->startRecording(player);
                     }
                     this->m_gameController->LockControls(false);
                     break;
                 case VK_BACK:
                     globalRecordingState.setRecordingState(CRecordingStateEnum::PLAYING);
-                    this->m_gameController->playRecording(player,m_recording.get());
+                    this->m_gameController->playRecording(player,m_recording);
                     this->m_gameController->LockControls(true);
                     this->m_gameController->PrintDebugMessage("Replay pressed");
                     break;
@@ -88,7 +88,13 @@ class CRecorderMode: public CGenericMode
                 ImVec2 window_pos_pivot = ImVec2((corner & 1) ? 1.0f : 0.0f, (corner & 2) ? 1.0f : 0.0f);
                 ImGui::SetNextWindowPos(window_pos, ImGuiCond_Always, window_pos_pivot);
             }
-
+            auto player = this->m_gameController->getLocalPlayer();
+            auto info = this->m_gameController->getRecordingInfo(player);
+            size_t framesCount = 0;
+            if(info)
+            {
+                framesCount = info->getFramesCount();
+            }
             ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
             if (ImGui::Begin("Example: Simple overlay", &shouldRenderOverlay, (shouldBeMoveable != -1 ? ImGuiWindowFlags_NoMove : 0) | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
             {
@@ -96,20 +102,15 @@ class CRecorderMode: public CGenericMode
                 {
                     case CRecordingStateEnum::RECORDING:
                         ImGui::Text("Recording is running");
-                        ImGui::Text("Frames: %d",globalRecordingState.m_recordedPath.size());
+                        ImGui::Text("Frames: %d",framesCount);
                     break;
                     case CRecordingStateEnum::PLAYING:
                         ImGui::Text("Replaying");
+                    break;
                     default:
                         ImGui::Text("Recording is not running");
                     break;
                 }
-
-                ImGui::Separator();
-                if (ImGui::IsMousePosValid())
-                    ImGui::Text("Mouse Position: (%.1f,%.1f)", io.MousePos.x, io.MousePos.y);
-                else
-                    ImGui::Text("Mouse Position: <invalid>");
                 if (ImGui::BeginPopupContextWindow())
                 {
                     if (ImGui::MenuItem("Custom",       NULL, corner == -1)) corner = -1;
