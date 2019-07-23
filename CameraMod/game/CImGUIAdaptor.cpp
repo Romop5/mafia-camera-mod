@@ -153,8 +153,19 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
             auto baseCharacter = (io.KeyShift ? 'A':'a');
             io.AddInputCharacter(keycode-0x41+baseCharacter);
         }
+        static std::unordered_map<size_t, size_t> specialKeyMapping = {
+            {VK_OEM_COMMA, ','},
+            {VK_OEM_MINUS, '-'},
+            {VK_OEM_PERIOD, '.'},
+            {VK_OEM_PERIOD, '.'}
+        };
+
+        if(specialKeyMapping.count(keycode) > 0)
+        {
+            io.AddInputCharacter(specialKeyMapping[keycode]);
+        }
     }
-    
+
     switch(keycode)
     {
         case VK_CONTROL:    io.KeyCtrl = isDown; break;

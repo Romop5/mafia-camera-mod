@@ -1,6 +1,7 @@
 #ifndef CSCENE_HPP
 #define CSCENE_HPP
 #include <glm/glm.hpp>
+#include <nlohmann/json.hpp>
 #include <vector>
 #include <sstream>
 #include "game/CGame.h"
@@ -12,10 +13,26 @@ class CCameraPoint
 {
     public:
         CCameraPoint(glm::vec3 p, glm::vec3 r): m_point(p), m_rotation(r), m_name("CamPoint") {}
+        explicit CCameraPoint(const nlohmann::json obj) { deserialize(obj); }
         glm::vec3 m_point;
         glm::vec3 m_rotation;
         std::string m_name;
+        const nlohmann::json serialize() const 
+        {
+            nlohmann::json jsonDump;
+            jsonDump["position"] = Vec3ToJSON(m_point);
+            jsonDump["rotation"] = Vec3ToJSON(m_rotation);
+            jsonDump["name"] = m_name;
+            return jsonDump;
+        }
 
+        bool deserialize(const nlohmann::json obj) 
+        {
+            m_point = JSONToVec3(obj["position"]);
+            m_rotation = JSONToVec3(obj["rotation"]);
+            m_name = obj["name"].get<std::string>();
+            return true;
+        }
 };
 
 using CameraPointVector_t = std::vector<CCameraPoint>;
@@ -28,6 +45,31 @@ class CCameraTrack
         std::vector<CCameraPoint> m_trackPoints; 
         void addPoint(CCameraPoint* m_point) { this->m_trackPoints.push_back(*m_point); }
         std::vector<CCameraPoint>& getPoints() { return this->m_trackPoints; }
+        const nlohmann::json serialize() const 
+        {
+            nlohmann::json jsonDump;
+            nlohmann::json jsonPoints;
+            for(auto& point: m_trackPoints)
+            {
+                jsonPoints.push_back(point.serialize());
+            }
+            jsonDump["name"] = m_name;
+            jsonDump["points"] = jsonPoints;
+            return jsonDump;
+        }
+        bool deserialize(const nlohmann::json obj)
+        {
+            bool resultStatus = true;
+            m_trackPoints.clear();
+            for(auto& point: obj["points"])
+            {
+                auto newPoint = CCameraPoint(glm::vec3(),glm::vec3(0));
+                resultStatus &= newPoint.deserialize(point);
+                m_trackPoints.push_back(newPoint);
+            }
+            m_name = obj["name"].get<std::string>();
+            return resultStatus;
+        }
 };
 
 class CCameraManager
@@ -41,6 +83,45 @@ class CCameraManager
     void addNewTrack();
     std::vector<CCameraPoint>& getCameraPoints() { return this->m_points; }
     std::vector<CCameraTrack>& getCameraTracks() { return this->m_tracks; }
+    const nlohmann::json serialize() const 
+    {
+        nlohmann::json jsonDump;
+        nlohmann::json points; 
+        nlohmann::json tracks; 
+
+        // create array of points
+        for(auto& point: m_points)
+        {
+            points.push_back(point.serialize());
+        }  
+        // create array of tracks
+        for(auto& track: m_tracks)
+        {
+            tracks.push_back(track.serialize());
+        }
+        jsonDump["points"] = points;
+        jsonDump["tracks"] = tracks;
+        return jsonDump;
+    }
+    bool deserialize(const nlohmann::json obj)
+    {
+        bool status = true;
+        m_tracks.clear();
+        for(auto& track: obj["tracks"])
+        {
+            auto newTrack = CCameraTrack();
+            status &= newTrack.deserialize(track);
+            m_tracks.push_back(newTrack);
+        }
+        m_points.clear();
+        for(auto& point: obj["points"])
+        {
+            auto newPoint = CCameraPoint(glm::vec3(0),glm::vec3(0));
+            status &= newPoint.deserialize(point);
+            m_points.push_back(newPoint);
+        }
+        return status;
+    }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,8 +210,8 @@ class CRecordingState
 class CScene
 {
     public:
-    void save(const std::string path) {}
-    void load(const std::string path) {}
+    void save(const std::string path);
+    void load(const std::string path);
 
     CRecordingState m_recordingState;
     CCameraManager m_cameraManager;

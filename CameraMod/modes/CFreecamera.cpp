@@ -56,14 +56,18 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
     ImGui::BeginChild("left pane", ImVec2(100, 0), true);
     if (ImGui::ArrowButton("Up", ImGuiDir_Up)) {
         if(index > 0)
+        {
             std::swap(points[index], points[index-1]);
             index--;
+        }
     }
     ImGui::SameLine();
     if (ImGui::ArrowButton("Down", ImGuiDir_Down)) {
         if(index < points.size()-1)
+        {
             std::swap(points[index], points[index+1]);
             index++;
+        }
     }
     size_t i = 0;
     for(auto &cameraPoint: points)
@@ -79,7 +83,7 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
 
     // right
     ImGui::BeginGroup();
-        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
             if(points.size() > 0)
             {
                 auto &cameraPoint = points[index];
@@ -97,7 +101,7 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
                 if(tracks.size() > 0)
                 {
                     auto &selectedTrack = tracks[indexTrack];
-                    if (ImGui::BeginCombo("combo 1", selectedTrack.m_name.c_str(), 0)) // The second parameter is the label previewed before opening the combo.
+                    if (ImGui::BeginCombo("Track", selectedTrack.m_name.c_str(), 0)) 
                     {
                         size_t id = 0;
                         for(auto &track: tracks)
@@ -106,13 +110,13 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
                             if (ImGui::Selectable(track.m_name.c_str(), is_index))
                                 indexTrack = id;
                             if (is_index)
-                                ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+                                ImGui::SetItemDefaultFocus();
                             id++;
                         }
                         ImGui::EndCombo();
                     }
                 
-                    if(ImGui::Button("Add point to track:"))
+                    if(ImGui::Button("Add point to track"))
                     {
                         tracks[indexTrack].addPoint(&cameraPoint);
                     }
@@ -183,7 +187,6 @@ void CFreecamera::renderTrackManager()
                 }
                 if (ImGui::BeginTabItem("Points"))
                 {
-                    ImGui::Text("ID: 0123456789");
                     auto& cameraTrack = tracks[index];
                     static size_t pointIndex = 0;
                     if(cameraTrack.getPoints().size() <= pointIndex)

@@ -4,7 +4,9 @@
 #include "modes/CFreecamera.hpp"
 #include "modes/CRecorderMode.hpp"
 #include "modes/CAbout.hpp"
+#include "common/imgui_utils.hpp"
 #include <sstream>
+#include <filesystem>
 
 CModeManager::CModeManager()
 {
@@ -96,7 +98,7 @@ void CModeManager::OnMouseButtons(unsigned short buttons)
 void CModeManager::RenderMainMenu()
 {
     ImGui::BeginMainMenuBar();
-    if (ImGui::BeginMenu("File"))
+    if (ImGui::BeginMenu("Modes"))
     {
         for(size_t i = 0; i < m_modes.size(); i++)
         {
@@ -108,8 +110,44 @@ void CModeManager::RenderMainMenu()
         }
         ImGui::EndMenu();
     }
+    bool openDialog = false;
+    static bool isSaveDialog = false;
+    if (ImGui::BeginMenu("Storage"))
+    {
+        if (ImGui::MenuItem("Save")) 
+        {
+            openDialog = true;
+            isSaveDialog = true;
+        }
+        if (ImGui::MenuItem("Load")) 
+        {
+            openDialog = true;
+            isSaveDialog = false;
+        }
+        ImGui::EndMenu();
+    }
     ImGui::EndMainMenuBar();
 
+    if(openDialog)
+        ImGui::OpenPopup("savedialog");
+    ImGui::SetNextWindowSize(ImVec2(400,200));
+    if(ImGui::BeginPopup("savedialog",ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar))
+    {
+        ImGui::Text("Choose file destination");
+        std::string path;
+        if(ImGui::Utils::FilePickerPlane(path,isSaveDialog))
+        {
+            std::string directory = std::filesystem::current_path().string();
+            if(isSaveDialog)
+            {
+                this->m_scene.save(directory+"/"+path);
+            } else {
+                this->m_scene.load(directory+"/"+path);
+            }
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup(); 
+    }
 }
 void CModeManager::Render()
 {

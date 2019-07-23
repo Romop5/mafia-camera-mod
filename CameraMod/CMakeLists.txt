@@ -24,8 +24,8 @@ add_custom_command(
     COMMAND cmake -E echo
 	)
 	
-add_custom_command(TARGET configure_version 
-	#OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
+add_custom_command(
+	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/version.cpp
   COMMAND ${CMAKE_COMMAND} -P
 	${CMAKE_CURRENT_BINARY_DIR}/version.cmake
   DEPENDS
@@ -50,6 +50,7 @@ add_library(CameraMod SHARED
 	modes/CModeManager.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 	dllmain.cpp
+	json_impl.cpp
 
 # Separate cd3dfont
 	../vendors/cd3dfont/
@@ -69,6 +70,7 @@ target_include_directories(CameraMod PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(CameraMod PRIVATE ../vendors/ ../vendors/DirectX9SDK2007/Include)
 target_include_directories(CameraMod PRIVATE ../vendors/d3d8to9/source)
 target_include_directories(CameraMod PRIVATE ../vendors/imgui)
+target_link_libraries(CameraMod PRIVATE nlohmann_json)
 target_link_libraries(CameraMod PRIVATE imgui)
 target_link_libraries(CameraMod PRIVATE glm)
 target_link_libraries(CameraMod PRIVATE utilslib)
