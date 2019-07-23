@@ -35,60 +35,55 @@ class CFreecamera: public CGenericMode
         }
 
         virtual void onRender() override {
-            static size_t counter = 0;
-            ImGui::Begin("Freecamera helper");                          
-            ImGui::Text("Position: %f %f %f", this->position.x, this->position.y, this->position.z);                          
-            ImGui::Text("Rotation: %f %f %f", this->rotation.x, this->rotation.y, this->rotation.z);                          
-            ImGui::SliderFloat("Flying speed", &m_cameraFlyingSpeed, 1.0f, 10.0f, "ratio = %.3f");
-            if(ImGui::Button("Teleport camera to player"))
-            {
-                auto player = m_gameController->getLocalPlayer();
-                auto transform = player->getTransform();
-                this->position = glm::vec3(transform[0]);
-                this->rotation = glm::vec3(transform[1]);
-                this->updateCamera();
-            }
+            static bool shouldShowPointsManager = true;
+            static bool shouldShowCameraTracksManager = true;
 
-            if(ImGui::Button("Add camera point"))
-            {
-                this->m_modeController.m_getScene().m_cameraManager.addCameraPoint(this->position, this->rotation);
-            }
-            if(ImGui::Button("Add track"))
-            {
-                this->m_modeController.m_getScene().m_cameraManager.addNewTrack();
-            }
-
-            ImGui::End();
-
-            /*
-            ImGui::Begin("Camera points");                          
-            auto &points = this->m_modeController.m_getScene().getCameraPoints();
-            size_t id = 0;
-            for(auto &cameraPoint: points)
-            {
-                if(ImGui::TreeNode((void*) (intptr_t) id, "Point %d", id))
+            if(ImGui::Begin("Freecamera helper"))
+            {                          
+                ImGui::Text("Position: %f %f %f", this->position.x, this->position.y, this->position.z);                          
+                ImGui::Text("Rotation: %f %f %f", this->rotation.x, this->rotation.y, this->rotation.z);                          
+                ImGui::SliderFloat("Flying speed", &m_cameraFlyingSpeed, 1.0f, 10.0f, "ratio = %.3f");
+                if(ImGui::Button("Teleport camera to player"))
                 {
-                    auto &point = cameraPoint.m_point;
-                    ImGui::Text("Point: %f %f %f", point.x, point.y, point.z);                          
-                    if(ImGui::Button("Teleport camera"))
-                    {
-                        this->position = point;
-                        updateCamera();
-                    }
-                    ImGui::TreePop();
-
+                    auto player = m_gameController->getLocalPlayer();
+                    auto transform = player->getTransform();
+                    this->position = glm::vec3(transform[0]);
+                    this->rotation = glm::vec3(transform[1]);
+                    this->updateCamera();
                 }
-                id++;
+
+                if(ImGui::Button("Add camera point"))
+                {
+                    this->m_modeController.m_getScene().m_cameraManager.addCameraPoint(this->position, this->rotation);
+                }
+                ImGui::SameLine();
+                if(ImGui::Button("Add track"))
+                {
+                    this->m_modeController.m_getScene().m_cameraManager.addNewTrack();
+                }
+                if(ImGui::Button("Show points"))
+                {
+                    shouldShowPointsManager = true;
+                }
+                ImGui::SameLine();
+                if(ImGui::Button("Show tracks"))
+                {
+                    shouldShowCameraTracksManager = true;
+                } 
+                ImGui::SameLine();
+                if(ImGui::Button("Hide all"))
+                {
+                    shouldShowCameraTracksManager = false;
+                    shouldShowPointsManager = false;
+                }
             }
             ImGui::End();
-            */
 
             ImGui::ShowDemoWindow();
 
             /* Camera points window */
-            ImGui::SetNextWindowSize(ImVec2(300, 440), ImGuiCond_FirstUseEver);
-            bool p_open = true;
-            if (ImGui::Begin("Camera Points", &p_open, ImGuiWindowFlags_MenuBar))
+            //ImGui::SetNextWindowSize(ImVec2(300, 440), ImGuiCond_FirstUseEver);
+            if (ImGui::Begin("Camera Points", &shouldShowPointsManager))
             {
                 auto &points = this->m_modeController.m_getScene().m_cameraManager.getCameraPoints();
                 static size_t selectedPoint = 0;
@@ -99,9 +94,8 @@ class CFreecamera: public CGenericMode
             ImGui::End();
 
             /* Camera paths */
-            ImGui::SetNextWindowSize(ImVec2(300, 440), ImGuiCond_FirstUseEver);
-            bool p_Pathopen = true;
-            if (ImGui::Begin("Camera paths", &p_Pathopen, ImGuiWindowFlags_MenuBar))
+            //ImGui::SetNextWindowSize(ImVec2(300, 440), ImGuiCond_FirstUseEver);
+            if (ImGui::Begin("Camera paths", &shouldShowCameraTracksManager))
             {
                 this->renderTrackManager();
             }
