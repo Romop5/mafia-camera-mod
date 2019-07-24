@@ -33,6 +33,7 @@ bool CCore::Initialize()
     CCoreController controller;
     controller.m_blockGameInput = [&] (bool shouldWe)->void { this->getRawInput()->shouldBlockInput(shouldWe); };
     controller.m_blockGUIInput = [&] (bool shouldWe)->void { this->m_isGUIacceptingInput = shouldWe; };
+    controller.m_exitMod = [&] ()->void { this->ModDetach(); };
     // TODO
     //controller.m_hideGUI = NULL;
     // Set controller to mod control
@@ -44,12 +45,6 @@ bool CCore::Initialize()
     // Register onPressKey callback
     this->getRawInput()->m_onKeyPressedHandlers.add(
             [&] (USHORT pressedKey, bool isKeyDown = true)->bool {
-                // Shutdown on ESC
-                if(pressedKey == VK_ESCAPE)
-                {
-                    this->getGame()->PrintDebugMessage("Shutting down LOL");
-                    this->ModDetach();
-                    }
                 if(this->m_isGUIacceptingInput)
                 {
                     this->getGraphics()->getImGUIAdaptor().updateKey(pressedKey, isKeyDown);

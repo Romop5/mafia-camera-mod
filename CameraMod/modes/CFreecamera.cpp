@@ -48,6 +48,10 @@ void CFreecamera::onMouseMove(int x, int y)
 
 void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
 {
+    if(ImGui::Button("Add current camera as a point"))
+    {
+        points.push_back(CCameraPoint(this->position, this->rotation));
+    }
     if(points.size() == 0)
     {
         ImGui::Text("No camera points available");
@@ -75,7 +79,13 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
         char label[128];
         sprintf(label, "ID %d", i);
         if (ImGui::Selectable(label, index == i))
+        {
+            // teleport camera
+            this->position = cameraPoint.m_point;
+            this->rotation = cameraPoint.m_rotation;
+            updateCamera();
             index = i;
+        }
         i++;
     }
     ImGui::EndChild();
@@ -90,12 +100,7 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
                 auto &point = cameraPoint.m_point;
                 auto &rotation = cameraPoint.m_rotation;
                 ImGui::Text("Point: %f %f %f", point.x, point.y, point.z);                          
-                if(ImGui::Button("Teleport camera to point"))
-                {
-                    this->position = point;
-                    this->rotation = rotation;
-                    updateCamera();
-                }
+    
                 static size_t indexTrack = 0;
                 auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
                 if(tracks.size() > 0)
@@ -144,6 +149,11 @@ void CFreecamera::renderTrackManager()
         ImGui::Text("No camera tracks available");
         return;
     }
+    
+    if(ImGui::Button("Add new track"))
+    {
+        this->m_modeController.m_getScene().m_cameraManager.addNewTrack();
+    }
 
     // Input strings
     static char inputCameraTrackName[255];
@@ -180,7 +190,18 @@ void CFreecamera::renderTrackManager()
                         {
                             tracks[index].m_name = inputCameraTrackName;
                         }
-                        ImGui::Text("Points: %d", cameraTrack.getPoints().size());
+                        ImGui::Text("Count of points: %d", cameraTrack.getPoints().size());
+                        if(ImGui::Button("Play track"))
+                        {
+                            m_player.setTrack(&cameraTrack);
+                            m_player.reset();
+                            this->m_state = FREECAMERA_REPLAYING;
+                        }
+                    }
+
+                    if(ImGui::Button("Delete track"))
+                    {
+                        tracks.erase(tracks.begin()+index);
                     }
 
                     ImGui::EndTabItem();
@@ -198,4 +219,95 @@ void CFreecamera::renderTrackManager()
             }
         ImGui::EndChild();
     ImGui::EndGroup();
+}
+
+void CFreecamera::renderFreecameraHelper()
+{
+    if(ImGui::Begin("Freecamera helper"))
+    {                          
+        ImGui::Text("Position: %f %f %f", this->position.x, this->position.y, this->position.z);                          
+        ImGui::Text("Rotation: %f %f %f", this->rotation.x, this->rotation.y, this->rotation.z);                          
+        ImGui::SliderFloat("Flying speed", &m_cameraFlyingSpeed, 1.0f, 10.0f, "ratio = %.3f");
+        if(ImGui::Button("Teleport camera to player"))
+        {
+            auto player = m_gameController->getLocalPlayer();
+            auto transform = player->getTransform();
+            this->position = glm::vec3(transform[0]);
+            this->rotation = glm::vec3(transform[1]);
+            this->updateCamera();
+        }
+
+        if(ImGui::Button("Add camera point"))
+        {
+            this->m_modeController.m_getScene().m_cameraManager.addCameraPoint(this->position, this->rotation);
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Add track"))
+        {
+            this->m_modeController.m_getScene().m_cameraManager.addNewTrack();
+        }
+        if(ImGui::Button("Show points"))
+        {
+            shouldShowPointsManager = true;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Show tracks"))
+        {
+            shouldShowCameraTracksManager = true;
+        } 
+        ImGui::SameLine();
+        if(ImGui::Button("Hide all"))
+        {
+            shouldShowCameraTracksManager = false;
+            shouldShowPointsManager = false;
+        }
+    }
+    ImGui::End();
+}
+
+void CFreecamera::renderReplayingPanel()
+{
+    auto track = this->m_player.m_currentTrack;
+    if(ImGui::Begin("Replaying controller",nullptr,ImGuiWindowFlags_AlwaysAutoResize))
+    {  
+        if(track) 
+        {
+            ImGui::Text("Replaying track: %s", track->m_name.c_str());
+            if(ImGui::Button("Restart"))
+            {
+                m_player.reset();
+            }
+            auto stopActionText = (m_player.isStoped() ? "Play" : "Stop");
+            ImGui::SameLine();
+            if(ImGui::Button(stopActionText))
+            {
+                m_player.toggleStop(!m_player.isStoped());
+            }
+
+            float speed = m_player.getSpeed();
+            if(ImGui::SliderFloat("Replay speed",&speed,0.1,10.0))
+            {
+                m_player.setSpeed(speed);
+            }
+
+            bool isRewinding = m_player.isRewinding();
+            if(ImGui::Checkbox("Is rewinding",&isRewinding))
+            {
+                m_player.toggleRewinding(isRewinding);
+            } 
+            if(ImGui::Button("Next step"))
+            {
+                m_player.moveForward();
+            }
+        } 
+        
+        if(ImGui::Button("Exit replaying"))
+        {
+            this->m_player.setTrack(nullptr);
+            this->m_state = FREECAMERA_FREE;
+        }
+
+        ImGui::Text("Debug Head: %d", m_player.m_replayingHead);
+    }
+    ImGui::End();
 }

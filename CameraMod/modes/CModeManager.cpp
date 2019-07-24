@@ -108,6 +108,10 @@ void CModeManager::RenderMainMenu()
                 this->switchToMode(i);
             }
         }
+        if (ImGui::MenuItem("Exit mod"))
+        {
+            this->m_coreController.m_exitMod();
+        }
         ImGui::EndMenu();
     }
     bool openDialog = false;

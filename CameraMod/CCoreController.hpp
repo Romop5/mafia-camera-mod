@@ -8,5 +8,6 @@ class CCoreController
         std::function<void(bool)> m_blockGameInput;
         std::function<void(bool)> m_blockGUIInput;
         std::function<void(bool)> m_hideGUI;
+        std::function<void(void)> m_exitMod;
 };
 #endif

@@ -4,7 +4,9 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 #include "game/CGame.h"
+#include <glm/gtx/compatibility.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Camera points + camera paths
@@ -12,11 +14,12 @@
 class CCameraPoint
 {
     public:
-        CCameraPoint(glm::vec3 p, glm::vec3 r): m_point(p), m_rotation(r), m_name("CamPoint") {}
+        CCameraPoint(glm::vec3 p, glm::vec3 r): m_point(p), m_rotation(r), m_name("CamPoint"), duration(1000.0) {}
         explicit CCameraPoint(const nlohmann::json obj) { deserialize(obj); }
         glm::vec3 m_point;
         glm::vec3 m_rotation;
         std::string m_name;
+        float duration;
         const nlohmann::json serialize() const 
         {
             nlohmann::json jsonDump;
@@ -70,6 +73,75 @@ class CCameraTrack
             m_name = obj["name"].get<std::string>();
             return resultStatus;
         }
+};
+
+
+class CTrackPlayer
+{
+    public:
+    CCameraTrack* m_currentTrack;
+    size_t m_replayingHead;
+    bool m_isRewinding;
+    float m_speed;
+    float m_elapsedTime;
+    bool m_isStoped;
+
+    public:
+    CTrackPlayer(): m_isRewinding(false), m_speed(1.0), m_isStoped(true), m_currentTrack(nullptr) {}
+
+    void moveForward() {
+        m_replayingHead = getNextHeadPosition();
+    }
+    void toggleStop(bool shouldBeStoped) { m_isStoped = shouldBeStoped; }
+    bool isStoped() const { return m_isStoped; } 
+
+    void setSpeed(float speed) { m_speed = speed; }
+    float getSpeed() const { return m_speed; }
+
+    void toggleRewinding(bool shouldRewind) { m_isRewinding = shouldRewind; }
+    bool isRewinding() const { return m_isRewinding; }
+    void reset() 
+    {
+        m_elapsedTime = 0;
+        m_replayingHead = 0;
+    }
+    void setTrack(CCameraTrack* track) { m_currentTrack = track; }
+
+    void updateCamera(glm::vec3& cameraPosition, glm::vec3& cameraRotation)
+    {
+        if(!m_currentTrack)
+            return;
+        if(m_currentTrack->getPoints().size() == 0)
+            return;
+        if(this->isStoped())
+            return;
+        auto& currentFrame = m_currentTrack->getPoints()[m_replayingHead];
+        
+        // interpolate between successive frames
+        float t = m_elapsedTime/currentFrame.duration;
+        auto& nextFrame = m_currentTrack->getPoints()[getNextHeadPosition()];
+
+        cameraPosition = glm::lerp(currentFrame.m_point,nextFrame.m_point, t);
+        auto newQuat = glm::slerp(glm::quat(currentFrame.m_rotation),glm::quat(nextFrame.m_rotation), t);
+        cameraRotation = glm::vec3(newQuat.x, newQuat.y, newQuat.z);
+        // fixed-time loop update
+        m_elapsedTime += 30*m_speed;
+        if(m_elapsedTime > currentFrame.duration)
+        {
+            m_elapsedTime = 0;
+            m_replayingHead = getNextHeadPosition();
+        }
+    }
+    private:
+    size_t getNextHeadPosition() const { 
+        auto length = m_currentTrack->getPoints().size();
+        auto offset = (m_isRewinding ? -1 : 1);
+        if(length == 0)
+            return 0;
+        if(m_isRewinding && m_replayingHead == 0)
+            return length-1;
+        return (m_replayingHead+offset) % length;
+    }
 };
 
 class CCameraManager
