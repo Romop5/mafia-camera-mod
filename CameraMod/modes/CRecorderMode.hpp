@@ -65,22 +65,10 @@ class CRecorderMode: public CGenericMode
         virtual void onTick() {}
         virtual void onRender() {
             auto& globalRecordingState = this->m_modeController.m_getScene().m_recordingState;
-            // If recording is running, then record current position
-            //if(globalRecordingState.m_isRecordingRunning)
-
-            /*switch(globalRecordingState.getState())
-            {
-                case CRecordingStateEnum::RECORDING:
-                    this->recordMovementTick();
-                break;
-                case CRecordingStateEnum::PLAYING:
-                    this->playPlayerMovementTick();
-                break;
-            }*/
             static bool shouldRenderOverlay = true;
             bool shouldBeMoveable = true;
             static int corner = 0;
-            float DISTANCE = 10;
+            float DISTANCE = 50;
             ImGuiIO& io = ImGui::GetIO();
             if (corner != -1)
             {

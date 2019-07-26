@@ -97,13 +97,15 @@ typedef struct _PED {
 	bool		isReloading;		//	01FC-01FD
 	_pad(_unk5, 0x11B);
 	FRAME*		frm_neck;			//	0318-031C
-	_pad(_unk6, 0x184);
+	_pad(_unk6, 0xF0);
+	bool		controlState;		//	040C-040D
+	_pad(_unk7, 0x93);
 	INVENTARY	inventary;			//	04A0-0520
-	_pad(_unk7, 0xD4);
+	_pad(_unk8, 0xD4);
 	float		inCarRotation;		//	05F4-05F8
-	_pad(_unk8, 0x4C);
+	_pad(_unk9, 0x4C);
 	float		health;				//	0644-0648
-	_pad(_unk9, 0x492);
+	_pad(_unk10, 0x492);
 	bool 		isControlled;		//  0ADA
 } PED;
 

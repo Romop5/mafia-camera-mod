@@ -3,33 +3,50 @@
 #include <glm/gtx/transform.hpp>
 
 bool CFreecamera::onVKKey(USHORT key) {
-    float frontVectorMagnitude = 0.0;
-    float leftVectorMagnitude = 0.0;
-    glm::vec3 upVector = glm::vec3(0.0,1.0,0.0);
+    switch(m_state)
+    {
+        case FREECAMERA_FREE:
+        {
+            float frontVectorMagnitude = 0.0;
+            float leftVectorMagnitude = 0.0;
+            glm::vec3 upVector = glm::vec3(0.0,1.0,0.0);
 
-    enum 
-    {
-        VK_A = 0x41,
-        VK_S = 0x53,
-        VK_W = 0x57,
-        VK_D = 0x44,
-    };
-    switch(key)
-    {
-        case VK_W:
-        case VK_UP: frontVectorMagnitude += m_cameraFlyingSpeed; break;
-        case VK_S:
-        case VK_DOWN: frontVectorMagnitude -= m_cameraFlyingSpeed; break;
-        case VK_A:
-        case VK_LEFT: leftVectorMagnitude += m_cameraFlyingSpeed; break;
-        case VK_D:
-        case VK_RIGHT: leftVectorMagnitude -= m_cameraFlyingSpeed; break;
+            enum 
+            {
+                VK_A = 0x41,
+                VK_S = 0x53,
+                VK_W = 0x57,
+                VK_D = 0x44,
+            };
+            switch(key)
+            {
+                case VK_W:
+                case VK_UP: frontVectorMagnitude += m_cameraFlyingSpeed; break;
+                case VK_S:
+                case VK_DOWN: frontVectorMagnitude -= m_cameraFlyingSpeed; break;
+                case VK_A:
+                case VK_LEFT: leftVectorMagnitude += m_cameraFlyingSpeed; break;
+                case VK_D:
+                case VK_RIGHT: leftVectorMagnitude -= m_cameraFlyingSpeed; break;
+            }
+
+            glm::vec3 leftVector = glm::cross(rotation, upVector);
+
+            this->position += leftVector*leftVectorMagnitude + rotation*frontVectorMagnitude;
+            this->updateCamera();
+        }
+        break;
+        case FREECAMERA_REPLAYING:
+        {
+            switch(key)
+            {
+                case VK_ESCAPE:
+                    auto &player = m_modeController.m_getScene().m_player;
+                break;
+            }
+        }
+        break;
     }
-
-    glm::vec3 leftVector = glm::cross(rotation, upVector);
-
-    this->position += leftVector*leftVectorMagnitude + rotation*frontVectorMagnitude;
-    this->updateCamera();
     return true;
 }
 
@@ -193,8 +210,9 @@ void CFreecamera::renderTrackManager()
                         ImGui::Text("Count of points: %d", cameraTrack.getPoints().size());
                         if(ImGui::Button("Play track"))
                         {
-                            m_player.setTrack(&cameraTrack);
-                            m_player.reset();
+                            auto &player = this->m_modeController.m_getScene().m_player;
+                            player.setTrack(&cameraTrack);
+                            player.reset();
                             this->m_state = FREECAMERA_REPLAYING;
                         }
                     }
@@ -267,7 +285,8 @@ void CFreecamera::renderFreecameraHelper()
 
 void CFreecamera::renderReplayingPanel()
 {
-    auto track = this->m_player.m_currentTrack;
+    auto &player = this->m_modeController.m_getScene().m_player;
+    auto track = player.m_currentTrack;
     if(ImGui::Begin("Replaying controller",nullptr,ImGuiWindowFlags_AlwaysAutoResize))
     {  
         if(track) 
@@ -275,39 +294,37 @@ void CFreecamera::renderReplayingPanel()
             ImGui::Text("Replaying track: %s", track->m_name.c_str());
             if(ImGui::Button("Restart"))
             {
-                m_player.reset();
+                player.reset();
             }
-            auto stopActionText = (m_player.isStoped() ? "Play" : "Stop");
+            auto stopActionText = (player.isStoped() ? "Play" : "Stop");
             ImGui::SameLine();
             if(ImGui::Button(stopActionText))
             {
-                m_player.toggleStop(!m_player.isStoped());
+                player.toggleStop(!player.isStoped());
             }
 
-            float speed = m_player.getSpeed();
-            if(ImGui::SliderFloat("Replay speed",&speed,0.1,10.0))
+            float speed = player.getSpeed();
+            if(ImGui::SliderFloat("Replay speed",&speed,0.25,4.0))
             {
-                m_player.setSpeed(speed);
+                player.setSpeed(speed);
             }
 
-            bool isRewinding = m_player.isRewinding();
+            bool isRewinding = player.isRewinding();
             if(ImGui::Checkbox("Is rewinding",&isRewinding))
             {
-                m_player.toggleRewinding(isRewinding);
+                player.toggleRewinding(isRewinding);
             } 
             if(ImGui::Button("Next step"))
             {
-                m_player.moveForward();
+                player.moveForward();
             }
         } 
         
         if(ImGui::Button("Exit replaying"))
         {
-            this->m_player.setTrack(nullptr);
+            player.setTrack(nullptr);
             this->m_state = FREECAMERA_FREE;
         }
-
-        ImGui::Text("Debug Head: %d", m_player.m_replayingHead);
     }
     ImGui::End();
 }

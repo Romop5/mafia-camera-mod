@@ -287,5 +287,6 @@ class CScene
 
     CRecordingState m_recordingState;
     CCameraManager m_cameraManager;
+    CTrackPlayer m_player;
 };
 #endif

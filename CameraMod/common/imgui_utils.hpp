@@ -4,10 +4,35 @@
 #include <imgui.h>
 #include <string>
 #include <filesystem>
+#include <cstdarg>
 
 namespace ImGui {
 namespace Utils {
     
+    inline void TextColoredCentered(const ImVec4& col, const char* text,...)
+    {
+        auto width = ImGui::GetWindowWidth();
+        auto box = ImGui::CalcTextSize(text);
+        ImGui::Indent((width-box.x)/2);
+        va_list list;
+        va_start(list,text);
+        ImGui::TextColoredV(col,text,list);
+        va_end(list);
+        ImGui::Unindent((width-box.x)/2);
+    }
+    inline void TextCentered(const char* text,...)
+    {
+        auto width = ImGui::GetWindowWidth();
+        char buffer[1024];
+        va_list list;
+        va_start(list,text);
+        vsprintf(buffer, text,list);
+        auto box = ImGui::CalcTextSize(buffer);
+        ImGui::Indent((width-box.x)/2);
+        ImGui::TextV(text,list);
+        va_end(list);
+        ImGui::Unindent((width-box.x)/2);
+    }
     inline bool FilePickerPlane(std::string& resultPath, bool isStoring, std::string directory = "")
     {
         static char currentPath[256] = "";

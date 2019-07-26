@@ -176,6 +176,7 @@ void CGame::internalLockControls(bool shouldLock)
     if(playerBase)
     {
         playerBase->isControlled = (shouldLock == true);
+        playerBase->controlState = (shouldLock == false);
     }
 }
 

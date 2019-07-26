@@ -61,7 +61,8 @@ class CFreecamera: public CGenericMode
             if(m_state == FREECAMERA_REPLAYING)
             {
                 renderReplayingPanel();
-                m_player.updateCamera(position,rotation);
+                auto &player = this->m_modeController.m_getScene().m_player;
+                player.updateCamera(position,rotation);
                 updateCamera();
             }
         };
@@ -74,8 +75,6 @@ class CFreecamera: public CGenericMode
             FREECAMERA_FREE = 0,
             FREECAMERA_REPLAYING,
         } m_state;
-
-        CTrackPlayer m_player;
 
         void renderPointsManager(CameraPointVector_t& points,size_t& index);
         void renderTrackManager();
