@@ -85,9 +85,10 @@ class CTrackPlayer
     float m_speed;
     float m_elapsedTime;
     bool m_isStoped;
+    bool m_isCircular;
 
     public:
-    CTrackPlayer(): m_isRewinding(false), m_speed(1.0), m_isStoped(true), m_currentTrack(nullptr) {}
+    CTrackPlayer(): m_isRewinding(false), m_speed(1.0), m_isStoped(true), m_currentTrack(nullptr),m_isCircular(true) {}
 
     void moveForward() {
         m_replayingHead = getNextHeadPosition();
@@ -97,6 +98,9 @@ class CTrackPlayer
 
     void setSpeed(float speed) { m_speed = speed; }
     float getSpeed() const { return m_speed; }
+
+    void toggleCircular(bool shouldRewind) { m_isCircular = shouldRewind; }
+    bool isCircular() const { return m_isCircular; }
 
     void toggleRewinding(bool shouldRewind) { m_isRewinding = shouldRewind; }
     bool isRewinding() const { return m_isRewinding; }
@@ -130,6 +134,11 @@ class CTrackPlayer
         {
             m_elapsedTime = 0;
             m_replayingHead = getNextHeadPosition();
+            
+            if(!m_isCircular && (m_replayingHead == m_currentTrack->getPoints().size()-1))
+            {   // if it's not circular, then skip the last point
+                m_replayingHead = getNextHeadPosition();
+            }
         }
     }
     private:

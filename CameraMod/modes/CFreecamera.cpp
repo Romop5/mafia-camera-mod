@@ -53,14 +53,21 @@ bool CFreecamera::onVKKey(USHORT key) {
 
 void CFreecamera::onMouseMove(int x, int y)
 {
-    this->angleX += x*0.01;
-    this->angleY += y*0.01;
+    switch(m_state)
+    {
+        case FREECAMERA_FREE:
+        {
+            this->angleX += x*0.01;
+            this->angleY += y*0.01;
 
-    //auto verticalMatrix = glm::rotate(this->angleY, glm::vec3(-1.0,0.0,0.0)); 
-    //auto horizontalMatrix = glm::rotate(this->angleX, glm::vec3(0.0,1.0,0.0)); 
-    //this->rotation = glm::vec3(horizontalMatrix*verticalMatrix*glm::vec4(1.0,0.0,0.0,0.0));
-    this->rotation = glm::vec3(cos(this->angleY)*sin(this->angleX), sin(this->angleY), cos(this->angleX)*cos(this->angleY));
-    updateCamera();
+            //auto verticalMatrix = glm::rotate(this->angleY, glm::vec3(-1.0,0.0,0.0)); 
+            //auto horizontalMatrix = glm::rotate(this->angleX, glm::vec3(0.0,1.0,0.0)); 
+            //this->rotation = glm::vec3(horizontalMatrix*verticalMatrix*glm::vec4(1.0,0.0,0.0,0.0));
+            this->rotation = glm::vec3(cos(this->angleY)*sin(this->angleX), sin(this->angleY), cos(this->angleX)*cos(this->angleY));
+            updateCamera();
+        }
+        break;
+    }
 }
 
 void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
@@ -313,6 +320,12 @@ void CFreecamera::renderReplayingPanel()
             if(ImGui::Checkbox("Is rewinding",&isRewinding))
             {
                 player.toggleRewinding(isRewinding);
+            } 
+
+            bool isCircular = player.isCircular();
+            if(ImGui::Checkbox("Is circular",&isCircular))
+            {
+                player.toggleCircular(isCircular);
             } 
             if(ImGui::Button("Next step"))
             {

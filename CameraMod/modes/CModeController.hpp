@@ -8,5 +8,6 @@ class CModeController
     public:
         std::function<void(bool)> m_blockInput;
         std::function<CScene&()> m_getScene;
+        std::function<bool()> m_isGUIVisible;
 };
 #endif

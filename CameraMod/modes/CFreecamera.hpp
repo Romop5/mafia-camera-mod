@@ -60,7 +60,11 @@ class CFreecamera: public CGenericMode
             }
             if(m_state == FREECAMERA_REPLAYING)
             {
-                renderReplayingPanel();
+                // Render manager
+                if(m_modeController.m_isGUIVisible())
+                {
+                    renderReplayingPanel();
+                }
                 auto &player = this->m_modeController.m_getScene().m_player;
                 player.updateCamera(position,rotation);
                 updateCamera();
