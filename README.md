@@ -10,8 +10,8 @@ Originally, the mod was coded in November 2014 to provide a movie making utility
 
 <div align=center>
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=cbWiwHvqdX8
-" target="_blank"><img src="http://img.youtube.com/vi/cbWiwHvqdX8/0.jpg" 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=4qpn5Yar9HM
+" target="_blank"><img src="http://img.youtube.com/vi/4qpn5Yar9HM/0.jpg" 
 alt="CameraMod preview" width="480" height="360" border="10" /></a>
 
 </div>
@@ -33,6 +33,8 @@ alt="CameraMod preview" width="480" height="360" border="10" /></a>
 ## Usage
 Copy `HotReloader.exe`, `camera_injector.exe` and `cameramod.dll` to game's directory.
 Then run the original game, and run `camera_injector.exe` to load the modification.
+
+D3D8to9 wrapper is required for mod to work correctly. Please, use Release package which contains the copy of .dll.
 
 Use **F2** key to control GUI ingame.
 
