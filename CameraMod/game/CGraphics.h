@@ -61,9 +61,6 @@ public:
     void RestoreRenderBackup(RenderClip*);
     void SetViewport(RenderClip*, DWORD x, DWORD y, DWORD width, DWORD heigh);
 
-    DWORD ColorPlusColor(DWORD, DWORD);
-    DWORD ColorMinusColor(DWORD, DWORD);
-
     void DrawCubePoint(Vector3D position);
 
     void FillARGB(int x, int y, int w, int h, D3DCOLOR color);

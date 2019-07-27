@@ -189,7 +189,8 @@ const std::string& CHuman::getName() const
     auto base = this->toPED();
     if(base)
         base->object.frame->frameName;
-    return "Unknown human";
+    static const std::string humanString = "Unknown human"; 
+    return humanString;
 }
 
 glm::mat4 CHuman::getTransform() const
@@ -292,9 +293,11 @@ void CGame::ToggleHUD(bool shouldBeVisible)
 }
 const std::string& CGame::GetVersionString() const
 {
-    char version[255];
-    sprintf(version, "Version %d", this->GetGameVersion());
-    return version;
+    static std::string versionString(100,' ');
+    std::stringstream ss;
+    ss << "Version " << this->GetGameVersion();
+    versionString = ss.str();
+    return versionString;
 }
 void CGame::PrintDebugMessage(const std::string& message)
 {

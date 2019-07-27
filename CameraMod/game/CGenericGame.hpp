@@ -115,7 +115,10 @@ class CGenericGame
     // OPTIONAL METHODS (may be implemented by game)
     ///////////////////////////////////////////////////////////////////////////
     virtual void ToggleHUD(bool shouldBeVisible) {}
-    virtual const std::string& GetVersionString() const {return "Not implemented";}
+    virtual const std::string& GetVersionString() const {
+        static const std::string versionString = "Not implemented";
+        return versionString;
+    }
     virtual void PrintDebugMessage(const std::string& message) {}
 
     /// Record object's state starting this moment

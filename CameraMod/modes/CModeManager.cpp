@@ -82,6 +82,7 @@ bool CModeManager::OnVKKey(USHORT key)
         if(this->m_currentMode)
         return this->m_currentMode->onVKKey(key);
     }
+    return true;
 }
 
 void CModeManager::OnMouseMove(int x, int y)

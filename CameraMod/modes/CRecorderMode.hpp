@@ -84,7 +84,7 @@ class CRecorderMode: public CGenericMode
                 framesCount = info->getFramesCount();
             }
             ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
-            if (ImGui::Begin("Example: Simple overlay", &shouldRenderOverlay, (shouldBeMoveable != -1 ? ImGuiWindowFlags_NoMove : 0) | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
+            if (ImGui::Begin("Example: Simple overlay", &shouldRenderOverlay, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav))
             {
                 switch(globalRecordingState.getState())
                 {

@@ -67,7 +67,7 @@ IDirect3DDevice8* CGraphics::GetDevice() { return this->device; }
 void CGraphics::TextDraw(int x, int y, char* text, DWORD color)
 {
     if (betterFont)
-        betterFont->DrawTextA(x, y, color, text, D3DFONT_FILTERED);
+        betterFont->DrawTextA(static_cast<float>(x), static_cast<float>(y), color, text, D3DFONT_FILTERED);
     // g_font->Begin();
 }
 
@@ -245,47 +245,6 @@ void CGraphics::SetViewport(RenderClip* backup, DWORD x, DWORD y, DWORD width,
     this->GetDevice()->SetViewport(&port);
 }
 
-DWORD CGraphics::ColorPlusColor(DWORD a, DWORD b)
-{
-    unsigned char calc = 0x0;
-    DWORD result = 0x0000000;
-
-    calc = (a >> 16) + (b >> 16);
-    if (calc < (unsigned char)(a >> 16))
-        calc = 0xff;
-    result += (calc << 16);
-    calc = (a >> 8) + (b >> 8);
-    if (calc < (unsigned char)(a >> 8))
-        calc = 0xff;
-    result += (calc << 8);
-    calc = (a) + (b);
-    if (calc < (unsigned char)a)
-        calc = 0xff;
-    result += (calc);
-    result += (0xff << 24);
-    return result;
-}
-
-DWORD CGraphics::ColorMinusColor(DWORD a, DWORD b)
-{
-    unsigned char calc = 0x0;
-    DWORD result = 0x0000000;
-
-    calc = (a >> 16) - (b >> 16);
-    if (calc > (unsigned char)(a >> 16))
-        calc = 0x0;
-    result += (calc << 16);
-    calc = (a >> 8) - (b >> 8);
-    if (calc > (unsigned char)(a >> 8))
-        calc = 0x0;
-    result += (calc << 8);
-    calc = (a) - (b);
-    if (calc > (unsigned char)a)
-        calc = 0x0;
-    result += (calc);
-    result += (0xff << 24);
-    return result;
-}
 
 void CGraphics::DrawCubePoint(Vector3D position)
 {

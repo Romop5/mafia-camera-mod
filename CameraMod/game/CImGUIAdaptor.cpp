@@ -94,9 +94,7 @@ void CImGUIAdaptor::Win32NewFrame()
                                      "ImGui_ImplOpenGL3_NewFrame().");
 
     // Setup display size (every frame to accommodate for window resizing)
-    RECT rect;
-    //::GetClientRect(g_hWnd, &rect);
-    io.DisplaySize = ImVec2(this->screenSize.x, this->screenSize.y);
+    io.DisplaySize = ImVec2(static_cast<float>(this->screenSize.x), static_cast<float>(this->screenSize.y));
  //   io.MouseDrawCursor = true;
 
     /*

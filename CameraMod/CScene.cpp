@@ -26,6 +26,9 @@ void CScene::save(const std::string path)
 }
 void CScene::load(const std::string path)
 {
+    // reset player
+    m_player.setTrack(nullptr);
+    
     try {
         std::ifstream inputFile(path);
         if(inputFile.is_open())

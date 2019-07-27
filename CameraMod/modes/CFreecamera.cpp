@@ -57,8 +57,8 @@ void CFreecamera::onMouseMove(int x, int y)
     {
         case FREECAMERA_FREE:
         {
-            this->angleX += x*0.01;
-            this->angleY += y*0.01;
+            this->angleX += static_cast<float>(x)*0.01f;
+            this->angleY += static_cast<float>(y)*0.01f;
 
             //auto verticalMatrix = glm::rotate(this->angleY, glm::vec3(-1.0,0.0,0.0)); 
             //auto horizontalMatrix = glm::rotate(this->angleX, glm::vec3(0.0,1.0,0.0)); 

@@ -212,7 +212,10 @@ class CHuman: public CMafiaObject
 
 	public:
 	virtual const std::string& getName() const override;
-    virtual const std::string& getType() const override { return "HUMAN";}
+    virtual const std::string& getType() const override {
+		static const std::string classString = "HUMAN"; 
+		return classString;
+	}
 
     virtual glm::mat4 getTransform() const override; 
     virtual void setTransform(const glm::mat4&) override;
