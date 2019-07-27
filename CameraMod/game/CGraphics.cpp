@@ -16,6 +16,12 @@ CGraphics::CGraphics()
     Texture = NULL;
 }
 
+IDirect3DDevice9* CGraphics::getD3D9() const
+{
+   auto d3d9Object = CD3D9Accessor::castFromD3D8(this->device);
+   return d3d9Object;
+} 
+
 void CGraphics::Init()
 {
     // Note: this is a hack and it requires d3d8to9 to be compiled using the same
@@ -45,6 +51,31 @@ void CGraphics::Init()
 void CGraphics::Unload()
 {
     adaptor.CleanUP();
+}
+
+bool CGraphics::saveScreenshot(const std::string path)
+{
+    auto d3d8device = this->device;
+    IDirect3DSurface8* backbuffer;
+    auto result = d3d8device->GetBackBuffer(0,D3DBACKBUFFER_TYPE_MONO, &backbuffer);
+    if(D3DERR_INVALIDCALL == result)
+    {
+        core->getGame()->PrintDebugMessage("get back buffer");
+        return false;
+    }
+    // copy
+    IDirect3DSurface8* copySurface;
+    auto screenSize = GetScreenSize();
+    d3d8device->CreateImageSurface(screenSize.x,screenSize.y,D3DFMT_R8G8B8,&copySurface);
+    result = d3d8device->CopyRects(backbuffer,NULL,0,copySurface,NULL);
+    if(D3DERR_INVALIDCALL == result)
+    {
+        core->getGame()->PrintDebugMessage("UpdateSurface fail");
+        return false;
+    }
+    result = D3DXSaveSurfaceToFileA(path.c_str(),D3DXIFF_BMP,copySurface,NULL,NULL);
+    copySurface->Release();
+    return (result == D3D_OK);
 }
 
 void CGraphics::onEndScene()
@@ -452,9 +483,7 @@ Point2D CGraphics::GetScreenSize()
 
     device->GetCreationParameters(&cparams);
     GetWindowRect(cparams.hFocusWindow, &rect);
-    Point2D screen;
-    screen.x = rect.right;
-    screen.y = rect.bottom;
-    return screen;
+    Point2D point = {rect.right-rect.left, rect.bottom-rect.top};
+    return point;
 }
 

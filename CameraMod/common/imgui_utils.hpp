@@ -40,6 +40,9 @@ namespace Utils {
         for(auto& p: std::filesystem::directory_iterator(directory))
         {
             std::string& path = p.path().string();
+            // Search for .txt files
+            if(path.find(".txt") == path.npos)
+                continue;
             if(ImGui::Selectable(path.c_str()))
             {
                 strcpy(currentPath, path.c_str());
@@ -60,6 +63,12 @@ namespace Utils {
         ImGui::EndChild();
         return status;
     }
+    inline bool  InputText(const char* label, std::string* str)
+    {
+        return ImGui::InputText(label, (char*)str->c_str(), str->capacity() + 1);
+    }
+ 
+
 }; // ImGUI::Utils
 }; // ImGUI
 

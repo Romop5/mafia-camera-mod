@@ -144,6 +144,13 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
     io.KeysDown[keycode] = isDown;
     if(isDown)
     {
+        // is 0-9
+        if(keycode >= 0x30 && keycode <= 0x39)
+        {
+            // Append character
+            auto baseCharacter = '0';
+            io.AddInputCharacter(keycode-0x30+baseCharacter);
+        }
         // is a character code
         if(keycode >= 0x41 && keycode <= 0x5A)
         {
@@ -169,6 +176,8 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
         case VK_CONTROL:    io.KeyCtrl = isDown; break;
         case VK_SHIFT:      io.KeyShift = isDown; break;
         case VK_MENU:       io.KeyAlt = isDown; break;
+        case VK_SPACE:      io.AddInputCharacter(' '); break;
+        
     }
     //utilslib::Logger::getInfo() << "[ImGUI Hook] key: " << std::hex << keycode << " status: " << isDown << std::endl;
 }

@@ -45,6 +45,13 @@ bool CCore::Initialize()
     // Register onPressKey callback
     this->getRawInput()->m_onKeyPressedHandlers.add(
             [&] (USHORT pressedKey, bool isKeyDown = true)->bool {
+                if(pressedKey == VK_F12 && isKeyDown)
+                {
+                    if(this->getGraphics()->saveScreenshot("C:\\screenshot.bmp"))
+                        this->getGame()->PrintDebugMessage("Screenshot taken");
+                    else
+                        this->getGame()->PrintDebugMessage("Screenshot.bmp failed");
+                }
                 if(this->m_isGUIacceptingInput)
                 {
                     this->getGraphics()->getImGUIAdaptor().updateKey(pressedKey, isKeyDown);

@@ -14,7 +14,7 @@ void CCameraManager::addNewTrack()
 }
 
 
-void CScene::save(const std::string path)
+bool  CScene::save(const std::string path)
 {
     auto jsonObject = m_cameraManager.serialize();
     std::string str = jsonObject.dump();
@@ -23,8 +23,9 @@ void CScene::save(const std::string path)
     outputFile << str;
 
     utilslib::Logger::getInfo() << "CScene::save() " << path << ": " << str << std::endl;
+    return true;
 }
-void CScene::load(const std::string path)
+bool CScene::load(const std::string path)
 {
     // reset player
     m_player.setTrack(nullptr);
@@ -48,6 +49,7 @@ void CScene::load(const std::string path)
     }
     catch(...)
     {
-
+        return false;
     }
+    return true;
 }

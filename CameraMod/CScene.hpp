@@ -5,8 +5,10 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <array>
 #include "game/CGame.h"
 #include <glm/gtx/compatibility.hpp>
+#include <glm/gtx/spline.hpp>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Camera points + camera paths
@@ -74,12 +76,187 @@ class CCameraTrack
             return resultStatus;
         }
 };
+class CTrackPlayerController
+{
+    public:
+    /// Returns point for given ID
+    std::function<CCameraPoint&(size_t)> m_getPoint;
+    ///Returns the next point ID for given ID
+    std::function<size_t(size_t)> m_getNextID;
+    ///Move track's head by N points
+    std::function<void(size_t)> m_moveHead;
+    ///Get current point
+    std::function<size_t()> m_getCurrentPoint;
+};
+/**
+ * @brief Component which moves camera along the path
+ * 
+ * The component is reponsible for calculating camera's properties for each frame.
+ * For example, CPointTrackInterpolator moves camera in descrete steps whereas
+ * CLinearTrackInterpolator moves camera in lines.
+ * 
+ * When updateCamera is called, the component can use passed controller to query
+ * current track's head position and underlying camera points, and 
+ * also triggers moving of the head.
+ */
+class CGenericTrackInterpolator
+{
+    protected:
+    CTrackPlayerController* m_controller;
+    float m_elapsedTime;
+    public:
+    CGenericTrackInterpolator(): m_elapsedTime(0) {}
+    virtual ~CGenericTrackInterpolator() = default;
+    void setController(CTrackPlayerController* controller) { m_controller = controller; }
+    virtual void updateCamera(glm::vec3& cameraPosition, glm::vec3& cameraRotation, float deltams) = 0;
 
+};
+
+class CPointTrackInterpolator: public CGenericTrackInterpolator
+{
+    public:
+    virtual void updateCamera(glm::vec3& cameraPosition, glm::vec3& cameraRotation, float deltams) override
+    {
+        auto tmpCurrentID = m_controller->m_getCurrentPoint();
+        auto tmpCurrentPoint = m_controller->m_getPoint(tmpCurrentID);
+        m_elapsedTime += deltams;
+        if(tmpCurrentPoint.duration < m_elapsedTime)
+        {
+            m_elapsedTime = 0;
+            // Update camera head position
+            m_controller->m_moveHead(1);
+        }
+        auto currentID = m_controller->m_getCurrentPoint();
+        auto currentPoint = m_controller->m_getPoint(currentID);
+
+        auto nextID = m_controller->m_getNextID(currentID);
+        auto nextPoint = m_controller->m_getPoint(nextID);
+
+        // Turns off interpolation => moves in discrete steps
+        float t = 0;
+
+        cameraPosition = glm::lerp(currentPoint.m_point,nextPoint.m_point, t);
+        auto newQuat = glm::slerp(glm::quat(currentPoint.m_rotation),glm::quat(nextPoint.m_rotation), t);
+        cameraRotation = glm::vec3(newQuat.x, newQuat.y, newQuat.z);
+    }
+};
+
+class CLinearTrackInterpolator: public CGenericTrackInterpolator
+{
+    public:
+    virtual void updateCamera(glm::vec3& cameraPosition, glm::vec3& cameraRotation, float deltams) override
+    {
+        auto tmpCurrentID = m_controller->m_getCurrentPoint();
+        auto tmpCurrentPoint = m_controller->m_getPoint(tmpCurrentID);
+        m_elapsedTime += deltams;
+        if(tmpCurrentPoint.duration < m_elapsedTime)
+        {
+            m_elapsedTime = 0;
+            m_controller->m_moveHead(1);
+        }
+        auto currentID = m_controller->m_getCurrentPoint();
+        auto currentPoint = m_controller->m_getPoint(currentID);
+
+        auto nextID = m_controller->m_getNextID(currentID);
+        auto nextPoint = m_controller->m_getPoint(nextID);
+
+        float t = m_elapsedTime / currentPoint.duration;
+
+        cameraPosition = glm::lerp(currentPoint.m_point,nextPoint.m_point, t);
+        auto newQuat = glm::slerp(glm::quat(currentPoint.m_rotation),glm::quat(nextPoint.m_rotation), t);
+        cameraRotation = glm::vec3(newQuat.x, newQuat.y, newQuat.z);
+    }
+};
+
+class CCatmulRomTrackInterpolator: public CGenericTrackInterpolator
+{
+    public:
+    virtual void updateCamera(glm::vec3& cameraPosition, glm::vec3& cameraRotation, float deltams) override
+    {
+        auto id = m_controller->m_getCurrentPoint();
+        std::array<CCameraPoint*,4> points;
+        // Get points
+        for(auto& ptr: points)
+        {
+            ptr = &m_controller->m_getPoint(id);
+            id = m_controller->m_getNextID(id);
+        }
+
+        m_elapsedTime += deltams;
+        float t = m_elapsedTime / points[0]->duration;
+        if(t > 1.0f)
+        {
+            m_controller->m_moveHead(1);
+            t = 1.0;
+            m_elapsedTime = 0;
+        }
+
+        cameraPosition = glm::catmullRom(points[0]->m_point,points[1]->m_point,points[2]->m_point,points[3]->m_point,t);
+        cameraRotation = glm::catmullRom(points[0]->m_rotation,points[1]->m_rotation,points[2]->m_rotation,points[3]->m_rotation,t);
+    }
+};
+
+class CCubicTrackInterpolator: public CGenericTrackInterpolator
+{
+    public:
+    virtual void updateCamera(glm::vec3& cameraPosition, glm::vec3& cameraRotation, float deltams) override
+    {
+        auto id = m_controller->m_getCurrentPoint();
+        std::array<CCameraPoint*,2> points;
+        // Get points
+        for(auto& ptr: points)
+        {
+            ptr = &m_controller->m_getPoint(id);
+            id = m_controller->m_getNextID(id);
+        }
+
+        m_elapsedTime += deltams;
+        float t = m_elapsedTime / points[0]->duration;
+        if(t > 1.0f)
+        {
+            m_controller->m_moveHead(1);
+            t = 1.0;
+            m_elapsedTime = 0;
+        }
+
+        static glm::vec3 coef = glm::vec3(0.0,0.1,0.0);
+        cameraPosition = glm::hermite(points[0]->m_point,coef,points[1]->m_point,coef,t);
+        cameraRotation = glm::hermite(points[0]->m_rotation,coef,points[1]->m_rotation,coef,t);
+    }
+};
+
+class CGenericInterpolatorFactory
+{
+    using return_type = std::unique_ptr<CGenericTrackInterpolator>;
+    public:
+    inline static std::unique_ptr<CGenericTrackInterpolator> createInterpolator(const std::string name)
+    {
+        for(const auto& pair: getNames())
+        {
+            if(pair.first == name)
+            return pair.second();
+        }
+        return static_cast<return_type>(std::make_unique<CLinearTrackInterpolator>());
+    }
+
+    inline static const std::vector<std::pair<std::string,std::function<return_type()>>> getNames() 
+    {
+        static const std::vector<std::pair<std::string,std::function<return_type()>>> interpolatorNames = {
+            std::make_pair("CatmulRom", [] { return static_cast<return_type>(std::make_unique<CCatmulRomTrackInterpolator>());}),
+            std::make_pair("Point", [] { return static_cast<return_type>(std::make_unique<CPointTrackInterpolator>());}),
+            std::make_pair("Cubic", [] { return static_cast<return_type>(std::make_unique<CCubicTrackInterpolator>());}),
+            std::make_pair("Linear", [] { return static_cast<return_type>(std::make_unique<CLinearTrackInterpolator>());})
+        }; 
+        return interpolatorNames;
+    }
+};
 
 class CTrackPlayer
 {
     public:
     CCameraTrack* m_currentTrack;
+    std::unique_ptr<CGenericTrackInterpolator> m_interpolator;
+    CTrackPlayerController m_ourController;
     size_t m_replayingHead;
     bool m_isRewinding;
     float m_speed;
@@ -88,7 +265,30 @@ class CTrackPlayer
     bool m_isCircular;
 
     public:
-    CTrackPlayer(): m_isRewinding(false), m_speed(1.0), m_isStoped(true), m_currentTrack(nullptr),m_isCircular(true) {}
+    CTrackPlayer(): m_isRewinding(false), m_speed(1.0), m_isStoped(true), m_currentTrack(nullptr),m_isCircular(true) {
+
+        m_ourController.m_getPoint = [&] (size_t id)->CCameraPoint& 
+        {
+            return m_currentTrack->getPoints()[id];
+        };
+        m_ourController.m_getNextID = [&] (size_t id)->size_t 
+        {
+            return getNextHeadPosition(id);
+        }; 
+        m_ourController.m_moveHead = [&] (size_t positions)->void 
+        {
+            for(size_t i = 0; i < positions; i++)
+            {
+                m_replayingHead = getNextHeadPosition();
+            }
+        };
+        m_ourController.m_getCurrentPoint = [&] (void)->size_t
+        {
+            return m_replayingHead;
+        };
+
+        this->setInterpolator(static_cast<std::unique_ptr<CGenericTrackInterpolator>>(std::make_unique<CCatmulRomTrackInterpolator>()));
+    }
 
     void moveForward() {
         m_replayingHead = getNextHeadPosition();
@@ -111,6 +311,12 @@ class CTrackPlayer
     }
     void setTrack(CCameraTrack* track) { m_currentTrack = track; }
 
+    void setInterpolator(std::unique_ptr<CGenericTrackInterpolator>& interpolator)
+    {
+        m_interpolator = std::move(interpolator);
+        m_interpolator->setController(&m_ourController);
+    }
+
     void updateCamera(glm::vec3& cameraPosition, glm::vec3& cameraRotation)
     {
         if(!m_currentTrack)
@@ -119,7 +325,11 @@ class CTrackPlayer
             return;
         if(this->isStoped())
             return;
-        auto& currentFrame = m_currentTrack->getPoints()[m_replayingHead];
+        if(!m_interpolator)
+            return;
+        m_interpolator->updateCamera(cameraPosition, cameraRotation, 30.0f*m_speed);
+
+        /*auto& currentFrame = m_currentTrack->getPoints()[m_replayingHead];
         
         // interpolate between successive frames
         float t = m_elapsedTime/currentFrame.duration;
@@ -139,17 +349,29 @@ class CTrackPlayer
             {   // if it's not circular, then skip the last point
                 m_replayingHead = getNextHeadPosition();
             }
-        }
+        }*/
     }
     private:
-    size_t getNextHeadPosition() const { 
+    size_t getNextHeadPosition(size_t position = -1) const { 
+        if(position == -1)
+            position = m_replayingHead;
         auto length = m_currentTrack->getPoints().size();
         auto offset = (m_isRewinding ? -1 : 1);
         if(length == 0)
             return 0;
-        if(m_isRewinding && m_replayingHead == 0)
-            return length-1;
-        return (m_replayingHead+offset) % length;
+        if(m_isRewinding && position == 0)
+        {
+            if(m_isCircular)
+                return length-1;
+            return 0;
+        }
+        auto newPosition = (position+offset) % length;
+        if(!m_isCircular)
+        {
+            if(newPosition < position && m_isRewinding)
+                return position;
+        }
+        return newPosition;
     }
 };
 
@@ -291,8 +513,8 @@ class CRecordingState
 class CScene
 {
     public:
-    void save(const std::string path);
-    void load(const std::string path);
+    bool save(const std::string path);
+    bool load(const std::string path);
 
     CRecordingState m_recordingState;
     CCameraManager m_cameraManager;

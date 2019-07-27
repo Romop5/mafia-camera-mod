@@ -23,6 +23,7 @@ private:
     bool m_isGUIVisible;
 
     CScene m_scene;
+    CGenericGame* m_gameController;
 
     void RenderMainMenu();
     void AddMode(CGenericMode*, const std::string name = "Unknown mode");

@@ -67,6 +67,10 @@ public:
     void FillARGBGradient(int x, int y, int w, int h, D3DCOLOR color,
         D3DCOLOR colorSec);
 
+    inline IDirect3DDevice9* getD3D9() const; 
+
+    bool saveScreenshot(const std::string path);
+
     Point2D GetScreenSize();
 
     // Dx8 overrides

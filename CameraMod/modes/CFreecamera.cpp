@@ -1,6 +1,7 @@
 #include "modes/CFreecamera.hpp"
 #include <glm/glm.hpp> 
 #include <glm/gtx/transform.hpp>
+#include <common/imgui_utils.hpp>
 
 bool CFreecamera::onVKKey(USHORT key) {
     switch(m_state)
@@ -72,9 +73,18 @@ void CFreecamera::onMouseMove(int x, int y)
 
 void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
 {
+    static char inputPointName[255] = "";
+    auto updateToID = [&] (size_t id) {
+        // teleport camera
+        this->position = points[id].m_point;
+        this->rotation = points[id].m_rotation;
+        updateCamera();
+        index = id;
+    };
     if(ImGui::Button("Add current camera as a point"))
     {
-        points.push_back(CCameraPoint(this->position, this->rotation));
+        auto newPosition = points.insert(points.begin()+index+1,CCameraPoint(this->position, this->rotation));
+        updateToID(index+1);
     }
     if(points.size() == 0)
     {
@@ -86,7 +96,7 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
         if(index > 0)
         {
             std::swap(points[index], points[index-1]);
-            index--;
+            updateToID(--index);
         }
     }
     ImGui::SameLine();
@@ -94,22 +104,19 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
         if(index < points.size()-1)
         {
             std::swap(points[index], points[index+1]);
-            index++;
+            updateToID(++index);
         }
     }
     size_t i = 0;
     for(auto &cameraPoint: points)
     {
-        char label[128];
-        sprintf(label, "ID %d", i);
-        if (ImGui::Selectable(label, index == i))
+        ImGui::PushID(i);
+        if (ImGui::Selectable(cameraPoint.m_name.c_str(), index == i))
         {
-            // teleport camera
-            this->position = cameraPoint.m_point;
-            this->rotation = cameraPoint.m_rotation;
-            updateCamera();
+            updateToID(i);
             index = i;
         }
+        ImGui::PopID();
         i++;
     }
     ImGui::EndChild();
@@ -123,8 +130,19 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
                 auto &cameraPoint = points[index];
                 auto &point = cameraPoint.m_point;
                 auto &rotation = cameraPoint.m_rotation;
-                ImGui::Text("Point: %f %f %f", point.x, point.y, point.z);                          
+                ImGui::Text("Point: %f %f %f", point.x, point.y, point.z);  
+
+                if(ImGui::Button("Update point from current position"))
+                {
+                    point = this->position;
+                    rotation = this->rotation;
+                }
+
+                //if(ImGui::InputText("Name", inputPointName, IM_ARRAYSIZE(inputPointName)))
+                ImGui::Utils::InputText("Name",&cameraPoint.m_name);
+                ImGui::DragFloat("Duration", &cameraPoint.duration, 100,10000);                
     
+                ImGui::Separator();
                 static size_t indexTrack = 0;
                 auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
                 if(tracks.size() > 0)
@@ -152,11 +170,13 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
                 } else {
                     ImGui::Text("No tracks available - add track at first.");
                 }
+                ImGui::Separator();
                 ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f,1.0f,1.0f));
                 if(ImGui::Button("Delete point"))
                 {
                     points.erase(points.begin()+index);
-                    index = 0;
+                    if(index)
+                        updateToID(--index);
                 }
                 ImGui::PopStyleColor();
             }
@@ -180,19 +200,15 @@ void CFreecamera::renderTrackManager()
     }
 
     // Input strings
-    static char inputCameraTrackName[255];
     static int index = 0;
     ImGui::BeginChild("left pane", ImVec2(80, 0), true,ImGuiWindowFlags_HorizontalScrollbar);
 
     size_t i = 0;
     for(auto &track: tracks)
     {
-        char label[128];
-        sprintf(label, "%s", track.m_name.c_str());
-        if (ImGui::Selectable(label, index == i))
+        if (ImGui::Selectable(track.m_name.c_str(), index == i))
         {
             index = i;
-            sprintf(inputCameraTrackName, track.m_name.c_str());
         }
         i++;
     }
@@ -210,9 +226,8 @@ void CFreecamera::renderTrackManager()
                     {
                         auto& cameraTrack = tracks[index];
                         
-                        if(ImGui::InputText("Name", inputCameraTrackName, IM_ARRAYSIZE(inputCameraTrackName)))
+                        if(ImGui::Utils::InputText("Name",&cameraTrack.m_name))
                         {
-                            tracks[index].m_name = inputCameraTrackName;
                         }
                         ImGui::Text("Count of points: %d", cameraTrack.getPoints().size());
                         if(ImGui::Button("Play track"))
@@ -222,13 +237,25 @@ void CFreecamera::renderTrackManager()
                             player.reset();
                             this->m_state = FREECAMERA_REPLAYING;
                         }
-                    }
 
-                    if(ImGui::Button("Delete track"))
-                    {
-                        tracks.erase(tracks.begin()+index);
-                    }
+                        ImGui::SameLine();
+                    
+                        if(ImGui::Button("Duplicate"))
+                        {
+                            CCameraTrack duplicate = cameraTrack;
+                            duplicate.m_name += " dup";
+                            tracks.push_back(duplicate);
+                        }
 
+                        ImGui::SameLine();
+                        
+                        ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f,1.0f,1.0f));
+                        if(ImGui::Button("Delete track"))
+                        {
+                            tracks.erase(tracks.begin()+index);
+                        }
+                        ImGui::PopStyleColor();
+                    }
                     ImGui::EndTabItem();
                 }
                 if (ImGui::BeginTabItem("Points"))
@@ -299,6 +326,28 @@ void CFreecamera::renderReplayingPanel()
         if(track) 
         {
             ImGui::Text("Replaying track: %s", track->m_name.c_str());
+            
+            auto& interpolatorNames = CGenericInterpolatorFactory::getNames();
+            static size_t interpolatorID = 0;
+            if (ImGui::BeginCombo("Interpolation method", interpolatorNames[interpolatorID].first.c_str()))
+            {
+                size_t id = 0;
+                for (auto& [name,func]: interpolatorNames)
+                {
+                    bool is_selected = (interpolatorID == id);
+                    if (ImGui::Selectable(name.c_str(), is_selected))
+                    {
+                        interpolatorID = id;
+                        auto interpolator = func();
+                        player.setInterpolator(interpolator);
+                    }
+                    if (is_selected)
+                        ImGui::SetItemDefaultFocus();
+                    id++;  
+                }
+                ImGui::EndCombo();
+            }
+
             if(ImGui::Button("Restart"))
             {
                 player.reset();

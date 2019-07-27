@@ -60,6 +60,7 @@ void CModeManager::InitializeModes(CGame* game)
 
     this->m_currentModeIndex = 0;
 
+    this->m_gameController = game;
 }
 
 void CModeManager::AddMode(CGenericMode* mode, const std::string name)
@@ -148,9 +149,13 @@ void CModeManager::RenderMainMenu()
             std::string directory = std::filesystem::current_path().string();
             if(isSaveDialog)
             {
-                this->m_scene.save(directory+"/"+path);
+                if(this->m_scene.save(directory+"/"+path))
+                {
+                    m_gameController->PrintDebugMessage("Saved successfully");
+                }
             } else {
-                this->m_scene.load(directory+"/"+path);
+                if(this->m_scene.load(directory+"/"+path))
+                    m_gameController->PrintDebugMessage("Loaded successfully");
             }
             ImGui::CloseCurrentPopup();
         }
