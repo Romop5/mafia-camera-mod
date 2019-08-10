@@ -4,6 +4,7 @@
 #include "modes/CFreecamera.hpp"
 #include "modes/CRecorderMode.hpp"
 #include "modes/CAbout.hpp"
+#include "modes/CTimelineManager.hpp"
 #include "common/imgui_utils.hpp"
 #include <sstream>
 #include <filesystem>
@@ -34,7 +35,8 @@ void CModeManager::InitializeModes(CGame* game)
     AddMode(new CAbout(), "About"); // About
     AddMode(new CFreecamera(), "Free camera");
     AddMode(new CGenericMode(), "Regular game"); // Regular 1st person gameplay
-    AddMode(new CRecorderMode(), "Recorder"); // Regular 1st person gameplay
+    AddMode(new CRecorderMode(), "Recorder"); // 1st person with recording / replaying
+    AddMode(new CTimelineManager(), "Timeline manager"); // Timeline manager
 
     // create controller
     CModeController controller;

@@ -4,6 +4,9 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include "sdk/CGenericGraphics.hpp"
+#include "sdk/CGenericInput.hpp"
+
 class CGenericObject
 {
     public:
@@ -85,6 +88,15 @@ class CGenericRecordingInfo
     virtual size_t getCurrentFrameIndex() const = 0;
 };
 
+class CGenericGameEvent
+{
+    public:
+    /// List of event's parameters
+    virtual std::vector<std::unique_ptr<CGenericGameSettingBase>>& getParameters() = 0;
+    /// Get type
+    virtual const std::string& getType() = 0;
+};
+
 /**
  * @brief Describes a generic API that a game must implement
  * 
@@ -95,6 +107,15 @@ class CGenericGame
 {
     public:
     virtual ~CGenericGame() = default;
+ 
+    ///////////////////////////////////////////////////////////////////////////
+    // ENGINE
+    ///////////////////////////////////////////////////////////////////////////
+    virtual CGenericGraphics* getGraphics() const = 0;
+    virtual CGenericInput* getInput() const = 0;
+    ///////////////////////////////////////////////////////////////////////////
+    // GAME
+    ///////////////////////////////////////////////////////////////////////////
     virtual CGenericObject* getLocalPlayer() = 0;
 
     virtual void SetCameraTransform(const glm::mat4& transform) = 0;
@@ -127,5 +148,6 @@ class CGenericGame
     virtual CGenericObjectRecording* saveRecording(CGenericObject* object) = 0;
     virtual  void playRecording(CGenericObject* object, CGenericObjectRecording* record) = 0;
     virtual CGenericRecordingInfo* getRecordingInfo(CGenericObject* object) = 0;
+
 };
 #endif

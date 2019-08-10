@@ -80,5 +80,9 @@ target_link_libraries(CameraMod PRIVATE winmm)
 target_link_libraries(CameraMod PRIVATE legacy_stdio_definitions.lib)
 
 
+# Compile game wrappers
+add_subdirectory(games)
+
+
 
 
