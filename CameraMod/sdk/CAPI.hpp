@@ -10,7 +10,7 @@
 #ifndef CAMERAMOD_SDK_API_HPP
 #define CAMERAMOD_SDK_API_HPP
 
-#include "sdk/CGenericGame.hpp"
+#include "CGenericGame.hpp"
 
 /// Returns game's wrapper version. Used to verify API/ABI compability
 extern "C" size_t cameramod_game_get_module_version();

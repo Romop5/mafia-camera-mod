@@ -6,9 +6,10 @@
 #include <sstream>
 #include <algorithm>
 #include <array>
-#include "game/CGame.h"
+#include "sdk/CGenericGame.hpp"
 #include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/spline.hpp>
+#include <common/structures.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Camera points + camera paths
@@ -436,8 +437,7 @@ class CPlayerMovementFrame
     public:
     glm::vec3 position;
     glm::vec3 rotation;
-    PED_State objectState;
-    CPlayerMovementFrame(const glm::vec3 pos,const glm::vec3 rot, PED_State state): position(pos), rotation(rot), objectState(state) {}
+    CPlayerMovementFrame(const glm::vec3 pos,const glm::vec3 rot): position(pos), rotation(rot) {}
     inline std::string serialize() const 
     {
         std::stringstream ss;

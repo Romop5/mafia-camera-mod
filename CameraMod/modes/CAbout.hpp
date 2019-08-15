@@ -1,7 +1,7 @@
 #ifndef CABOUT_MODE_HPP
 #define CABOUT_MODE_HPP
 #include "Windows.h"
-#include "game/CGenericGame.hpp"
+#include "sdk/CGenericGame.hpppp"
 #include "modes/CModeController.hpp"
 #include "modes/CGenericMode.hpp"
 #include <utilslib/logger.hpp>

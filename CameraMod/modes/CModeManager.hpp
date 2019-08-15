@@ -4,7 +4,7 @@
 #include <memory>
 #include "CGenericMode.hpp"
 #include "CCoreController.hpp"
-#include "game/CGame.h"
+#include "sdk/CGenericGame.hpp"
 
 enum BlockStatus:size_t
 {
@@ -31,7 +31,7 @@ public:
     CModeManager();
     ~CModeManager();
     void setCoreController(const CCoreController controller);
-    void InitializeModes(CGame* game);
+    void InitializeModes(CGenericGame* game);
 
     bool IsActive();
     bool OnVKKey(USHORT key);

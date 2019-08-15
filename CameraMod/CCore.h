@@ -7,40 +7,31 @@
 #include <vector>
 
 #include "common/tools.h"
+#include "common/dynamic_module.hpp"
 
-#include "game/CGame.h"
-#include "game/CGraphics.h"
-#include "game/CHooks.h"
-#include "game/CRawInput.h"
+#include "sdk/CGenericGame.hpp"
+#include "sdk/CGenericGraphics.hpp"
+#include "sdk/CGenericInput.hpp"
 #include "modes/CModeManager.hpp"
+
 
 static void DetachIt(void* cor);
 
 // CCore is singleton class used to control whole parts of mod
 class CCore {
 private:
-    CHooks p_CHook;
-    CGraphics p_CGraphics;
-    CRawInput p_CRawinput;
-    CGame p_CGame;
     CModeManager p_CModeManager;
+    DynamicModule m_gameWrapper;
 
-    bool p_isGamePhys;
-
+    CGenericGame* m_game;
     bool m_isGUIacceptingInput;
     
-
 public:
-    CCore(): m_isGUIacceptingInput(false) { this->p_isGamePhys = true;}
-    bool IsGamePhysicRunning() { return this->p_isGamePhys; }
-    void SetGamePhysic(bool state) { this->p_isGamePhys = state; }
-    CHooks* getHook() { return &this->p_CHook; }
-    CGraphics* getGraphics() { return &this->p_CGraphics; }
+    CCore(): m_isGUIacceptingInput(false), m_game(nullptr) {}
 
-    CRawInput* getRawInput() { return &this->p_CRawinput; }
+    CGenericGame* getGame() { return this->m_game; }
 
-    CGame* getGame() { return &this->p_CGame; }
-
+    DynamicModule* getWrapper() { return &this->m_gameWrapper; }
     CModeManager* getModControl() { return &this->p_CModeManager; }
 
     void ModDetach()
@@ -67,7 +58,7 @@ public:
     bool Initialize();
     bool Unload();
 
-    IDirect3DDevice8* m_originalD3DDriver;
+    //IDirect3DDevice8* m_originalD3DDriver;
 
     // This function is called by CCore when unloading is desired
     // If not specified, skipped

@@ -16,9 +16,9 @@ using mousemove_delta_callback_t = std::function<void(float x, float y)>;
 class CGenericInput
 {
     public:
-    virtual bool registerOnKey(onkey_callback_t& callback);
-    virtual bool registerOnMouseMove(mousemove_callback_t& callback);
-    virtual bool registerOnMouseMoveDelta(mousemove_delta_callback_t& callback);
+    virtual bool registerOnKey(onkey_callback_t callback);
+    virtual bool registerOnMouseMove(mousemove_callback_t callback);
+    virtual bool registerOnMouseMoveDelta(mousemove_delta_callback_t callback);
 };
 
 #endif

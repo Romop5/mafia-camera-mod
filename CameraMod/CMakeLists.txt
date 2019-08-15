@@ -40,12 +40,6 @@ add_custom_target(configure_version ALL
 add_library(CameraMod SHARED 
 	CCore.cpp
 	CScene.cpp
-	game/CGame.cpp
-	game/CGraphics.cpp
-	game/CRawInput.cpp
-	game/CHooks.cpp
-	game/CD3D9Accessor.cpp
-	game/CImGUIAdaptor.cpp
 	modes/CFreecamera.cpp
 	modes/CModeManager.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/version.cpp
@@ -60,9 +54,6 @@ add_library(CameraMod SHARED
 	../vendors/cd3dfont/d3dutil.h
 	../vendors/cd3dfont/dxutil.cpp
 	../vendors/cd3dfont/dxutil.h
-
-	# imGui
-	game/imgui_impl_dx9.cpp
 	)
 add_dependencies(CameraMod configure_version)
 target_include_directories(CameraMod PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
