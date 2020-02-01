@@ -188,17 +188,16 @@ void CFreecamera::renderPointsManager(CameraPointVector_t& points,size_t& index)
 void CFreecamera::renderTrackManager()
 {
     auto &tracks = this->m_modeController.m_getScene().m_cameraManager.getCameraTracks();
+    if(ImGui::Button("Add new track"))
+    {
+        this->m_modeController.m_getScene().m_cameraManager.addNewTrack();
+    }
+    
     if(tracks.size() == 0)
     {
         ImGui::Text("No camera tracks available");
         return;
     }
-    
-    if(ImGui::Button("Add new track"))
-    {
-        this->m_modeController.m_getScene().m_cameraManager.addNewTrack();
-    }
-
     // Input strings
     static int index = 0;
     ImGui::BeginChild("left pane", ImVec2(80, 0), true,ImGuiWindowFlags_HorizontalScrollbar);
