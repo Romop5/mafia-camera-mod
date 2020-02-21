@@ -119,6 +119,67 @@ struct PED_State
 	bool	isReloading;
 };
 
+struct Attribute
+{
+	DWORD type;		// or length ? 
+};
+
+/**
+ * @brief Describes a script command
+ * 
+ * Each command is made of opcode (an unique command ID) and may have additional payload.
+ * The payload is modelled using @Attribute class. 
+ */
+struct Opcode
+{
+	DWORD   m_opcode;
+	Attribute* m_attribute;
+};
+
+struct Script
+{
+	byte	unk1[4];			// vtable
+	char*	m_name;				// 0x4 - string name of script
+	char*	m_sourceCode;		// 0x8 - string literal with full code
+	byte 	unk2[4];
+	Opcode* m_assemblyStart;	// 0x10
+	Opcode* m_assemblyEnd;		// 0x14
+	byte 	unk3[4];
+	DWORD	m_currentOpcodeID;  // 0x1C
+	byte 	unk4[0x44];
+	DWORD	m_isSleeping;  		// 0x64 - or is stopped
+
+	size_t getOpcodesCount() const 
+	{
+		ptrdiff_t distance = m_assemblyEnd-m_assemblyStart;
+		return distance;
+	}
+};
+
+/**
+ * @brief Contains important handles
+ * 
+ * In Mafia 1.0, the object is located at 0x006F9440
+ */
+struct ScriptMachine
+{
+	byte 		unk1[0x58];
+	Script**	m_scriptsPoolStart;		// 0x58 - an array of ptrs to script structures	
+	Script**	m_scriptsPoolEnd;		// 0x5C - ptr to end, each element has 4 bytes
+
+	size_t getCountOfScripts() const
+	{
+		ptrdiff_t distance = m_scriptsPoolEnd-m_scriptsPoolStart;
+		return distance;
+	}
+	Script* getScriptAtIndex(const size_t i)
+	{
+		if(i >= getCountOfScripts())
+			return nullptr;
+		return m_scriptsPoolStart[i];
+	}	
+};
+
 
 ///////////////////////////////////////////////////////////////////////////
 // INTERFACES
@@ -289,7 +350,6 @@ private:
 	CLocalPlayer m_localPlayer;
 	
     std::vector<std::unique_ptr<CGenericGameSettingBase>> m_settings;
-
 public:
 	virtual void onTick() override;
     virtual CGenericObject* getLocalPlayer() override;
@@ -318,6 +378,9 @@ public:
     virtual CGenericObjectRecording* saveRecording(CGenericObject* object) override;
     virtual void playRecording(CGenericObject* object, CGenericObjectRecording* record) override;
     virtual CGenericRecordingInfo* getRecordingInfo(CGenericObject* object) override;
+
+	
+	ScriptMachine* getScriptMachine() { return *reinterpret_cast<ScriptMachine**>(0x0065115C); }
 };
 
 #endif

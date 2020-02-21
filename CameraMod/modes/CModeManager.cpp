@@ -4,6 +4,7 @@
 #include "modes/CFreecamera.hpp"
 #include "modes/CRecorderMode.hpp"
 #include "modes/CAbout.hpp"
+#include "modes/CSandbox.hpp"
 #include "common/imgui_utils.hpp"
 #include <sstream>
 #include <filesystem>
@@ -35,6 +36,7 @@ void CModeManager::InitializeModes(CGame* game)
     AddMode(new CFreecamera(), "Free camera");
     AddMode(new CGenericMode(), "Regular game"); // Regular 1st person gameplay
     AddMode(new CRecorderMode(), "Recorder"); // Regular 1st person gameplay
+    AddMode(new CSandbox(), "Sandbox"); // Regular 1st person gameplay
 
     // create controller
     CModeController controller;
