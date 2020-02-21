@@ -66,7 +66,12 @@ void on_tick()
 {
     if(!g_isLoaded)
     {
-        g_cameraModule = LoadLibrary("CameraMod.dll");
+        auto instanceID = rand();
+        std::string tmpName = "CameraMod"+std::to_string(instanceID)+".dll";
+        // Create a temp copy
+        CopyFileA("CameraMod.dll",tmpName.c_str(),false);
+        g_cameraModule = LoadLibraryA(tmpName.c_str());
+        
         if(g_cameraModule == NULL)
         {
             MessageBox(NULL, TEXT("Failed to load CameraMod.dll"), TEXT("Failed"), MB_OK);
