@@ -136,9 +136,24 @@ struct Opcode
 	Attribute* m_attribute;
 };
 
+struct Vtable
+{
+	DWORD* swapFunction(size_t index, DWORD* newPtr)
+	{
+		index *= 4;
+		auto oldPtr = *reinterpret_cast<DWORD**>(this+index);
+		DWORD protect;
+		DWORD** address = reinterpret_cast<DWORD**>(this+index);
+        VirtualProtect(address, 4, PAGE_READWRITE, &protect);
+		*address = newPtr;
+        VirtualProtect(address, 4, protect, &protect);
+		return oldPtr;
+	}
+};
+
 struct Script
 {
-	byte	unk1[4];			// vtable
+	Vtable*	m_vtable;			// vtable
 	char*	m_name;				// 0x4 - string name of script
 	char*	m_sourceCode;		// 0x8 - string literal with full code
 	byte 	unk2[4];
@@ -149,11 +164,31 @@ struct Script
 	byte 	unk4[0x44];
 	DWORD	m_isSleeping;  		// 0x64 - or is stopped
 
+	const char* getName() const
+	{
+		return (m_name?m_name:"Empty name");
+	}
+
+	const char* getSource() const
+	{
+		return (m_sourceCode?m_sourceCode:"");
+	}
+
 	size_t getOpcodesCount() const 
 	{
 		ptrdiff_t distance = m_assemblyEnd-m_assemblyStart;
 		return distance;
 	}
+	
+	static Vtable* getVtable()
+	{
+		//return reinterpret_cast<Vtable*>(0x0063C0A4);
+		return reinterpret_cast<Vtable*>(0x0063B45C);
+	} 
+	static Vtable* getVtable1()
+	{
+		return reinterpret_cast<Vtable*>(0x0063C0A4);
+	} 
 };
 
 /**
