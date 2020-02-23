@@ -21,6 +21,13 @@ originalUpdate_t* g_originalUpdater1 = nullptr;
 
 std::set<Script*> g_perFrameScripts;
 
+/*struct ScriptCommand
+{
+
+};
+*/
+//std::map<Script*,ScriptCommand> g_perScriptCommand;
+
 CGame* g_game = nullptr;
 
 class CSandbox: public CGenericMode
@@ -81,6 +88,20 @@ class CSandbox: public CGenericMode
                 std::stringstream ss;
                 ss << "Name: " << script;
                 ImGui::Begin(ss.str().c_str(), nullptr,0);
+                if(ImGui::Button("Recompile"))
+                {
+                    script->recompile();
+                }
+                if(ImGui::Button("NextStep"))
+                {
+                    script->m_nextOpcodeID++;
+                    script->m_currentOpcodeID = script->m_nextOpcodeID;
+                    script->forceRun();
+                }
+                int sleep = script->m_isSleeping;
+                ImGui::InputInt("IsSleeping",&sleep);
+                script->m_isSleeping = sleep;
+
                 std::stringstream txt;
                 txt << "Name: " << script->getName() << "\n"
                 << "Opcode ID: " << script->m_currentOpcodeID << "\n"
@@ -100,18 +121,32 @@ class CSandbox: public CGenericMode
             g_originalUpdater = reinterpret_cast<originalUpdate_t*>(Script::getVtable()->swapFunction(0x1C/4,(DWORD*) scriptUpdate));
 
             
-            g_originalDeleter1 = reinterpret_cast<originalDelete_t*>(Script::getVtable1()->swapFunction(0,(DWORD*) scriptDelete));
-            g_originalUpdater1 = reinterpret_cast<originalUpdate_t*>(Script::getVtable1()->swapFunction(0x1C/4,(DWORD*) scriptUpdate));
+            g_originalDeleter1 = reinterpret_cast<originalDelete_t*>(Script::getVtable1()->swapFunction(0,(DWORD*) scriptDelete1));
+            g_originalUpdater1 = reinterpret_cast<originalUpdate_t*>(Script::getVtable1()->swapFunction(0x1C/4,(DWORD*) scriptUpdate1));
         }
 
         static void __thiscall scriptUpdate(Script* script, DWORD deltaTime)
         {
             g_perFrameScripts.insert(script);
+            g_originalUpdater(script,0,deltaTime);
         }
 
         static void __thiscall scriptDelete(Script* script)
         {
             g_perFrameScripts.erase(script);
+            g_originalDeleter(script);
+        }
+
+         static void __thiscall scriptUpdate1(Script* script, DWORD deltaTime)
+        {
+            g_perFrameScripts.insert(script);
+            g_originalUpdater1(script,0,deltaTime);
+        }
+
+        static void __thiscall scriptDelete1(Script* script)
+        {
+            g_perFrameScripts.erase(script);
+            g_originalDeleter1(script);
         }
 
         virtual void deactivate() override {

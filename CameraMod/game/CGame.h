@@ -161,7 +161,8 @@ struct Script
 	Opcode* m_assemblyEnd;		// 0x14
 	byte 	unk3[4];
 	DWORD	m_currentOpcodeID;  // 0x1C
-	byte 	unk4[0x44];
+	DWORD	m_nextOpcodeID;     // 0x20
+	byte 	unk4[0x40];
 	DWORD	m_isSleeping;  		// 0x64 - or is stopped
 
 	const char* getName() const
@@ -188,7 +189,24 @@ struct Script
 	static Vtable* getVtable1()
 	{
 		return reinterpret_cast<Vtable*>(0x0063C0A4);
+	}
+
+	void forceRun()
+	{
+		using initScript_t = void __fastcall(Script* s);
+		auto initFunc = reinterpret_cast<initScript_t*>(0x005BAAE0);
+		initFunc(this);
 	} 
+
+	void recompile()
+	{
+		// TODO: we should deallocated properly to prevent leaks, but scripts are small (1kb max, so who cares?) 
+		//this->m_assemblyStart = nullptr;
+		//this->m_assemblyEnd = nullptr;
+		using recompile_T = void __fastcall(Script* s);
+		auto recompileFunc = reinterpret_cast<recompile_T*>(0x005AF780);
+		recompileFunc(this);
+	}
 };
 
 /**
