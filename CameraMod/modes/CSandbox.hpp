@@ -21,6 +21,68 @@ originalUpdate_t* g_originalUpdater1 = nullptr;
 
 std::set<Script*> g_perFrameScripts;
 
+class ScriptInspector
+{
+    std::map<Script*,std::string> m_editBoxes;
+    public:
+    void render()
+    {
+        for(auto& script: g_perFrameScripts)
+        {
+            std::stringstream ss;
+            ss << "Name: " << script;
+            ImGui::Begin(ss.str().c_str(), nullptr,0);
+            if(ImGui::Button("Recompile"))
+                script->recompile();
+                
+            if(ImGui::Button("NextStep"))
+            {
+                script->m_nextOpcodeID++;
+                script->m_currentOpcodeID = script->m_nextOpcodeID;
+                script->forceRun();
+            }
+            int sleep = script->m_isSleeping;
+            ImGui::InputInt("IsSleeping",&sleep);
+            script->m_isSleeping = sleep;
+
+            std::stringstream txt;
+            txt << "Name: " << script->getName() << "\n"
+            << "Opcode ID: " << script->m_currentOpcodeID << "\n";
+            ImGui::Text(txt.str().c_str());
+
+            static bool toggleSourceEditing = false;
+            if(m_editBoxes.count(script) == 0)
+            {
+                m_editBoxes[script] = script->m_sourceCode;
+                m_editBoxes[script].reserve(1000);
+            }
+            if(ImGui::Button("Toggle view/edit of source"))
+            {
+                toggleSourceEditing = !toggleSourceEditing;
+            }
+            if(toggleSourceEditing)
+            {
+                if(ImGui::Button("Save"))
+                {
+                    script->m_sourceCode = strdup(m_editBoxes[script].c_str());
+                }
+                ImGui::SameLine();
+                if(ImGui::Button("Reload"))
+                {
+                    m_editBoxes[script] = script->m_sourceCode;
+                }
+                ImGui::Utils::InputTextMultiline("Script:", &m_editBoxes[script]);
+            } else {
+                std::stringstream txt;
+                txt << "Script: " << script->getSource();
+                ImGui::Text(txt.str().c_str());
+            }
+            
+            ImGui::End();
+        }
+    }
+};
+
 /*struct ScriptCommand
 {
 
@@ -34,6 +96,7 @@ class CSandbox: public CGenericMode
 {
     protected:
         ImFont* m_font;
+        ScriptInspector m_inspector;
     public:
         CSandbox(){
             ImGuiIO& io = ImGui::GetIO();
@@ -83,32 +146,7 @@ class CSandbox: public CGenericMode
             ImGui::Text(ss.str().c_str());
             ImGui::End();
 
-            for(auto& script: g_perFrameScripts)
-            {
-                std::stringstream ss;
-                ss << "Name: " << script;
-                ImGui::Begin(ss.str().c_str(), nullptr,0);
-                if(ImGui::Button("Recompile"))
-                {
-                    script->recompile();
-                }
-                if(ImGui::Button("NextStep"))
-                {
-                    script->m_nextOpcodeID++;
-                    script->m_currentOpcodeID = script->m_nextOpcodeID;
-                    script->forceRun();
-                }
-                int sleep = script->m_isSleeping;
-                ImGui::InputInt("IsSleeping",&sleep);
-                script->m_isSleeping = sleep;
-
-                std::stringstream txt;
-                txt << "Name: " << script->getName() << "\n"
-                << "Opcode ID: " << script->m_currentOpcodeID << "\n"
-                << "Script: " << script->getSource();
-                ImGui::Text(txt.str().c_str());
-                ImGui::End();
-            }
+            m_inspector.render();
         }
 
         virtual void activate() override {
@@ -155,6 +193,8 @@ class CSandbox: public CGenericMode
 
             reinterpret_cast<originalDelete_t*>(Script::getVtable1()->swapFunction(0,(DWORD*) g_originalDeleter1));
             reinterpret_cast<originalUpdate_t*>(Script::getVtable1()->swapFunction(0x1C/4,(DWORD*) g_originalUpdater1));
+        
+            g_perFrameScripts.clear();
         }
 };
 #endif

@@ -67,6 +67,11 @@ namespace Utils {
     {
         return ImGui::InputText(label, (char*)str->c_str(), str->capacity() + 1);
     }
+
+    inline bool  InputTextMultiline(const char* label, std::string* str)
+    {
+        return ImGui::InputTextMultiline(label, (char*)str->c_str(), str->capacity() + 1);
+    }
  
 
 }; // ImGUI::Utils
