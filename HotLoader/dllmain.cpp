@@ -52,6 +52,33 @@ void __stdcall onRender(void* p_engine)
     */
 }
 
+class FileChangedDetector
+{
+    private:
+    std::string m_name;
+    FILETIME m_writeTime;
+    public:
+    FileChangedDetector(const std::string file): m_name(file) {
+        memset(&m_writeTime,0,sizeof(FILETIME));
+    }
+    bool hasChanged()
+    {
+        auto fileHandle = CreateFileA(m_name.c_str(),GENERIC_READ,FILE_SHARE_READ,0,OPEN_ALWAYS,0,0);
+        FILETIME lastWriteTime;
+        if(!GetFileTime(fileHandle,nullptr,nullptr,&lastWriteTime))
+            return false;
+        
+        bool status = false;
+        if(lastWriteTime.dwHighDateTime > m_writeTime.dwHighDateTime || lastWriteTime.dwLowDateTime > m_writeTime.dwLowDateTime)
+        {
+            status = true;
+        }
+        CloseHandle(fileHandle);
+        memcpy(&m_writeTime,&lastWriteTime,sizeof(FILETIME));
+        return status;
+    }
+};
+
 void onUnload()
 {
     g_shouldUnload = true;
@@ -64,10 +91,13 @@ void onUnload()
  */
 void on_tick()
 {
+    static FileChangedDetector detector = FileChangedDetector("CameraMod.dll");
     if(!g_isLoaded)
     {
         auto instanceID = rand();
         std::string tmpName = "CameraMod"+std::to_string(instanceID)+".dll";
+        // Hack: update our last write time to prevent false changes
+        detector.hasChanged();
         // Create a temp copy
         CopyFileA("CameraMod.dll",tmpName.c_str(),false);
         g_cameraModule = LoadLibraryA(tmpName.c_str());
@@ -93,6 +123,14 @@ void on_tick()
     {
         while(FreeLibrary(g_cameraModule));
         g_shouldUnload = false;
+    }
+
+    if(detector.hasChanged())
+    {
+        // Force unload && reload
+        while(FreeLibrary(g_cameraModule));
+        g_shouldUnload = false;
+        g_isLoaded = false;
     }
 }
 
