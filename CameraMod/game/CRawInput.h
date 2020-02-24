@@ -11,7 +11,7 @@ using func_key_handler = std::function<bool(unsigned short,bool)>;
 using mouse_handler = std::function<void(long, long)>;
 
 // Mouse buttons handler type
-using mouse_buttons_handler = std::function<void(unsigned short)>;
+using mouse_buttons_handler = std::function<void(unsigned short state, unsigned short delta)>;
 
 class CRawInput {
 private:

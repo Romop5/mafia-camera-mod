@@ -73,15 +73,15 @@ bool CCore::Initialize()
             });
     // Register mouse button callback
     this->getRawInput()->m_onMouseButtonsUpdateHandlers.add(
-            [&] (unsigned short state)->void {
+            [&] (unsigned short state, unsigned short delta)->void {
                 this->getModControl()->OnMouseButtons(state);
             });
     // Register mouse button callback for ImGUI
     this->getRawInput()->m_onMouseButtonsUpdateHandlers.add(
-            [&] (unsigned short state)->void {
+            [&] (unsigned short state, unsigned short delta)->void {
                 if(this->m_isGUIacceptingInput)
                 {
-                    this->getGraphics()->getImGUIAdaptor().updateButton(state);
+                    this->getGraphics()->getImGUIAdaptor().updateButton(state,delta);
                 }
             });
 
@@ -110,6 +110,7 @@ bool CCore::Initialize()
 }
 bool CCore::Unload()
 {
+    this->getModControl()->switchToMode(0);
     this->getGraphics()->Unload();
     // Restore original D3D8 driver
     this->getHook()->replaceDirectXDriver(m_originalD3DDriver);

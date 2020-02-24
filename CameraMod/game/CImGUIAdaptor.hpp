@@ -15,7 +15,7 @@ public:
     void CleanUP();
     void Invalidate();
     void updateMousePosition(Point2D position);
-    void updateButton(unsigned short state);
+    void updateButton(unsigned short state, unsigned short delta);
     void updateKey(size_t keycode, bool isDown);
     
     void setMouseVisible(bool state);

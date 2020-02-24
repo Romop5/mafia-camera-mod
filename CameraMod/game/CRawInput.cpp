@@ -52,5 +52,5 @@ void CRawInput::OnMouseTick(RAWMOUSE* mouse)
 
     // Call all registered mouse movement handlers
     for(auto handler: this->m_onMouseButtonsUpdateHandlers)
-        handler(mouse->usButtonFlags);
+        handler(mouse->usButtonFlags,mouse->usButtonData);
 }

@@ -21,7 +21,8 @@ void CImGUIAdaptor::Initialize(IDirect3DDevice9* device, Point2D size)
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
-    // ImGui::StyleColorsClassic();
+    //ImGui::StyleColorsClassic();
+
 
     ImGui_ImplDX9_Init(device);
     this->SetUpIO();
@@ -145,6 +146,13 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
     if(isDown)
     {
         // is 0-9
+        if(keycode >= 0x60 && keycode <= 0x69)
+        {
+            // Append character
+            auto baseCharacter = '0';
+            io.AddInputCharacter(keycode-0x30+baseCharacter);
+        }
+        // is 0-9
         if(keycode >= 0x30 && keycode <= 0x39)
         {
             // Append character
@@ -158,17 +166,22 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
             auto baseCharacter = (io.KeyShift ? 'A':'a');
             io.AddInputCharacter(keycode-0x41+baseCharacter);
         }
-        static std::unordered_map<size_t, size_t> specialKeyMapping = {
-            {VK_OEM_COMMA, ','},
-            {VK_OEM_MINUS, '-'},
-            {VK_OEM_PERIOD, '.'},
-            {VK_OEM_PERIOD, '.'}
+        static std::unordered_map<size_t, std::pair<size_t,size_t>> specialKeyMapping = {
+            {VK_OEM_COMMA, {',',','}},
+            {VK_OEM_MINUS, {'-','_'}},
+            {VK_OEM_PLUS, {'+','='}},
+            {VK_OEM_1, {':',';'}},
+            {VK_OEM_PERIOD, {'.','.'}}
         };
 
         if(specialKeyMapping.count(keycode) > 0)
         {
-            io.AddInputCharacter(specialKeyMapping[keycode]);
+            auto pair = specialKeyMapping[keycode];
+            auto character = (!io.KeyShift) ?pair.first:pair.second;
+            io.AddInputCharacter(character);
         }
+
+
     }
 
     switch(keycode)
@@ -181,7 +194,7 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
     }
     //utilslib::Logger::getInfo() << "[ImGUI Hook] key: " << std::hex << keycode << " status: " << isDown << std::endl;
 }
-void CImGUIAdaptor::updateButton(unsigned short state)
+void CImGUIAdaptor::updateButton(unsigned short state, unsigned short delta)
 {
    std::vector<std::tuple<unsigned short,unsigned short,unsigned short>> buttons = { {0, RI_MOUSE_LEFT_BUTTON_DOWN,RI_MOUSE_LEFT_BUTTON_UP}, {1, RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_UP}};
    ImGuiIO& io = ImGui::GetIO();
@@ -196,6 +209,11 @@ void CImGUIAdaptor::updateButton(unsigned short state)
        if(state & flagUp)
            io.MouseDown[id] = false;
    }
+
+    if(state & RI_MOUSE_WHEEL)
+    {
+        io.MouseWheel = static_cast<float>(static_cast<signed short>(delta))*0.01;
+    }
 }
 
 void CImGUIAdaptor::setMouseVisible(bool state)
