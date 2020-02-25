@@ -19,76 +19,95 @@ originalUpdate_t* g_originalUpdater = nullptr;
 originalDelete_t* g_originalDeleter1 = nullptr;
 originalUpdate_t* g_originalUpdater1 = nullptr;
 
-std::set<Script*> g_perFrameScripts;
 
 class ScriptInspector
 {
-    std::map<Script*,std::string> m_editBoxes;
+    std::string m_editBox;
+    Script* m_script;
+    bool toggleSourceEditing = true;
+    bool shouldForcefullyPause = false;
     public:
+    ScriptInspector(): m_script(nullptr) {}
+    ScriptInspector(Script* owner): m_script(owner) {
+        m_editBox.reserve(1000);
+        m_editBox = m_script->m_sourceCode;
+    }
+    bool shouldBePaused() const { return shouldForcefullyPause; }
     void render()
     {
-        for(auto& script: g_perFrameScripts)
+        if(!m_script)
+            return;
+        std::stringstream ss;
+        ss << "Name: " << m_script;
+        ImGui::Begin(ss.str().c_str(), nullptr,0);
+
+        const char* pauseButtons[] = {"Pause","Unpause"};
+        if(ImGui::Button(pauseButtons[shouldForcefullyPause]))
+           this->shouldForcefullyPause = !shouldForcefullyPause;
+
+        ImGui::SameLine();
+        if(ImGui::Button("Recompile"))
+            m_script->recompile();
+            
+        ImGui::SameLine();
+        if(ImGui::Button("NextStep"))
         {
-            std::stringstream ss;
-            ss << "Name: " << script;
-            ImGui::Begin(ss.str().c_str(), nullptr,0);
-            if(ImGui::Button("Recompile"))
-                script->recompile();
-                
-            if(ImGui::Button("NextStep"))
-            {
-                script->m_nextOpcodeID++;
-                script->m_currentOpcodeID = script->m_nextOpcodeID;
-                script->forceRun();
-            }
-            int sleep = script->m_isSleeping;
-            ImGui::InputInt("IsSleeping",&sleep);
-            script->m_isSleeping = sleep;
+            m_script->m_nextOpcodeID++;
+            m_script->m_currentOpcodeID = m_script->m_nextOpcodeID;
+            m_script->forceRun();
+        }
+        int sleep = m_script->m_isSleeping;
+        ImGui::InputInt("IsSleeping",&sleep);
+        m_script->m_isSleeping = sleep;
 
-            std::stringstream txt;
-            txt << "Name: " << script->getName() << "\n"
-            << "Opcode ID: " << script->m_currentOpcodeID << "\n";
-            ImGui::Text(txt.str().c_str());
+        std::stringstream txt;
+        txt << "Name: " << m_script->getName() << "\n"
+        << "Opcode ID: " << m_script->m_currentOpcodeID << "\n";
+        ImGui::Text(txt.str().c_str());
 
-            static bool toggleSourceEditing = false;
-            if(m_editBoxes.count(script) == 0)
+        if(ImGui::Button("Toggle view/edit of source"))
+        {
+            toggleSourceEditing = !toggleSourceEditing;
+        }
+        if(toggleSourceEditing)
+        {
+            if(ImGui::Button("Save"))
             {
-                m_editBoxes[script] = script->m_sourceCode;
-                m_editBoxes[script].reserve(1000);
+                m_script->m_sourceCode = strdup(m_editBox.c_str());
             }
-            if(ImGui::Button("Toggle view/edit of source"))
+            ImGui::SameLine();
+            if(ImGui::Button("Reload"))
             {
-                toggleSourceEditing = !toggleSourceEditing;
-            }
-            if(toggleSourceEditing)
-            {
-                if(ImGui::Button("Save"))
-                {
-                    script->m_sourceCode = strdup(m_editBoxes[script].c_str());
-                }
-                ImGui::SameLine();
-                if(ImGui::Button("Reload"))
-                {
-                    m_editBoxes[script] = script->m_sourceCode;
-                }
-                ImGui::Utils::InputTextMultiline("Script:", &m_editBoxes[script]);
-            } else {
-                std::stringstream txt;
-                txt << "Script: " << script->getSource();
-                ImGui::Text(txt.str().c_str());
+                m_editBox = m_script->m_sourceCode;
             }
             
-            ImGui::End();
+            ImGui::SetNextWindowSize(ImVec2(0.0f,0.0f),0);
+            ImGui::Utils::InputTextMultiline("Script:", &m_editBox);
+        } else {
+            //std::stringstream txt;
+            //txt << "Script: " << m_script->getSource();
+            //ImGui::Text(txt.str().c_str());
+            for(size_t i = 0; i < m_script->getOpcodesCount(); i++)
+            {
+                auto opcode = m_script->getOpcodeAtPosition(i);
+                auto command = opcode->getName();
+                if(!command)
+                    command = "UNK";
+
+                std::stringstream txt;
+                if(m_script->m_currentOpcodeID == i)
+                    txt << "== ";
+                txt << opcode << " - " << command;
+                ImGui::Text(txt.str().c_str());
+            }
         }
+        
+        ImGui::End();
     }
 };
 
-/*struct ScriptCommand
-{
-
-};
-*/
-//std::map<Script*,ScriptCommand> g_perScriptCommand;
+std::set<Script*> g_perFrameScripts;
+std::map<Script*,ScriptInspector> g_perFrameScriptsObjects;
 
 CGame* g_game = nullptr;
 
@@ -96,7 +115,6 @@ class CSandbox: public CGenericMode
 {
     protected:
         ImFont* m_font;
-        ScriptInspector m_inspector;
     public:
         CSandbox(){
             ImGuiIO& io = ImGui::GetIO();
@@ -148,7 +166,10 @@ class CSandbox: public CGenericMode
             ImGui::Text(ss.str().c_str());
             ImGui::End();
 
-            m_inspector.render();
+            for(auto& scriptWindow: g_perFrameScriptsObjects)
+            {
+                scriptWindow.second.render();
+            }
         }
 
         virtual void activate() override {
@@ -168,7 +189,12 @@ class CSandbox: public CGenericMode
         static void __thiscall scriptUpdate(Script* script, DWORD deltaTime)
         {
             g_perFrameScripts.insert(script);
-            g_originalUpdater(script,0,deltaTime);
+            if(g_perFrameScriptsObjects.count(script) == 0)
+            {
+                g_perFrameScriptsObjects[script] = ScriptInspector(script);
+            }
+            if(!g_perFrameScriptsObjects[script].shouldBePaused())
+                g_originalUpdater(script,0,deltaTime);
         }
 
         static void __thiscall scriptDelete(Script* script)
@@ -180,7 +206,12 @@ class CSandbox: public CGenericMode
          static void __thiscall scriptUpdate1(Script* script, DWORD deltaTime)
         {
             g_perFrameScripts.insert(script);
-            g_originalUpdater1(script,0,deltaTime);
+            if(g_perFrameScriptsObjects.count(script) == 0)
+            {
+                g_perFrameScriptsObjects[script] = ScriptInspector(script);
+            }
+            if(!g_perFrameScriptsObjects[script].shouldBePaused())
+                g_originalUpdater1(script,0,deltaTime);
         }
 
         static void __thiscall scriptDelete1(Script* script)

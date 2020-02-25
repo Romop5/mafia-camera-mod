@@ -9,6 +9,7 @@
 #include "common/structures.h"
 
 #include "CGenericGame.hpp"
+#include "CScript.h"
 
 enum ObjectTypes
 {
@@ -134,6 +135,12 @@ struct Opcode
 {
 	DWORD   m_opcode;
 	Attribute* m_attribute;
+	const char* getName() const
+	{
+		if(m_opcode >= g_commandID)
+			return "Unknown command";
+		return g_scriptCommands[m_opcode];
+	}
 };
 
 struct Vtable
@@ -175,6 +182,12 @@ struct Script
 		return (m_sourceCode?m_sourceCode:"");
 	}
 
+	Opcode* getOpcodeAtPosition(size_t i)
+	{
+		if(getOpcodesCount() < i)
+			return m_assemblyStart;
+		return &m_assemblyStart[i];
+	}
 	size_t getOpcodesCount() const 
 	{
 		ptrdiff_t distance = m_assemblyEnd-m_assemblyStart;
