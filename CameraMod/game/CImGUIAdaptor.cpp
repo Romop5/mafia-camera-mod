@@ -14,8 +14,8 @@ void CImGUIAdaptor::Initialize(IDirect3DDevice9* device, Point2D size)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    (void)io;
-    // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard
+    //(void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard
     // Controls io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable
     // Gamepad Controls
 
@@ -141,6 +141,15 @@ void CImGUIAdaptor::updateMousePosition(Point2D position)
 
 void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
 {
+    /*std::map<size_t, size_t> virtualKeyRemapping = {
+        {VK_LWIN, VK_LEFT},
+        {VK_RWIN, VK_RIGHT}
+    };
+    if(virtualKeyRemapping.count(keycode))
+    {
+        keycode = virtualKeyRemapping[keycode];
+    }*/
+
     ImGuiIO& io = ImGui::GetIO();
     io.KeysDown[keycode] = isDown;
     if(isDown)
@@ -150,7 +159,7 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
         {
             // Append character
             auto baseCharacter = '0';
-            io.AddInputCharacter(keycode-0x30+baseCharacter);
+            io.AddInputCharacter(keycode-0x60+baseCharacter);
         }
         // is 0-9
         if(keycode >= 0x30 && keycode <= 0x39)
@@ -171,7 +180,20 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
             {VK_OEM_MINUS, {'-','_'}},
             {VK_OEM_PLUS, {'+','='}},
             {VK_OEM_1, {':',';'}},
-            {VK_OEM_PERIOD, {'.','.'}}
+            {VK_OEM_2, {'/','?'}},
+            {VK_OEM_3, {'`','~'}},
+            {VK_OEM_4, {'[','{'}},
+            {VK_OEM_5, {'\\','|'}},
+            {VK_OEM_6, {']','}'}},
+            {VK_OEM_7, {'\'','"'}},
+            {VK_OEM_8, {'<','>'}},
+            {VK_OEM_PERIOD, {'.','.'}},
+            {VK_ADD, {'+','+'}},
+            {VK_MULTIPLY, {'*','*'}},
+            {VK_DIVIDE, {'/','/'}},
+            {VK_SUBTRACT, {'-','-'}},
+            {VK_OEM_102, {'<','>'}},
+            {VK_SEPARATOR, {'-','-'}},
         };
 
         if(specialKeyMapping.count(keycode) > 0)
@@ -186,6 +208,8 @@ void CImGUIAdaptor::updateKey(size_t keycode, bool isDown)
 
     switch(keycode)
     {
+        case VK_LWIN:       io.KeySuper = isDown; break;
+        case VK_RWIN:       io.KeySuper = isDown; break;
         case VK_CONTROL:    io.KeyCtrl = isDown; break;
         case VK_SHIFT:      io.KeyShift = isDown; break;
         case VK_MENU:       io.KeyAlt = isDown; break;

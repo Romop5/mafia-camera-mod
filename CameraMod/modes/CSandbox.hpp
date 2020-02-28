@@ -95,10 +95,13 @@ class ScriptInspector
                     command = "UNK";
 
                 std::stringstream txt;
-                if(m_script->m_currentOpcodeID == i)
+                /*if(m_script->m_currentOpcodeID == i)
                     txt << "== ";
+                */
                 txt << opcode << " - " << command;
-                ImGui::Text(txt.str().c_str());
+                bool isMarkedLine = (m_script->m_currentOpcodeID == i);
+                auto color = (isMarkedLine)?ImVec4(1.0,0.0,0.0,1.0):ImVec4(1.0,1.0,1.0,1.0);
+                ImGui::TextColored(color,txt.str().c_str());
             }
         }
         
