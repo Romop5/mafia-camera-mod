@@ -19,31 +19,60 @@ originalUpdate_t* g_originalUpdater = nullptr;
 originalDelete_t* g_originalDeleter1 = nullptr;
 originalUpdate_t* g_originalUpdater1 = nullptr;
 
-
 class ScriptInspector
 {
+    enum ScriptState
+    {
+        RUNNING,
+        PAUSED,
+        SINGLESTEP
+    };
     std::string m_editBox;
     Script* m_script;
-    bool toggleSourceEditing = true;
-    bool shouldForcefullyPause = false;
+    bool m_toggleSourceEditing = true;
+    bool m_shouldForcefullyPause = false;
+    bool m_isVisible = false;
+    ScriptState m_state = RUNNING;
     public:
     ScriptInspector(): m_script(nullptr) {}
     ScriptInspector(Script* owner): m_script(owner) {
         m_editBox.reserve(1000);
         m_editBox = m_script->m_sourceCode;
     }
-    bool shouldBePaused() const { return shouldForcefullyPause; }
+    Script* getScript() { return m_script; }
+    bool shouldBePaused() const { return m_state == PAUSED; }
+    void forceState(ScriptState s) { m_state = s; } 
+
+    /**
+     * @brief Return true when game can continue
+     */
+    bool requestUpdate() {
+        if(m_state == SINGLESTEP)
+        {
+            forceState(PAUSED);
+            return true;
+        }
+        if(m_state == PAUSED)
+            return false;
+        return true;
+    }
+    bool isVisible() const { return m_isVisible; }
+    void setVisible(bool b) { m_isVisible = b; }
     void render()
     {
         if(!m_script)
             return;
+        if(!m_isVisible)
+            return;
+
         std::stringstream ss;
         ss << "Name: " << m_script;
-        ImGui::Begin(ss.str().c_str(), nullptr,0);
+        if(!ImGui::Begin(ss.str().c_str(), &m_isVisible,0))
+            return;
 
         const char* pauseButtons[] = {"Pause","Unpause"};
-        if(ImGui::Button(pauseButtons[shouldForcefullyPause]))
-           this->shouldForcefullyPause = !shouldForcefullyPause;
+        if(ImGui::Button(pauseButtons[shouldBePaused()]))
+           forceState((shouldBePaused()?RUNNING:PAUSED));
 
         ImGui::SameLine();
         if(ImGui::Button("Recompile"))
@@ -52,9 +81,10 @@ class ScriptInspector
         ImGui::SameLine();
         if(ImGui::Button("NextStep"))
         {
-            m_script->m_nextOpcodeID++;
-            m_script->m_currentOpcodeID = m_script->m_nextOpcodeID;
-            m_script->forceRun();
+            forceState(SINGLESTEP);
+            //m_script->m_nextOpcodeID++;
+            //m_script->m_currentOpcodeID = m_script->m_nextOpcodeID;
+            //m_script->forceRun();
         }
         int sleep = m_script->m_isSleeping;
         ImGui::InputInt("IsSleeping",&sleep);
@@ -67,9 +97,9 @@ class ScriptInspector
 
         if(ImGui::Button("Toggle view/edit of source"))
         {
-            toggleSourceEditing = !toggleSourceEditing;
+            m_toggleSourceEditing = !m_toggleSourceEditing;
         }
-        if(toggleSourceEditing)
+        if(m_toggleSourceEditing)
         {
             if(ImGui::Button("Save"))
             {
@@ -110,7 +140,33 @@ class ScriptInspector
 };
 
 std::set<Script*> g_perFrameScripts;
-std::map<Script*,ScriptInspector> g_perFrameScriptsObjects;
+
+class ScriptHandleMap
+{
+    using map_t = std::map<Script*, ScriptInspector>;
+    map_t m_map;
+    public:
+    void update(Script* script)
+    {
+        if(m_map.count(script) == 0)
+        {
+            m_map[script] = ScriptInspector(script);
+        }
+    }
+    ScriptInspector& getAtIndex(const size_t id) {
+        size_t i = 0;
+        for(auto& pair: m_map)
+        {
+            if(i == id)
+                return pair.second;
+            i++;
+        }
+        return (*m_map.begin()).second;
+    }
+    map_t& getMap() { return m_map; }
+};
+
+static ScriptHandleMap g_ScriptMap;
 
 CGame* g_game = nullptr;
 
@@ -135,43 +191,42 @@ class CSandbox: public CGenericMode
             
             auto mafiaGame = reinterpret_cast<CGame*>(this->m_gameController);
             auto machine = mafiaGame->getScriptMachine();
-
-            bool shouldRenderOverlay = true;
-            ImGui::SetNextWindowPosCenter();
-            ImGui::SetNextWindowSize(ImVec2(400,200));
-            ImGui::Begin("Example: overlay", &shouldRenderOverlay,0);
-
-            std::string scripts = std::string("Count: ") + std::to_string(machine->getCountOfScripts()); 
-            ImGui::Text(scripts.c_str());
-            auto numberOfScripts = machine->getCountOfScripts();
-
-            auto min = [](size_t a, size_t b) { return (a>b)?b:a;};
-            numberOfScripts = min(10, numberOfScripts);
-            
-            std::stringstream pool;
-            pool << "Pool: " << machine->m_scriptsPoolStart << " - " << machine->m_scriptsPoolEnd;
-            ImGui::Text(pool.str().c_str());
-            for(size_t i = 0; i < numberOfScripts; i++)
+            // Add scripts to list of all scripts
+            for(auto script = machine->m_scriptsPoolStart; script != machine->m_scriptsPoolEnd; script++)
             {
-                if(i > 0)
-                    ImGui::Separator();
-                auto script = machine->getScriptAtIndex(i);
-                ImGui::Text(script->m_name);
-                ImGui::Text(script->m_sourceCode);
-                std::stringstream out;
-                out << "Opcode: " << script->m_currentOpcodeID;
-                ImGui::Text(out.str().c_str());
+                g_ScriptMap.update(*script);
             }
 
-            ImGui::Separator();
-            std::stringstream ss;
-            ss << "Script count: " << g_perFrameScripts.size();
+            bool shouldRenderOverlay = true;
+            ImGui::Begin("List of ingame scripts", &shouldRenderOverlay,0);
+            static std::vector<std::string> menuItems;
+            menuItems.clear();
+            for(auto pair: g_ScriptMap.getMap())
+            {
+                menuItems.push_back(pair.first->getName());
+            }
+            static size_t selectedID = 0;
+            std::stringstream ss; 
+            ss << "Num. of scripts: " << g_ScriptMap.getMap().size();
             ImGui::Text(ss.str().c_str());
+            ImGui::Utils::BeginSelectorWithSideMenu(menuItems,&selectedID);
+            auto& selectedWindow = g_ScriptMap.getAtIndex(selectedID);
+            auto selectedScript = selectedWindow.getScript();
+            if(ImGui::Button("Open manipulator"))
+            {
+                selectedWindow.setVisible(!selectedWindow.isVisible());
+            }
+            std::stringstream scriptPreview;
+            scriptPreview << selectedScript->getName() << "\n"
+                << selectedScript->getSource();
+            ImGui::Text(scriptPreview.str().c_str());
+            ImGui::Utils::EndSelectorWithSideMenu();
             ImGui::End();
 
-            for(auto& scriptWindow: g_perFrameScriptsObjects)
+            for(auto& scriptWindow: g_ScriptMap.getMap())
             {
-                scriptWindow.second.render();
+                auto& window = scriptWindow.second;
+                window.render();
             }
         }
 
@@ -192,11 +247,8 @@ class CSandbox: public CGenericMode
         static void __thiscall scriptUpdate(Script* script, DWORD deltaTime)
         {
             g_perFrameScripts.insert(script);
-            if(g_perFrameScriptsObjects.count(script) == 0)
-            {
-                g_perFrameScriptsObjects[script] = ScriptInspector(script);
-            }
-            if(!g_perFrameScriptsObjects[script].shouldBePaused())
+            g_ScriptMap.update(script);
+            if(g_ScriptMap.getMap()[script].requestUpdate())
                 g_originalUpdater(script,0,deltaTime);
         }
 
@@ -209,11 +261,8 @@ class CSandbox: public CGenericMode
          static void __thiscall scriptUpdate1(Script* script, DWORD deltaTime)
         {
             g_perFrameScripts.insert(script);
-            if(g_perFrameScriptsObjects.count(script) == 0)
-            {
-                g_perFrameScriptsObjects[script] = ScriptInspector(script);
-            }
-            if(!g_perFrameScriptsObjects[script].shouldBePaused())
+            g_ScriptMap.update(script);
+            if(g_ScriptMap.getMap()[script].requestUpdate())
                 g_originalUpdater1(script,0,deltaTime);
         }
 

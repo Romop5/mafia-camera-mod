@@ -138,7 +138,9 @@ struct Opcode
 	const char* getName() const
 	{
 		if(m_opcode >= g_commandID)
+		{	
 			return "Unknown command";
+		}
 		return g_scriptCommands[m_opcode];
 	}
 };
@@ -174,7 +176,12 @@ struct Script
 
 	const char* getName() const
 	{
-		return (m_name?m_name:"Empty name");
+		if(m_name)
+			return m_name;
+	
+		static char ptrStr[100];
+		sprintf(ptrStr,"Script %p",this);
+		return ptrStr;
 	}
 
 	const char* getSource() const
