@@ -72,6 +72,41 @@ namespace Utils {
     {
         return ImGui::InputTextMultiline(label, (char*)str->c_str(), str->capacity() + 1);
     }
+
+    /**
+     * @brief Starts a window with side menu, showing 'items' in menu
+     * 
+     * @param items 
+     * @return size_t ID of selected item, 0 when not selected
+     */
+    inline void BeginSelectorWithSideMenu(const std::vector<std::string> items,size_t* selectedID)
+    {
+        ImGui::BeginChild("left pane", ImVec2(150, 0), true,ImGuiWindowFlags_HorizontalScrollbar);
+
+        size_t i = 0;
+        for(auto &item: items)
+        {
+            if (ImGui::Selectable(item.c_str(), *selectedID == i))
+            {
+                *selectedID = i;
+            }
+            i++;
+        }
+        if(*selectedID >= i)
+            i = 0;
+        ImGui::EndChild();
+        ImGui::SameLine();
+
+        // right
+        ImGui::BeginGroup();
+        ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));    
+    }
+    
+    inline void EndSelectorWithSideMenu()
+    {
+        ImGui::EndChild();
+        ImGui::EndGroup();
+    }
  
 
 }; // ImGUI::Utils
