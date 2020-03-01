@@ -228,6 +228,16 @@ class CSandbox: public CGenericMode
                 auto& window = scriptWindow.second;
                 window.render();
             }
+
+            /**
+             * @brief This is a stupid way how to get all IDs for these script commands
+             * 
+             * We just gonna call ParseCommand(commandName) over all commands in our database :D :D :D
+             * 
+             */
+
+            
+
         }
 
         virtual void activate() override {

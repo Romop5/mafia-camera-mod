@@ -1,12 +1,13 @@
 $maxCommands = 0x80
 $maxCommands = 0x187
-//$maxCommands = 0x2
+//$maxCommands = 0x10
 $i = 0
 
 printIt:
 $id = esp+$i*0x24+0x2C
-$string = $id+0x4
-log "{u:[$id]} {s:$string}
+$string = esp+$i*0x24+0xC
+//$string = $id+0x4
+log "{u:[$id]}[{x:[$id]}] {s:$string}
 $i = $i + 1
 cmp $i, $maxCommands
 jl printIt

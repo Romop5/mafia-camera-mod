@@ -144,11 +144,9 @@ struct Opcode
 	Attribute* m_attribute;
 	const char* getName() const
 	{
-		if(m_opcode >= g_commandID)
-		{	
+		if(g_scriptCommandNames.count(m_opcode) == 0)
 			return "Unknown command";
-		}
-		return g_scriptCommands[m_opcode];
+		return g_scriptCommandNames[m_opcode];
 	}
 };
 
