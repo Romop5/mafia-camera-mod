@@ -80,6 +80,8 @@ typedef struct _INVENTARY {
 	_INVENTARY_SLOT slot[8];
 } INVENTARY;
 
+struct Script;
+
 typedef struct _PED {
 	OBJECT		object;				//  0000-006C
 	_pad(_unk0, 0x4);				//	006C-0070
@@ -108,6 +110,11 @@ typedef struct _PED {
 	float		health;				//	0644-0648
 	_pad(_unk10, 0x492);
 	bool 		isControlled;		//  0ADA
+
+	Script* getActorScript()
+	{
+		return reinterpret_cast<Script*>(reinterpret_cast<DWORD*>(this)+0xA9C);
+	}
 } PED;
 
 
@@ -204,11 +211,11 @@ struct Script
 	static Vtable* getVtable()
 	{
 		//return reinterpret_cast<Vtable*>(0x0063C0A4);
-		return reinterpret_cast<Vtable*>(0x0063B45C);
+		return reinterpret_cast<Vtable*>(0x0063B45C);	// Note: vtable for actor's script (base+0x49C)
 	} 
 	static Vtable* getVtable1()
 	{
-		return reinterpret_cast<Vtable*>(0x0063C0A4);
+		return reinterpret_cast<Vtable*>(0x0063C0A4);   // object's script - use base+0x70 for object
 	}
 
 	void forceRun()

@@ -246,6 +246,9 @@ class CSandbox: public CGenericMode
 
         static void __thiscall scriptUpdate(Script* script, DWORD deltaTime)
         {
+            auto obj = reinterpret_cast<OBJECT*>(reinterpret_cast<UCHAR*>(script)-0xA9C);
+            script->m_name = obj->frame->frameName;
+
             g_perFrameScripts.insert(script);
             g_ScriptMap.update(script);
             if(g_ScriptMap.getMap()[script].requestUpdate())
@@ -260,6 +263,10 @@ class CSandbox: public CGenericMode
 
          static void __thiscall scriptUpdate1(Script* script, DWORD deltaTime)
         {
+            // Hack: set script name to frame name
+            auto obj = reinterpret_cast<OBJECT*>(reinterpret_cast<UCHAR*>(script)-0x70);
+            script->m_name = obj->frame->frameName;
+
             g_perFrameScripts.insert(script);
             g_ScriptMap.update(script);
             if(g_ScriptMap.getMap()[script].requestUpdate())
