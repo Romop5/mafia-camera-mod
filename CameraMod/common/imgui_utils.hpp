@@ -8,7 +8,11 @@
 
 namespace ImGui {
 namespace Utils {
-    
+    static ImVec4 COLOR_WHITE = ImVec4(1.0,1.0,1.0,1.0);
+    static ImVec4 COLOR_RED = ImVec4(1.0,0.0,0.0,1.0);
+    static ImVec4 COLOR_GREEN = ImVec4(0.0,1.0,0.0,1.0);
+    static ImVec4 COLOR_BLUE = ImVec4(0.0,0.0,1.0,1.0);
+
     inline void TextColoredCentered(const ImVec4& col, const char* text,...)
     {
         auto width = ImGui::GetWindowWidth();
@@ -86,10 +90,12 @@ namespace Utils {
         size_t i = 0;
         for(auto &item: items)
         {
+            ImGui::PushID(i);
             if (ImGui::Selectable(item.c_str(), *selectedID == i))
             {
                 *selectedID = i;
             }
+            ImGui::PopID();
             i++;
         }
         if(*selectedID >= i)
@@ -107,8 +113,17 @@ namespace Utils {
         ImGui::EndChild();
         ImGui::EndGroup();
     }
- 
 
+    inline bool TextColoredButton(ImVec4 color, const std::string str)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Button,ImVec4(0.0,0.0,0.0,0.0));
+        ImGui::PushStyleColor(ImGuiCol_Text,color);
+        //auto size = CalcTextSize(str.c_str());
+        auto size = ImVec2(30.0,20.0);
+        auto result = ImGui::SmallButton(str.c_str());
+        ImGui::PopStyleColor(2);
+        return result;
+    }
 }; // ImGUI::Utils
 }; // ImGUI
 

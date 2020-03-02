@@ -27,11 +27,18 @@ class ScriptInspector
         PAUSED,
         SINGLESTEP
     };
+    
+    /// Is breakpoint set for given address
+    std::set<size_t> m_breakPoints;
+    /// Currently edited text
     std::string m_editBox;
+    /// Parent (script reference)
     Script* m_script;
+    /// Should display source code or allow editing
     bool m_toggleSourceEditing = true;
-    bool m_shouldForcefullyPause = false;
+    /// Is script's window visible for inspection
     bool m_isVisible = false;
+    /// Control state for debugging, running, and pausing
     ScriptState m_state = RUNNING;
     public:
     ScriptInspector(): m_script(nullptr) {}
@@ -47,6 +54,13 @@ class ScriptInspector
      * @brief Return true when game can continue
      */
     bool requestUpdate() {
+        if(m_breakPoints.count(m_script->m_currentOpcodeID) > 0)
+        {
+            // TODO: notify break point
+            setVisible(true);
+            forceState(PAUSED);
+            return false;
+        }
         if(m_state == SINGLESTEP)
         {
             forceState(PAUSED);
@@ -76,15 +90,15 @@ class ScriptInspector
 
         ImGui::SameLine();
         if(ImGui::Button("Recompile"))
+        {
             m_script->recompile();
+            m_script->m_isSleeping = false;
+        }
             
         ImGui::SameLine();
         if(ImGui::Button("NextStep"))
         {
             forceState(SINGLESTEP);
-            //m_script->m_nextOpcodeID++;
-            //m_script->m_currentOpcodeID = m_script->m_nextOpcodeID;
-            //m_script->forceRun();
         }
         int sleep = m_script->m_isSleeping;
         ImGui::InputInt("IsSleeping",&sleep);
@@ -125,12 +139,25 @@ class ScriptInspector
                     command = "UNK";
 
                 std::stringstream txt;
-                /*if(m_script->m_currentOpcodeID == i)
-                    txt << "== ";
-                */
                 txt << opcode << " - " << command;
                 bool isMarkedLine = (m_script->m_currentOpcodeID == i);
                 auto color = (isMarkedLine)?ImVec4(1.0,0.0,0.0,1.0):ImVec4(1.0,1.0,1.0,1.0);
+                
+                bool hasBreakpoint = (m_breakPoints.count(i) > 0);
+                auto bpColor = (hasBreakpoint)?ImGui::Utils::COLOR_RED:ImGui::Utils::COLOR_WHITE;
+                ImGui::PushID(i);
+                auto isPushed = ImGui::Utils::TextColoredButton(bpColor,"-");
+                ImGui::PopID();
+                if(isPushed)
+                {
+                    if(hasBreakpoint)
+                    {
+                        m_breakPoints.erase(i);
+                    } else {
+                        m_breakPoints.insert(i);
+                    }
+                }
+                ImGui::SameLine();
                 ImGui::TextColored(color,txt.str().c_str());
             }
         }
@@ -236,7 +263,7 @@ class CSandbox: public CGenericMode
              * 
              */
 
-            
+
 
         }
 
