@@ -1,0 +1,6 @@
+005AFEA8 | FF248D C0185B00          | jmp dword ptr ds:[ecx*4+<&sub_5B0EB9>]                    |   arg parsing
+
+005B0BD5 | BE C8E66300              | mov esi,game.63E6C8                                       | esi:"UP1", 63E6C8:"UP"
+// points to list of constants (each 0x14 bytes a new string constant)
+
+cmp esi, 0x63EAB0   // last constant

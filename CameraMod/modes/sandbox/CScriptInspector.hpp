@@ -5,6 +5,7 @@
 #include <string>
 #include "game/CGame.h"
 #include "common/imgui_utils.hpp"
+#include "TextEditor.h"
 
 class ScriptInspector
 {
@@ -15,10 +16,10 @@ class ScriptInspector
         SINGLESTEP
     };
     
+    /// Editor
+    TextEditor m_editor;
     /// Is breakpoint set for given address
     std::set<size_t> m_breakPoints;
-    /// Currently edited text
-    std::string m_editBox;
     /// Parent (script reference)
     Script* m_script;
     /// Should display source code or allow editing
@@ -30,8 +31,7 @@ class ScriptInspector
     public:
     ScriptInspector(): m_script(nullptr) {}
     ScriptInspector(Script* owner): m_script(owner) {
-        m_editBox.reserve(1000);
-        m_editBox = m_script->m_sourceCode;
+        m_editor.SetText(m_script->m_sourceCode);
     }
     Script* getScript() { return m_script; }
     bool shouldBePaused() const { return m_state == PAUSED; }

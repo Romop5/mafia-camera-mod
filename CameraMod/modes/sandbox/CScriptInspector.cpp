@@ -12,7 +12,6 @@ void ScriptInspector::render()
     ss << "Name: " << m_script->getName();
     if(ImGui::Begin(ss.str().c_str(), &m_isVisible,0))
     {
-
         const char* pauseButtons[] = {"Running","Paused"};
         ImVec4 buttonColors[] = {ImVec4(0.0,1.0,0.0,1.0),ImVec4(1.0,0.0,0.0,1.0)};
         ImGui::PushStyleColor(ImGuiCol_Button,buttonColors[shouldBePaused()]);
@@ -28,19 +27,18 @@ void ScriptInspector::render()
         }
             
         ImGui::SameLine();
-        if(ImGui::Button("NextStep"))
+        if(m_state == PAUSED)
         {
-            forceState(SINGLESTEP);
+            if(ImGui::Button("NextStep"))
+            {
+                forceState(SINGLESTEP);
+            }
         }
-        bool sleep = m_script->m_isSleeping;
-        ImGui::Checkbox("IsSleeping",&sleep);
-        m_script->m_isSleeping = sleep;
 
         std::stringstream txt;
-        txt << "Name: " << m_script->getName() << " [ " << m_script << "]\n"
-        << "Opcode ID: " << m_script->m_currentOpcodeID << "\n";
+        txt << "Name: " << m_script->getName() << " [ " << m_script << "]\n";
         ImGui::Text(txt.str().c_str());
-
+        
         if(ImGui::Button("Toggle view/edit of source"))
         {
             m_toggleSourceEditing = !m_toggleSourceEditing;
@@ -50,16 +48,14 @@ void ScriptInspector::render()
         {
             if(ImGui::Button("Save"))
             {
-                m_script->m_sourceCode = strdup(m_editBox.c_str());
+                m_script->m_sourceCode = strdup(m_editor.GetText().c_str());
             }
             ImGui::SameLine();
             if(ImGui::Button("Reload"))
             {
-                m_editBox = m_script->m_sourceCode;
+                m_editor.SetText(m_script->m_sourceCode);
             }
-            
-            ImGui::SetNextWindowSize(ImVec2(0.0f,0.0f),0);
-            ImGui::Utils::InputTextMultiline("Script:", &m_editBox);
+            m_editor.Render("Editor");
         } else {
             ImGui::BeginChildFrame(1,frameSize,ImGuiWindowFlags_NoBackground);
             for(size_t i = 0; i < m_script->getOpcodesCount(); i++)
@@ -70,7 +66,7 @@ void ScriptInspector::render()
                     command = "UNK";
 
                 std::stringstream txt;
-                txt << opcode << " - " << command;
+                txt << command;
                 bool isMarkedLine = (m_script->m_currentOpcodeID == i);
                 auto color = (isMarkedLine)?ImVec4(1.0,0.0,0.0,1.0):ImVec4(1.0,1.0,1.0,1.0);
                 

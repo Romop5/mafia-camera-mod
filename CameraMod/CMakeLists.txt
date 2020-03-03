@@ -5,6 +5,12 @@ add_library(imgui STATIC
 	../vendors/imgui/imgui_widgets.cpp
 	)
 
+target_include_directories(imgui PUBLIC ../vendors/imgui)
+	
+add_library(imguieditor STATIC ../vendors/ImGuiColorTextEdit/TextEditor.cpp)
+target_link_libraries(imguieditor PUBLIC imgui)
+target_include_directories(imguieditor PUBLIC ../vendors/ImGuiColorTextEdit)
+
 
 # Disable linking libci
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /NODEFAULTLIB:\"libci\" /SAFESEH:NO")
@@ -72,11 +78,12 @@ target_include_directories(CameraMod PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_include_directories(CameraMod PRIVATE ../vendors/ ../vendors/DirectX9SDK2007/Include)
 target_include_directories(CameraMod PRIVATE ../vendors/d3d8to9/source)
-target_include_directories(CameraMod PRIVATE ../vendors/imgui)
 target_link_libraries(CameraMod PRIVATE nlohmann_json)
 target_link_libraries(CameraMod PRIVATE imgui)
 target_link_libraries(CameraMod PRIVATE glm)
 target_link_libraries(CameraMod PRIVATE utilslib)
+target_link_libraries(CameraMod PRIVATE imguieditor)
+
 
 target_link_libraries(CameraMod PRIVATE ${PROJECT_SOURCE_DIR}/vendors/DirectX9SDK2007/Lib/x86/d3dx8.lib)
 target_link_libraries(CameraMod PRIVATE winmm)
