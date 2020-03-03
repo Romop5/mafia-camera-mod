@@ -41,17 +41,17 @@ class ScriptInspector
      * @brief Return true when game can continue
      */
     bool requestUpdate() {
+        if(m_state == SINGLESTEP)
+        {
+            forceState(PAUSED);
+            return true;
+        }
         if(m_breakPoints.count(m_script->m_currentOpcodeID) > 0)
         {
             // TODO: notify break point
             setVisible(true);
             forceState(PAUSED);
             return false;
-        }
-        if(m_state == SINGLESTEP)
-        {
-            forceState(PAUSED);
-            return true;
         }
         if(m_state == PAUSED)
             return false;

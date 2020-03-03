@@ -144,9 +144,64 @@ struct Opcode
 	Attribute* m_attribute;
 	const char* getName() const
 	{
-		if(g_scriptCommandNames.count(m_opcode) == 0)
-			return "Unknown command";
-		return g_scriptCommandNames[m_opcode];
+		return getCommandName(m_opcode);
+	}
+	size_t getArgumentCount()
+	{
+		auto& args = getCommandArgumentsType(m_opcode);
+		return args.size();
+	}
+
+	bool hasArgumentAtPosition(size_t position)
+	{
+		auto& args = getCommandArgumentsType(m_opcode);
+		return (args.size() > position);
+	}
+	ArgumentType getArgumentAtPosition(size_t position)
+	{
+		if(!hasArgumentAtPosition(position))
+			return ARG_INT;
+		auto& args = getCommandArgumentsType(m_opcode);
+		return args[position];
+	}
+
+	std::string getArgumentAsString(size_t position)
+	{
+		if(!hasArgumentAtPosition(position))
+			return "";
+		auto argType = getArgumentAtPosition(position);
+		switch(argType)
+		{
+			case ARG_INT:
+			{
+				auto value = static_cast<size_t>(*(reinterpret_cast<DWORD*>(m_attribute)+position));
+				return std::to_string(value);
+				break;
+			}
+			case ARG_STRING:
+			{
+				auto value = reinterpret_cast<const char*>(reinterpret_cast<DWORD*>(m_attribute)+position);
+				return std::string(value);
+				break;
+			}
+			case ARG_INT_OR_FLOAT:
+			{
+				auto type = *(reinterpret_cast<DWORD*>(m_attribute)+position);
+				if(type == 0x0)
+				{
+					auto value = *reinterpret_cast<DWORD*>((reinterpret_cast<DWORD*>(m_attribute)+position+1));
+					return std::to_string(value);
+				} else if(type == 0xFFFFFFFF)
+				{
+					auto value = *reinterpret_cast<float*>((reinterpret_cast<DWORD*>(m_attribute)+position+1));
+					return std::to_string(value);
+				}
+				return std::string("");
+				break;
+			}
+			default:
+				return "";
+		}
 	}
 };
 

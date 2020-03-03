@@ -40,6 +40,7 @@ add_custom_target(configure_version ALL
 add_library(CameraMod SHARED 
 	CCore.cpp
 	CScene.cpp
+	game/CScript.cpp
 	game/CGame.cpp
 	game/CGraphics.cpp
 	game/CRawInput.cpp
