@@ -181,20 +181,19 @@ struct Opcode
 			case ARG_STRING:
 			{
 				auto value = reinterpret_cast<const char*>(reinterpret_cast<DWORD*>(m_attribute)+position);
-				return std::string(value);
+				return std::string("\"")+std::string(value)+std::string("\"");
 				break;
 			}
-			case ARG_INT_OR_FLOAT:
+			case ARG_FLT_ID_OR_FLOAT:
 			{
 				auto type = *(reinterpret_cast<DWORD*>(m_attribute)+position);
-				if(type == 0x0)
-				{
-					auto value = *reinterpret_cast<DWORD*>((reinterpret_cast<DWORD*>(m_attribute)+position+1));
-					return std::to_string(value);
-				} else if(type == 0xFFFFFFFF)
+				if(type == 0xFFFFFFFF)
 				{
 					auto value = *reinterpret_cast<float*>((reinterpret_cast<DWORD*>(m_attribute)+position+1));
 					return std::to_string(value);
+				} else {
+					auto value = *reinterpret_cast<DWORD*>((reinterpret_cast<DWORD*>(m_attribute)+position));
+					return std::string("flt[")+std::to_string(value)+std::string("]");
 				}
 				return std::string("");
 				break;
