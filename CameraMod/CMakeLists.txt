@@ -46,8 +46,10 @@ add_library(CameraMod SHARED
 	game/CHooks.cpp
 	game/CD3D9Accessor.cpp
 	game/CImGUIAdaptor.cpp
+	modes/CAbout.cpp
 	modes/CFreecamera.cpp
 	modes/CModeManager.cpp
+	modes/sandbox/CScriptInspector.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/version.cpp
 	dllmain.cpp
 	json_impl.cpp
