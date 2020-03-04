@@ -129,7 +129,9 @@ void CImGUIAdaptor::Win32NewFrame()
   */
 }
 
-void CImGUIAdaptor::CleanUP() {}
+void CImGUIAdaptor::CleanUP() {
+    ImGui_ImplDX9_Shutdown();
+}
 
 void CImGUIAdaptor::Invalidate() { ImGui_ImplDX9_InvalidateDeviceObjects(); }
 

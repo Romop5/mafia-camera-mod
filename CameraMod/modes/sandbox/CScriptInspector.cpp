@@ -35,46 +35,66 @@ void ScriptInspector::render()
         }
 
         std::stringstream txt;
-        txt << "Name: " << m_script->getName() << " [ " << m_script << "]"
+        txt << "Address [ " << m_script << "]"
          << "| Vars: " << m_script->m_fltArrayLength 
          << "| Frames: " << m_script->m_frameArrayLength 
          << "| Actors: " << m_script->m_actorArrayLength;
         ImGui::Text(txt.str().c_str());
 
-        // List variables
-        std::stringstream vars;
-        vars << "Vars:\n";
-        for(size_t i = 0; i < m_script->m_fltArrayLength; i++)
+        if (m_script->hasVariables() && ImGui::TreeNode("Variables"))
         {
-            vars << "-"<<i<<"-" << m_script->m_fltArray[i] << "\n";
-        }
-        ImGui::Text(vars.str().c_str());
-
-        // List frames
-        std::stringstream frames;
-        frames << "Frames:\n"; 
-        for(size_t i = 0; i < m_script->m_frameArrayLength; i++)
-        {
-            auto frame = m_script->m_frameArray[i];
-            if(frame)
+            for(size_t i = 0; i < m_script->m_fltArrayLength; i++)
             {
-                frames << "-"<<i<<"-" << frame->frameName << "\n";
+                ImGui::PushID(i);
+                ImGui::Text(std::to_string(i).c_str());
+                ImGui::SameLine();
+                ImGui::DragFloat("##var",&m_script->m_fltArray[i]);
+                ImGui::PopID();
             }
-        }
-        ImGui::Text(frames.str().c_str());
 
-        // List Actors
-        std::stringstream actors;
-        actors << "Actors:\n"; 
-        for(size_t i = 0; i < m_script->m_actorArrayLength; i++)
-        {
-            auto object = m_script->m_actorArray[i];
-            if(object)
-            {
-                actors << "-"<<i<<"-" << "0x" << std::hex << object->objectType << "\n";
-            }
+            ImGui::TreePop();
+            ImGui::Separator();
         }
-        ImGui::Text(actors.str().c_str());
+
+        if (m_script->hasFrames() && ImGui::TreeNode("Frames"))
+        {
+            // List frames
+            std::stringstream frames;
+            frames << "Frames:\n"; 
+            for(size_t i = 0; i < m_script->m_frameArrayLength; i++)
+            {
+                auto frame = m_script->m_frameArray[i];
+                if(frame)
+                {
+                    frames << "-"<<i<<"-" << frame->frameName << "\n";
+                }
+            }
+            ImGui::Text(frames.str().c_str());
+            ImGui::TreePop();
+            ImGui::Separator();
+        }
+
+        if (m_script->hasActors() && ImGui::TreeNode("Actors"))
+        {
+            // List Actors
+            std::stringstream actors;
+            actors << "Actors:\n"; 
+            for(size_t i = 0; i < m_script->m_actorArrayLength; i++)
+            {
+                auto object = m_script->m_actorArray[i];
+                if(object)
+                {
+                    actors << "-"<<i<<"- " << object->getObjectType() << " - "
+                    << object->frame->frameName;
+                    if(object->hasModel())
+                        actors << " (" <<  object->frame->frameModel << ")";
+                    actors << "\n";
+                }
+            }
+            ImGui::Text(actors.str().c_str());
+            ImGui::TreePop();
+            ImGui::Separator();
+        }
 
 
         if(ImGui::Button("Toggle view/edit of source"))

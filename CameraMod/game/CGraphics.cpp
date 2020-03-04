@@ -52,6 +52,10 @@ void CGraphics::Unload()
 {
     adaptor.CleanUP();
 }
+void CGraphics::Lost()
+{
+    adaptor.Invalidate();
+}
 
 bool CGraphics::saveScreenshot(const std::string path)
 {

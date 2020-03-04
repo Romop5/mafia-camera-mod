@@ -35,7 +35,7 @@ static std::unordered_map<size_t,command_t> g_scriptCommandNames =
     {25,{"act_setstate",{ARG_INT, ARG_INT}}},
     {26,{"detector_issignal",{ARG_INT, ARG_INT, ARG_INT}}},
     {27,{"detector_setsignal",{ARG_INT, ARG_INT}}},
-    {28,{"detector_inrange",{ARG_INT, ARG_INT}}},
+    {28,{"detector_inrange",{ARG_INT, ARG_FLT_ID_OR_FLOAT}}},
     {29,{"setcompass",{ARG_INT}}},
     {30,{"setlmlevel",{ARG_INT, ARG_INT}}},
     {31,{"detector_waitforuse",{ARG_INT}}},

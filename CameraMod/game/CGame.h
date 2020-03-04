@@ -15,7 +15,17 @@ enum ObjectTypes
 {
 	OBJECT_LOCALPLAYER = 0x2,
 	OBJECT_VEHICLE = 0x4,
-	OBJECT_ENEMY = 0x1B
+	OBJECT_ENEMY = 0x1B,
+	OBJECT_DETECTOR = 0x5,
+	OBJECT_DOOR = 0x6,
+	OBJECT_RAILWAY = 0x8,
+	OBJECT_BOX = 0x9,
+	OBJECT_BOTTLE = 0xA,
+	OBJECT_TRAFFIC_PERSON = 0x12,
+	OBJECT_TRAFFIC_CAR = 0xC,
+	OBJECT_BRIDGE = 0x14,
+	OBJECT_DOG = 0x15,
+	OBJECT_AIRPLANE = 0x16,
 };
 
 using byte = unsigned char;
@@ -39,6 +49,45 @@ typedef struct _OBJECT {
 	bool		isActive;			//	005D-005E
 	_pad(__unk4, 0xA);
 	FRAME*		frame;				//	0068-006C
+
+	bool hasModel() const{
+		if(objectType == OBJECT_ENEMY || objectType == OBJECT_LOCALPLAYER || objectType == OBJECT_VEHICLE)
+			return true;
+		return false;
+	}
+	const std::string getObjectType() const {
+		switch(objectType)
+		{
+			case OBJECT_ENEMY:
+				return "Enemy";
+			case OBJECT_LOCALPLAYER:
+				return "Player";
+			case OBJECT_VEHICLE:
+				return "Car";
+			case OBJECT_DETECTOR:
+				return "Detector";
+			case OBJECT_DOOR:
+				return "Door";
+			case OBJECT_RAILWAY:
+				return "Railway";
+			case OBJECT_BOX:
+				return "Box";
+			case OBJECT_BOTTLE:
+				return "Bottle";
+			case OBJECT_TRAFFIC_PERSON:
+				return "Traffic_person";
+			case OBJECT_TRAFFIC_CAR:
+				return "Traffic_car";
+			case OBJECT_BRIDGE:
+				return "Bridge";
+			case OBJECT_DOG:
+				return "Dog";
+			case OBJECT_AIRPLANE:
+				return "Airplane";
+			default:
+				return "Unk object type";
+		}
+	}
 } OBJECT;
 typedef struct _VEHICLE {
 	OBJECT		object;				//  0000-006C
@@ -242,6 +291,9 @@ struct Script
 	byte		m_isCommandBlockActivated; 	// 0x64 - when activated, script evaluation won't stop 
 									   	//until reaching commandblock 0 in a single frame 
 
+	bool hasVariables() const { return m_fltArrayLength > 0; }
+	bool hasFrames() const { return m_frameArrayLength > 0; }
+	bool hasActors() const { return m_actorArrayLength > 0; }
 	const char* getName() const
 	{
 		if(m_name)

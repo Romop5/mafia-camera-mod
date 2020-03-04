@@ -43,6 +43,7 @@ public:
     CGraphics();
     void Init();
     void Unload();
+    void Lost();
 
     CImGUIAdaptor& getImGUIAdaptor() {return this->adaptor; }
     
@@ -80,6 +81,14 @@ public:
         this->onEndScene();
         // Call original
         return CDirect3DDevice8Proxy::EndScene();
+    }
+
+    STDMETHOD(Reset)
+    (D3DPRESENT_PARAMETERS* presentParam)
+    {
+        // Clean our allocated resources
+        this->Lost();
+        return CDirect3DDevice8Proxy::Reset(presentParam);
     }
 
     utilslib::Callbacks<std::function<void()>> m_onRenderHandler;

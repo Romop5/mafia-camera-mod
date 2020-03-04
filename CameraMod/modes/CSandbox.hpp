@@ -69,7 +69,7 @@ class CSandbox: public CGenericMode
         virtual void onTick() {}
         virtual void onRender() {
 
-            //ImGui::ShowDemoWindow();
+            ImGui::ShowDemoWindow();
             
             auto mafiaGame = reinterpret_cast<CGame*>(this->m_gameController);
             auto machine = mafiaGame->getScriptMachine();
