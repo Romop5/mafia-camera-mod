@@ -10,6 +10,7 @@
 #include "common/imgui_utils.hpp"
 #include <sstream>
 #include <set>
+#include <unordered_map>
 
 using originalDelete_t = void __fastcall (Script* script);
 using originalUpdate_t = void __fastcall (Script* script,DWORD EDX, DWORD deltaTime);
@@ -24,7 +25,7 @@ std::set<Script*> g_perFrameScripts;
 
 class ScriptHandleMap
 {
-    using map_t = std::map<Script*, ScriptInspector>;
+    using map_t = std::unordered_map<Script*, ScriptInspector>;
     map_t m_map;
     public:
     void update(Script* script)
@@ -68,7 +69,7 @@ class CSandbox: public CGenericMode
         virtual void onTick() {}
         virtual void onRender() {
 
-            ImGui::ShowDemoWindow();
+            //ImGui::ShowDemoWindow();
             
             auto mafiaGame = reinterpret_cast<CGame*>(this->m_gameController);
             auto machine = mafiaGame->getScriptMachine();
@@ -80,28 +81,30 @@ class CSandbox: public CGenericMode
 
             bool shouldRenderOverlay = true;
             ImGui::Begin("List of ingame scripts", &shouldRenderOverlay,0);
-            static std::vector<std::string> menuItems;
-            menuItems.clear();
-            for(auto pair: g_ScriptMap.getMap())
             {
-                menuItems.push_back(pair.first->getName());
+                static std::vector<std::string> menuItems;
+                menuItems.clear();
+                for(auto pair: g_ScriptMap.getMap())
+                {
+                    menuItems.push_back(pair.first->getName());
+                }
+                static size_t selectedID = 0;
+                std::stringstream ss; 
+                ss << "Num. of scripts: " << g_ScriptMap.getMap().size();
+                ImGui::Text(ss.str().c_str());
+                ImGui::Utils::BeginSelectorWithSideMenu(menuItems,&selectedID);
+                auto& selectedWindow = g_ScriptMap.getAtIndex(selectedID);
+                auto selectedScript = selectedWindow.getScript();
+                if(ImGui::Button("Open manipulator"))
+                {
+                    selectedWindow.setVisible(!selectedWindow.isVisible());
+                }
+                std::stringstream scriptPreview;
+                scriptPreview << selectedScript->getName() << "\n"
+                    << selectedScript->getSource();
+                ImGui::Text(scriptPreview.str().c_str());
+                ImGui::Utils::EndSelectorWithSideMenu();
             }
-            static size_t selectedID = 0;
-            std::stringstream ss; 
-            ss << "Num. of scripts: " << g_ScriptMap.getMap().size();
-            ImGui::Text(ss.str().c_str());
-            ImGui::Utils::BeginSelectorWithSideMenu(menuItems,&selectedID);
-            auto& selectedWindow = g_ScriptMap.getAtIndex(selectedID);
-            auto selectedScript = selectedWindow.getScript();
-            if(ImGui::Button("Open manipulator"))
-            {
-                selectedWindow.setVisible(!selectedWindow.isVisible());
-            }
-            std::stringstream scriptPreview;
-            scriptPreview << selectedScript->getName() << "\n"
-                << selectedScript->getSource();
-            ImGui::Text(scriptPreview.str().c_str());
-            ImGui::Utils::EndSelectorWithSideMenu();
             ImGui::End();
 
             for(auto& scriptWindow: g_ScriptMap.getMap())
@@ -119,10 +122,9 @@ class CSandbox: public CGenericMode
             g_game = reinterpret_cast<CGame*>(this->m_gameController);
             g_originalDeleter = reinterpret_cast<originalDelete_t*>(Script::getVtable()->swapFunction(0,(DWORD*) scriptDelete));
             g_originalUpdater = reinterpret_cast<originalUpdate_t*>(Script::getVtable()->swapFunction(0x1C/4,(DWORD*) scriptUpdate));
-
-            
             g_originalDeleter1 = reinterpret_cast<originalDelete_t*>(Script::getVtable1()->swapFunction(0,(DWORD*) scriptDelete1));
             g_originalUpdater1 = reinterpret_cast<originalUpdate_t*>(Script::getVtable1()->swapFunction(0x1C/4,(DWORD*) scriptUpdate1));
+                
         }
 
         static void __thiscall scriptUpdate(Script* script, DWORD deltaTime)
@@ -166,7 +168,7 @@ class CSandbox: public CGenericMode
 
             reinterpret_cast<originalDelete_t*>(Script::getVtable1()->swapFunction(0,(DWORD*) g_originalDeleter1));
             reinterpret_cast<originalUpdate_t*>(Script::getVtable1()->swapFunction(0x1C/4,(DWORD*) g_originalUpdater1));
-        
+            
             g_perFrameScripts.clear();
         }
 };

@@ -12,7 +12,6 @@ set(GLM_TEST_ENABLE OFF CACHE BOOL "" FORCE)
 set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
 set(JSON_MultipleHeaders ON CACHE BOOL "" FORCE)
 add_subdirectory(vendors/json)
-
 add_subdirectory(CameraModInjector)
 add_subdirectory(HotLoader)
 add_subdirectory(CameraMod)

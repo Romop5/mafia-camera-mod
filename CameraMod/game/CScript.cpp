@@ -1,11 +1,11 @@
 
-#include <map>
+#include <unordered_map>
 #include <algorithm>
 #include <cctype>
 
 #include "CScript.h"
 
-static std::map<size_t,command_t> g_scriptCommandNames =
+static std::unordered_map<size_t,command_t> g_scriptCommandNames =
 {
     {0,{"label",{ARG_STRING}}},
     {1,{"goto",{ARG_INT}}},
@@ -483,7 +483,7 @@ arg_type_t getCommandArgumentsType(size_t id)
     return undefined;
 }
 
-std::map<std::string, size_t> g_constantToID =
+std::unordered_map<std::string, size_t> g_constantToID =
 {
     {"UP",0},
     {"UP1",1},

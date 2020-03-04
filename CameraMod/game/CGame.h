@@ -221,17 +221,26 @@ struct Vtable
 
 struct Script
 {
-	Vtable*	m_vtable;			// vtable
-	char*	m_name;				// 0x4 - string name of script
-	char*	m_sourceCode;		// 0x8 - string literal with full code
-	byte 	unk2[4];
-	Opcode* m_assemblyStart;	// 0x10
-	Opcode* m_assemblyEnd;		// 0x14
-	byte 	unk3[4];
-	DWORD	m_currentOpcodeID;  // 0x1C
-	DWORD	m_nextOpcodeID;     // 0x20
-	byte 	unk4[0x40];
-	DWORD	m_isSleeping;  		// 0x64 - or is stopped
+	Vtable*		m_vtable;			// vtable
+	char*		m_name;				// 0x4 - string name of script
+	char*		m_sourceCode;		// 0x8 - string literal with full code
+	byte 		unk2[4];
+	Opcode* 	m_assemblyStart;	// 0x10
+	Opcode* 	m_assemblyEnd;		// 0x14
+	byte 		unk3[4];
+	DWORD		m_currentOpcodeID;  // 0x1C
+	DWORD		m_nextOpcodeID;     // 0x20
+	DWORD		m_tickCount;     	// 0x24	- incremented with per-frame delta
+	byte 		unk4[0x20];
+	float*  	m_fltArray;			// 0x48
+	DWORD		m_fltArrayLength;	// 0x4C
+	_FRAME** 	m_frameArray;			// 0x50
+	DWORD		m_frameArrayLength;	// 0x54
+	_OBJECT** 	m_actorArray;			// 0x58
+	DWORD		m_actorArrayLength;	// 0x5C
+	byte 		unk5[0x4];
+	byte		m_isCommandBlockActivated; 	// 0x64 - when activated, script evaluation won't stop 
+									   	//until reaching commandblock 0 in a single frame 
 
 	const char* getName() const
 	{

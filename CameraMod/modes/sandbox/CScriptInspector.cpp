@@ -23,7 +23,6 @@ void ScriptInspector::render()
         if(ImGui::Button("Recompile"))
         {
             m_script->recompile();
-            m_script->m_isSleeping = false;
         }
             
         ImGui::SameLine();
@@ -36,9 +35,48 @@ void ScriptInspector::render()
         }
 
         std::stringstream txt;
-        txt << "Name: " << m_script->getName() << " [ " << m_script << "]\n";
+        txt << "Name: " << m_script->getName() << " [ " << m_script << "]"
+         << "| Vars: " << m_script->m_fltArrayLength 
+         << "| Frames: " << m_script->m_frameArrayLength 
+         << "| Actors: " << m_script->m_actorArrayLength;
         ImGui::Text(txt.str().c_str());
-        
+
+        // List variables
+        std::stringstream vars;
+        vars << "Vars:\n";
+        for(size_t i = 0; i < m_script->m_fltArrayLength; i++)
+        {
+            vars << "-"<<i<<"-" << m_script->m_fltArray[i] << "\n";
+        }
+        ImGui::Text(vars.str().c_str());
+
+        // List frames
+        std::stringstream frames;
+        frames << "Frames:\n"; 
+        for(size_t i = 0; i < m_script->m_frameArrayLength; i++)
+        {
+            auto frame = m_script->m_frameArray[i];
+            if(frame)
+            {
+                frames << "-"<<i<<"-" << frame->frameName << "\n";
+            }
+        }
+        ImGui::Text(frames.str().c_str());
+
+        // List Actors
+        std::stringstream actors;
+        actors << "Actors:\n"; 
+        for(size_t i = 0; i < m_script->m_actorArrayLength; i++)
+        {
+            auto object = m_script->m_actorArray[i];
+            if(object)
+            {
+                actors << "-"<<i<<"-" << "0x" << std::hex << object->objectType << "\n";
+            }
+        }
+        ImGui::Text(actors.str().c_str());
+
+
         if(ImGui::Button("Toggle view/edit of source"))
         {
             m_toggleSourceEditing = !m_toggleSourceEditing;
