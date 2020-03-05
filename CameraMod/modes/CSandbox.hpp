@@ -67,20 +67,9 @@ class CSandbox: public CGenericMode
         virtual void onMouseMove(int x, int y) {}
         virtual void onMouseButtons(unsigned short buttons) {}
         virtual void onTick() {}
-        virtual void onRender() {
-
-            ImGui::ShowDemoWindow();
-            
-            auto mafiaGame = reinterpret_cast<CGame*>(this->m_gameController);
-            auto machine = mafiaGame->getScriptMachine();
-            // Add scripts to list of all scripts
-            for(auto script = machine->m_scriptsPoolStart; script != machine->m_scriptsPoolEnd; script++)
-            {
-                g_ScriptMap.update(*script);
-            }
-
-            bool shouldRenderOverlay = true;
-            ImGui::Begin("List of ingame scripts", &shouldRenderOverlay,0);
+        virtual void renderScriptMenuWidget()
+        {
+            ImGui::Begin("List of ingame scripts", nullptr,0);
             {
                 static std::vector<std::string> menuItems;
                 menuItems.clear();
@@ -106,12 +95,94 @@ class CSandbox: public CGenericMode
                 ImGui::Utils::EndSelectorWithSideMenu();
             }
             ImGui::End();
+        }
+        virtual void renderObjectsMenuWidget()
+        {
+            ImGui::Begin("List of objects", nullptr,0);
+            {
+                auto scene = CMafiaContext::getInstance()->getScene();
+                static std::vector<std::string> menuItems;
+                menuItems.clear();
+                for(auto start = scene->m_objectPoolStart; start != scene->m_objectPoolEnd; start++)
+                {
+                    auto object = *start;
+                    menuItems.push_back(object->frame->getName());
+                }
+                static size_t selectedID = 0;
+                
+                std::stringstream objectsInfo;
+                objectsInfo << scene->getObjectPoolSize();
 
+                ImGui::Text(objectsInfo.str().c_str());
+
+                ImGui::Utils::BeginSelectorWithSideMenu(menuItems,&selectedID);
+                auto selectedObject = scene->m_objectPoolStart[selectedID];
+                auto selectedFrame = selectedObject->frame;
+                
+                std::stringstream info;
+                info << "Name: " << selectedObject->frame->getName()<< "\n"
+                << "Type: " << selectedObject->getObjectType() << "\n";
+                auto pos = selectedObject->position;
+                info << "Pos: " << "[" << pos.x << "," << pos.y << "," << pos.z << "]\n";
+                auto rot = selectedObject->rotation; 
+                info << "Rot: " << "[" << rot.x << "," << rot.y << "," << rot.z << "]\n";
+                info << "IsActive:" << selectedObject->isActive << "\n";
+                
+                switch(selectedObject->objectType)
+                {
+                    case OBJECT_ENEMY:
+                    case OBJECT_LOCALPLAYER:
+                    {
+                        auto ped = reinterpret_cast<PED*>(selectedObject);
+                        info << "Health:" << ped->health << "\n";
+                        info << "Is reloading:" << ped->isReloading << "\n";
+                    }
+                    break;
+                    case OBJECT_VEHICLE:
+                    {
+                        auto veh = reinterpret_cast<VEHICLE*>(selectedObject);
+                        info << "Petrol level:" << veh->petrolLevel << "\n";
+                        info << "Engine damage:" << veh->engineDamage << "\n";
+                        info << "Is horn activated:" << veh->hornState << "\n";
+                        info << "Is siren activated:" << veh->sirenState << "\n";
+                    }
+                    break;
+                }
+
+                ImGui::Text(info.str().c_str());
+
+                if(ImGui::Button("Teleport local player to object"))
+                {
+                    auto mafiaGame = reinterpret_cast<CGame*>(this->m_gameController);
+                    auto player = static_cast<CLocalPlayer*>(mafiaGame->getLocalPlayer());
+                    auto ped = reinterpret_cast<PED*>(player->getMafiaAddress());
+                    ped->object.position = pos;
+                }
+                ImGui::Utils::EndSelectorWithSideMenu();
+            }
+            ImGui::End();
+        }
+        virtual void onRender() {
+
+            ImGui::ShowDemoWindow();
+            
+            auto mafiaGame = reinterpret_cast<CGame*>(this->m_gameController);
+            auto machine = mafiaGame->getScriptMachine();
+            // Add scripts to list of all scripts
+            for(auto script = machine->m_scriptsPoolStart; script != machine->m_scriptsPoolEnd; script++)
+            {
+                g_ScriptMap.update(*script);
+            }
+    
             for(auto& scriptWindow: g_ScriptMap.getMap())
             {
                 auto& window = scriptWindow.second;
                 window.render();
             }
+
+            // Render menu widgets
+            renderScriptMenuWidget();
+            renderObjectsMenuWidget();
         }
 
         virtual void activate() override {

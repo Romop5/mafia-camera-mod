@@ -37,6 +37,17 @@ typedef struct _FRAME {
 	char*	frameName;		// 100-104
 	_pad(_unk2, 0x50);
 	char*	frameModel;		// 154-158
+
+	const std::string getName() const {
+		if(frameName)
+			return frameName;
+		return std::string("Frame: ") + std::to_string(reinterpret_cast<unsigned long>(this));
+	}
+	const std::string getModel() const {
+		if(frameModel)
+			return frameModel;
+		return std::string("Undefined model");
+	}
 } FRAME;
 typedef struct _OBJECT {
 	DWORD		vtable;				//  0000-0004
@@ -167,14 +178,33 @@ typedef struct _PED {
 } PED;
 
 
-struct PED_State
+#pragma pack(push,1)
+struct CMafiaScene 
 {
-	glm::mat4 transform;
-	byte	animState;
-	bool	isDucking;
-	bool	isAiming;	
-	bool	isReloading;
+	_pad(_unk0, 0xF0);	
+	_OBJECT** m_objectPoolStart;
+	_OBJECT** m_objectPoolEnd;
+
+	public:
+	size_t getObjectPoolSize() const {
+		return (m_objectPoolEnd-m_objectPoolStart);
+	}
 };
+#pragma pack(pop)
+
+#pragma pack(push,1)
+struct CMafiaContext
+{
+	_pad(_unk0, 0x24);	
+	CMafiaScene*	m_scene;	// 0x24	
+	public:
+	CMafiaScene* getScene() const { return m_scene; }
+	static CMafiaContext* getInstance()
+	{
+		return *reinterpret_cast<CMafiaContext**>(0x0065115C);
+	}
+};
+#pragma pack(pop)
 
 struct Attribute
 {

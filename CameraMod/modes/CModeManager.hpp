@@ -4,7 +4,6 @@
 #include <memory>
 #include "CGenericMode.hpp"
 #include "CCoreController.hpp"
-#include "game/CGame.h"
 
 enum BlockStatus:size_t
 {

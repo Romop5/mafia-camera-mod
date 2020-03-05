@@ -2,6 +2,7 @@
 #define STRUCTURES
 
 #include <glm/vec3.hpp> // glm::vec3
+#include <glm/glm.hpp>
 #include <nlohmann/json.hpp>
 #include <string>
 
@@ -48,5 +49,14 @@ inline const glm::vec3 JSONToVec3(const nlohmann::json obj)
     vec[2] = obj["z"];
     return vec;
 }
+
+struct PED_State
+{
+	glm::mat4 transform;
+	unsigned char	animState;
+	bool	isDucking;
+	bool	isAiming;	
+	bool	isReloading;
+};
 
 #endif

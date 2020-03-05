@@ -6,9 +6,9 @@
 #include <sstream>
 #include <algorithm>
 #include <array>
-#include "game/CGame.h"
 #include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/spline.hpp>
+#include "common/structures.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Camera points + camera paths
