@@ -83,13 +83,23 @@ namespace Utils {
      * @param items 
      * @return size_t ID of selected item, 0 when not selected
      */
-    inline void BeginSelectorWithSideMenu(const std::vector<std::string> items,size_t* selectedID)
+    inline void BeginSelectorWithSideMenu(const std::vector<std::string> items,size_t* selectedID,bool allowFiltering = true)
     {
         ImGui::BeginChild("left pane", ImVec2(150, 0), true,ImGuiWindowFlags_HorizontalScrollbar);
+        auto filterId = ImGui::GetID("filter");
+        static std::unordered_map<ImGuiID,ImGuiTextFilter> filters;
+        auto& filter = filters[filterId];
 
+        if(ImGui::CollapsingHeader("Filter"))
+        {
+            filter.Draw("");
+        }
         size_t i = 0;
         for(auto &item: items)
         {
+            // Skip item if it doesn't match
+            if(!filter.PassFilter(item.c_str()))
+                continue;
             ImGui::PushID(i);
             if (ImGui::Selectable(item.c_str(), *selectedID == i))
             {

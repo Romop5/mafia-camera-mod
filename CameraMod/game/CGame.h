@@ -177,18 +177,31 @@ typedef struct _PED {
 	}
 } PED;
 
+#pragma pack(push,1)
+template<typename T>
+struct Pool
+{
+	T** m_start;
+	T** m_end;
+	size_t getLength() const
+	{
+		if(!(m_start && m_end))
+			return 0;
+		return (m_end-m_start);
+	}
+	T* operator[](size_t id)
+	{
+		return m_start[id];
+	}
+};
+#pragma pack(pop)
+
 
 #pragma pack(push,1)
 struct CMafiaScene 
 {
 	_pad(_unk0, 0xF0);	
-	_OBJECT** m_objectPoolStart;
-	_OBJECT** m_objectPoolEnd;
-
-	public:
-	size_t getObjectPoolSize() const {
-		return (m_objectPoolEnd-m_objectPoolStart);
-	}
+	Pool<OBJECT> m_scriptedObjects;
 };
 #pragma pack(pop)
 
@@ -202,6 +215,15 @@ struct CMafiaContext
 	static CMafiaContext* getInstance()
 	{
 		return *reinterpret_cast<CMafiaContext**>(0x0065115C);
+	}
+	/**
+	 * @brief Get pool which contains regular city objects (trash cans, etc, pedestrians & cars)
+	 * 
+	 * @return CPool<OBJECT>& 
+	 */
+	static Pool<OBJECT>& getObjectPool()
+	{
+		return *reinterpret_cast<Pool<OBJECT>*>(0x65535C+0x4);
 	}
 };
 #pragma pack(pop)

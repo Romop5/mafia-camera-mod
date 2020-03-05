@@ -103,25 +103,35 @@ class CSandbox: public CGenericMode
                 auto scene = CMafiaContext::getInstance()->getScene();
                 static std::vector<std::string> menuItems;
                 menuItems.clear();
-                for(auto start = scene->m_objectPoolStart; start != scene->m_objectPoolEnd; start++)
+                //auto objectPool = scene->m_scriptedObjects;
+                auto& objectPool = CMafiaContext::getObjectPool();
+                auto poolSize = objectPool.getLength();
+
+                for(auto i = 0; i < poolSize; i++)
                 {
-                    auto object = *start;
-                    menuItems.push_back(object->frame->getName());
+                    auto object = objectPool[i];
+                    if(object->frame)
+                    {
+                        menuItems.push_back(object->frame->getName());
+                    } else {
+                        menuItems.push_back(std::string("Object ID: ")+std::to_string(i));
+                    }
                 }
                 static size_t selectedID = 0;
                 
                 std::stringstream objectsInfo;
-                objectsInfo << scene->getObjectPoolSize();
+                objectsInfo << objectPool.getLength();
 
                 ImGui::Text(objectsInfo.str().c_str());
 
                 ImGui::Utils::BeginSelectorWithSideMenu(menuItems,&selectedID);
-                auto selectedObject = scene->m_objectPoolStart[selectedID];
+                auto selectedObject = objectPool[selectedID];
                 auto selectedFrame = selectedObject->frame;
                 
                 std::stringstream info;
-                info << "Name: " << selectedObject->frame->getName()<< "\n"
-                << "Type: " << selectedObject->getObjectType() << "\n";
+                if(selectedFrame)
+                    info << "Name: " << selectedObject->frame->getName()<< "\n";
+                info << "Type: " << selectedObject->getObjectType() << "\n";
                 auto pos = selectedObject->position;
                 info << "Pos: " << "[" << pos.x << "," << pos.y << "," << pos.z << "]\n";
                 auto rot = selectedObject->rotation; 
