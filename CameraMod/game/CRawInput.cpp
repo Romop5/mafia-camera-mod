@@ -21,7 +21,7 @@ bool CRawInput::ProcessMessage(LPMSG message)
             if (raw->header.dwType == RIM_TYPEKEYBOARD) {
 
                 auto virtualKeyCode = raw->data.keyboard.VKey;
-                bool isKeyDown = !(raw->data.keyboard.Flags > 0);
+                bool isKeyDown = !(raw->data.keyboard.Flags & RI_KEY_BREAK);
                 //if (raw->data.keyboard.Flags & (RI_KEY_BREAK | RI_KEY_MAKE))
                 //{
                     // Call all registered onKeyPressed callbacks
