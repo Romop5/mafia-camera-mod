@@ -49,6 +49,9 @@ void CModeManager::InitializeModes(CGame* game)
     controller.m_isGUIVisible = [&] ()->bool {
         return this->m_isGUIVisible;
     };
+    controller.m_getGraphics = [&] ()->CGraphics* {
+        return this->m_coreController.m_getGraphics();
+    };
     
     // Set game to all of them
     for(auto mode: this->m_modes)

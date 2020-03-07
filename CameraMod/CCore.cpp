@@ -34,6 +34,7 @@ bool CCore::Initialize()
     controller.m_blockGameInput = [&] (bool shouldWe)->void { this->getRawInput()->shouldBlockInput(shouldWe); };
     controller.m_blockGUIInput = [&] (bool shouldWe)->void { this->m_isGUIacceptingInput = shouldWe; };
     controller.m_exitMod = [&] ()->void { this->ModDetach(); };
+    controller.m_getGraphics = [&] ()->CGraphics* { return this->getGraphics(); };
     // TODO
     //controller.m_hideGUI = NULL;
     // Set controller to mod control

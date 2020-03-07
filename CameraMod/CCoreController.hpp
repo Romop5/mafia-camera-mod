@@ -2,6 +2,8 @@
 #define CORECONTROLLER_HPP
 #include <functional>
 
+class CGraphics;
+
 class CCoreController
 {
     public:
@@ -9,5 +11,6 @@ class CCoreController
         std::function<void(bool)> m_blockGUIInput;
         std::function<void(bool)> m_hideGUI;
         std::function<void(void)> m_exitMod;
+        std::function<CGraphics*()> m_getGraphics;
 };
 #endif
