@@ -320,6 +320,7 @@ struct Vtable
 	}
 };
 
+#pragma pack(push,1)
 struct Script
 {
 	Vtable*		m_vtable;			// vtable
@@ -399,6 +400,30 @@ struct Script
 		auto recompileFunc = reinterpret_cast<recompile_T*>(0x005AF780);
 		recompileFunc(this);
 	}
+};
+#pragma pack(pop)
+
+enum AIControlMask: DWORD
+{
+	AI_IS_SENSING_OTHERS = 0x2 // Is enemy reacting to others
+};
+
+enum AIControlMask2
+{
+	AI_LOOK_AT_POSITION = 0x8, // has enemy activated a target position ?
+	AI_LOOK_AT_FRAME = 0x16, // has enemy activated a target position ?
+	AI_PODVADIM_JAK_TRETERA = 0x40, // sort of behaviour ?
+	AI_FOLLOW = 0x800
+};
+
+struct PlayerScript: public Script
+{
+	// 0x68 = Script structure
+	byte unk0[0x404];
+	AIControlMask2 m_unkAIcontrolState; // 0x46C		// used in podvadim_jak_tretera
+	DWORD m_enemyAction;	   // 0x470		// 0 when no action pending, 1 when action is active
+	byte unk1[0x40];
+	AIControlMask m_controlState; // 0x4B4
 };
 
 /**

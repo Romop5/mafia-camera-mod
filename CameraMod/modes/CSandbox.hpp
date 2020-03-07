@@ -12,6 +12,8 @@
 #include <set>
 #include <unordered_map>
 
+#include "game/CGraphics.h"
+
 using originalDelete_t = void __fastcall (Script* script);
 using originalUpdate_t = void __fastcall (Script* script,DWORD EDX, DWORD deltaTime);
 
@@ -133,10 +135,20 @@ class CSandbox: public CGenericMode
                     info << "Name: " << selectedObject->frame->getName()<< "\n";
                 info << "Type: " << selectedObject->getObjectType() << "\n";
                 auto pos = selectedObject->position;
+
                 info << "Pos: " << "[" << pos.x << "," << pos.y << "," << pos.z << "]\n";
                 auto rot = selectedObject->rotation; 
                 info << "Rot: " << "[" << rot.x << "," << rot.y << "," << rot.z << "]\n";
                 info << "IsActive:" << selectedObject->isActive << "\n";
+
+                // Mark object
+                CGraphics* graph = this->m_modeController.m_getGraphics();
+                Vector3D screenPos;
+                graph->Get2DFrom3D(pos,&screenPos);
+                graph->FillARGB(screenPos.x-10,screenPos.y-10,20,20,0xFF00adef);
+                //graph->DrawCubePoint(pos);
+
+                info << "OnScreen: " << "[" << screenPos.x << "," << screenPos.y << "," << screenPos.z << "]\n";
                 
                 switch(selectedObject->objectType)
                 {
