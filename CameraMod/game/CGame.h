@@ -205,11 +205,30 @@ struct CMafiaScene
 };
 #pragma pack(pop)
 
+/// Size = 0x1E
+class CNavPoint
+{
+	float position[3];	// 0x0
+	WORD  type;			// 0xE
+	DWORD id;			// 
+	_pad(_unk1,0x6);
+	DWORD link;			// unk link - TODO
+	_pad(_unk1,0x12);
+};
+class CNavMesh
+{
+	_pad(_unk1, 0x4);	// vtable
+	void*	m_poolStart;
+	_pad(_unk2, 0x4);
+	DWORD	m_length;
+};
 #pragma pack(push,1)
 struct CMafiaContext
 {
 	_pad(_unk0, 0x24);	
 	CMafiaScene*	m_scene;	// 0x24	
+	_pad(_unk1, 0x4);	
+	CNavMesh*		m_navMesh;	// 0x2C
 	public:
 	CMafiaScene* getScene() const { return m_scene; }
 	static CMafiaContext* getInstance()

@@ -4,3 +4,7 @@
 // points to list of constants (each 0x14 bytes a new string constant)
 
 cmp esi, 0x63EAB0   // last constant
+
+1006A8DD | 68 60121C10              | push ls3df.101C1260                                       |
+1006A8E2 | 50                       | push eax                                                  |
+1006A8E3 | FF51 38                  | call dword ptr ds:[ecx+38]                                | Reset ?
