@@ -1,17 +1,9 @@
-#ifndef TOOLS
-#define TOOLS
-#define WIN32_LEAN_AND_MEAN
-
-#define RADIAN (180.0f / 3.14159f)
-#define TORADIAN (3.14159f / 180.0f)
-
-#define POINTER_64 __ptr64
-#include <Windows.h>
 #include <psapi.h>
+#include "tools.h"
 
-// hook original function to call newfunc and copy original 5 bytes to patch
-// string
-static void InstallHook(void* original, void* newfunc, char* patch)
+namespace AngeloFramework
+{
+void InstallHook(void* original, void* newfunc, char* patch)
 {
     // save bytes
     DWORD old;
@@ -25,7 +17,7 @@ static void InstallHook(void* original, void* newfunc, char* patch)
     VirtualProtect((LPVOID)original, 5, old, &old);
 }
 
-static void UninstallHook(DWORD original, char* patch)
+void UninstallHook(DWORD original, char* patch)
 {
     // restore bytes
     DWORD old;
@@ -35,9 +27,9 @@ static void UninstallHook(DWORD original, char* patch)
 }
 
 // using arc tangens for 2 variables
-static float RotationTo180(float x, float y) { return atan2(x, y); }
+float RotationTo180(float x, float y) { return atan2(x, y); }
 
-static float RotationTo360(float x, float y)
+float RotationTo360(float x, float y)
 {
     float result = atan2(x, y) * RADIAN; // actually, this converts to degrees
     if (result < 0) {
@@ -46,23 +38,23 @@ static float RotationTo360(float x, float y)
     return result;
 }
 
-static float ASinTo180(float x) { return asin(x) * RADIAN; }
+float ASinTo180(float x) { return asin(x) * RADIAN; }
 
-static bool IsInRadius2D(int pointX, int pointY, int a, int b, int radius)
+bool IsInRadius2D(int pointX, int pointY, int a, int b, int radius)
 {
     if ((pointX >= a - radius && pointX <= a + radius) && (pointY >= b - radius && pointY <= b + radius))
         return true;
     return false;
 }
 
-static bool IsInRect(int pointX, int pointY, int Rx, int Ry, int Rx2, int Ry2)
+bool IsInRect(int pointX, int pointY, int Rx, int Ry, int Rx2, int Ry2)
 {
     if ((pointX >= Rx && pointX <= Rx2) && (pointY >= Ry && pointY <= Ry2))
         return true;
     return false;
 }
 
-static char ConvertToASCII(unsigned short VK)
+char ConvertToASCII(unsigned short VK)
 {
     unsigned char kbs[256];
     GetKeyboardState(kbs);
@@ -75,8 +67,7 @@ static char ConvertToASCII(unsigned short VK)
     return NULL;
 }
 
-
-static DWORD GetModuleBaseAddress(LPCSTR moduleName)
+DWORD GetModuleBaseAddress(LPCSTR moduleName)
 {
     MODULEINFO info;
     HMODULE h_Module = GetModuleHandle(moduleName);
@@ -86,8 +77,8 @@ static DWORD GetModuleBaseAddress(LPCSTR moduleName)
     return reinterpret_cast<DWORD>(info.lpBaseOfDll);
 }
 
-static DWORD GetAddressBasedOnOldModule(DWORD address, DWORD oldModule, DWORD newModule)
+DWORD GetAddressBasedOnOldModule(DWORD address, DWORD oldModule, DWORD newModule)
 {
     return (address-oldModule)+newModule;
 }
-#endif
+}

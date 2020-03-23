@@ -8,7 +8,6 @@
 #include "Windows.h"
 #include "common/structures.h"
 
-#include "CGenericGame.hpp"
 #include "CScript.h"
 
 enum ObjectTypes
@@ -470,141 +469,7 @@ struct ScriptMachine
 };
 
 
-///////////////////////////////////////////////////////////////////////////
-// INTERFACES
-///////////////////////////////////////////////////////////////////////////
-class CHuman;
-
-class CMafiaRecordingInfo: public CGenericRecordingInfo
-{
-	private:
-	size_t m_currentReplayIndex;
-	std::vector<PED_State> m_Frames;
-	bool m_isRecording;
-
-	public:
-	CMafiaRecordingInfo(): m_currentReplayIndex(0),m_isRecording(true) {}
-	// PUBLIC API
-    virtual bool IsRecording() const override 
-	{
-		return m_isRecording;	
-	}
-    virtual bool IsReplaying() const override { return !this->IsRecording(); }
-
-    virtual size_t getFramesCount() const override
-	{
-		return m_Frames.size();
-	}
-    virtual size_t getEventsCount() const override
-	{
-		return 0;
-	}
-    virtual size_t getCurrentFrameIndex() const override
-	{
-		return m_currentReplayIndex;
-	}
-	friend class CPlayerRecording;
-};
-
-class CPlayerRecording: public CGenericObjectRecording
-{
-	private:
-	CMafiaRecordingInfo m_state;
-	public:
-	CPlayerRecording() {}
-
-	// PUBLIC API
-    virtual const std::string dumpJSON() const
-	{
-		return "";
-	}
-    virtual void loadFromJSON(const std::string& json) {}
-
-	// INTERNAL API
-	void updateState(CHuman& human);
-	void recordState(CHuman& human);
-	CMafiaRecordingInfo* getInfo() { return &m_state; }
-};
-
-class CMafiaObject: public CGenericObject
-{
-	private:
-	/// Ingame object's address
-	DWORD m_mafiaAdress;
-	
-	///////////////////////////////////////////////////////
-	// RECORDING
-	public:
-	enum RecordingState
-	{
-		NONE,
-		RECORDING,
-		PLAYING	
-	};
-	private: 
-	CPlayerRecording m_recording;
-	std::forward_list<CPlayerRecording> m_recordings;
-	RecordingState m_currentState;
-	///////////////////////////////////////////////////////
-	public:
-	CMafiaObject(): m_currentState(NONE) {}
-	virtual DWORD getMafiaAddress() const { return m_mafiaAdress; }
-	void setMafiaAddress(const DWORD address) { m_mafiaAdress = address; }
-	friend class CGame;
-	friend class CMafiaRecordingInfo;
-};
-
-class CHuman: public CMafiaObject
-{
-	private:
-	PED* toPED() {return reinterpret_cast<PED*>(getMafiaAddress());}
-	PED* toPED() const {return reinterpret_cast<PED*>(getMafiaAddress());}
-
-	public:
-	virtual const std::string& getName() const override;
-    virtual const std::string& getType() const override {
-		static const std::string classString = "HUMAN"; 
-		return classString;
-	}
-
-    virtual glm::mat4 getTransform() const override; 
-    virtual void setTransform(const glm::mat4&) override;
-    virtual const std::string dumpJSON() const override;
-
-	void setState(const PED_State& state);
-	const PED_State getState() const;
-};
-
-class CLocalPlayer: public CHuman
-{
-	public:
-	virtual DWORD getMafiaAddress() const override 
-	{
-		return *(DWORD*)((*(DWORD*)0x6F9464) + 0xE4);
-	}
-};
-
-/*class CGameObjectManager
-{
-	private:
-	std::map<DWORD, CMafiaObject> m_objects;
-
-	auto begin() { return m_objects.begin(); }
-	auto end() { return m_objects.begin(); }
-
-	bool hasObject(CMafiaObject& obj)
-	{
-		auto reference = m_objects.find(obj.getMafiaAddress());
-		return (reference != m_objects.end());
-	}
-
-	void addObject(CMafiaObject& obj)
-	{
-		m_objects[obj.getMafiaAddress()] = obj;
-	}
-};
-*/
-class CGame: public CGenericGame {
+class CGame {
 private:
     enum COLOR:DWORD 
     {
@@ -636,9 +501,6 @@ private:
 	void internalLockControls(bool shouldLock);
     void internalToggleHUD(bool shouldBeHidden);
 
-	CLocalPlayer m_localPlayer;
-	
-    std::vector<std::unique_ptr<CGenericGameSettingBase>> m_settings;
 public:
 	virtual void onTick() override;
     virtual CGenericObject* getLocalPlayer() override;
@@ -649,24 +511,14 @@ public:
     virtual const glm::mat4 GetCameraTransform() const override;
 
     virtual void createObjectFromJSON(const std::string) override;
-
     virtual void LockControls(bool shouldBeLocked);
-
-    virtual std::vector<std::unique_ptr<CGenericGameSettingBase>>& getSettings();
 
     ///////////////////////////////////////////////////////////////////////////
     // OPTIONAL METHODS (may be implemented by game)
     ///////////////////////////////////////////////////////////////////////////
     virtual void ToggleHUD(bool shouldBeVisible) override;
-    virtual const std::string& GetVersionString() const override;
+  
     virtual void PrintDebugMessage(const std::string& message) override;
-
-    /// Record object's state starting this moment
-    virtual void startRecording(CGenericObject* object) override;
-    virtual void clearRecording(CGenericObject* object) override;
-    virtual CGenericObjectRecording* saveRecording(CGenericObject* object) override;
-    virtual void playRecording(CGenericObject* object, CGenericObjectRecording* record) override;
-    virtual CGenericRecordingInfo* getRecordingInfo(CGenericObject* object) override;
 
 	
 	ScriptMachine* getScriptMachine() { return *reinterpret_cast<ScriptMachine**>(0x0065115C); }
