@@ -5,9 +5,9 @@
 #define CREATE_THREAD_ACCESS (PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ) 
 #define MAXWAIT 10000
 
-BOOL Inject(DWORD processID, std::wstring dllName);
+BOOL Inject(DWORD processID, std::wstring dllPath);
 
-bool CheckFileExist(char filename[255]);
+bool CheckFileExist(std::wstring filename);
 
 bool IsGameRunning();
 

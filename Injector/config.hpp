@@ -26,7 +26,7 @@ InjectorConfig ParseCommandLine(std::wstring commandLine)
 
     auto PROCNAME_HANDLER = [&](std::wstring opt)
     {
-        result.dllName = opt;
+        result.processName = opt;
     };
 
     std::vector<std::pair<std::vector<std::wstring>, std::function<void(std::wstring)>>> optionsWithArgument = 
@@ -63,28 +63,31 @@ InjectorConfig ParseCommandLine(std::wstring commandLine)
     };
 
     std::wstring defaultArgument = L"UNDEFINED";
-    for(int i = 0; i < argumentCount; i++)
+    for(int i = 1; i < argumentCount; i++)
     {
+        auto command = argument[i];
         auto hasArgument = (i+1 < argumentCount);
+        // Parse single options
+        for (auto& optionEntry : singleOptions)
+        {
+            const auto& alias = optionEntry.first;
+            if (command == alias)
+            {
+                optionEntry.second();
+                break;
+            }
+        }
         // Parse options with arguments
         for(auto& optionEntry: optionsWithArgument)
         {
             const auto& aliases = optionEntry.first;
             for(auto& alias: aliases)
             {
-                if(argument[i] == alias)
+                if(command == alias)
                 {
                     optionEntry.second((hasArgument)?argument[++i]:defaultArgument);
+                    break;
                 }
-            }
-        }
-        // Parse single options
-        for(auto& optionEntry: singleOptions)
-        {
-            const auto& alias = optionEntry.first;
-            if(argument[i] == alias)
-            {
-                optionEntry.second();
             }
         }
     }

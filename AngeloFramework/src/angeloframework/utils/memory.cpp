@@ -1,9 +1,12 @@
+// Required due to psapi.h
+#include <cmath>
+#include <Windows.h>
 #include <psapi.h>
-#include "tools.h"
+
 
 namespace AngeloFramework
 {
-void InstallHook(void* original, void* newfunc, char* patch)
+void InstallHook(DWORD original, DWORD newfunc, char* patch)
 {
     // save bytes
     DWORD old;
@@ -24,34 +27,6 @@ void UninstallHook(DWORD original, char* patch)
     VirtualProtect((LPVOID)original, 5, PAGE_READWRITE, &old);
     memcpy((void*)original, patch, 5);
     VirtualProtect((LPVOID)original, 5, old, &old);
-}
-
-// using arc tangens for 2 variables
-float RotationTo180(float x, float y) { return atan2(x, y); }
-
-float RotationTo360(float x, float y)
-{
-    float result = atan2(x, y) * RADIAN; // actually, this converts to degrees
-    if (result < 0) {
-        result = 360.0f - result * (-1);
-    }
-    return result;
-}
-
-float ASinTo180(float x) { return asin(x) * RADIAN; }
-
-bool IsInRadius2D(int pointX, int pointY, int a, int b, int radius)
-{
-    if ((pointX >= a - radius && pointX <= a + radius) && (pointY >= b - radius && pointY <= b + radius))
-        return true;
-    return false;
-}
-
-bool IsInRect(int pointX, int pointY, int Rx, int Ry, int Rx2, int Ry2)
-{
-    if ((pointX >= Rx && pointX <= Rx2) && (pointY >= Ry && pointY <= Ry2))
-        return true;
-    return false;
 }
 
 char ConvertToASCII(unsigned short VK)
@@ -81,4 +56,27 @@ DWORD GetAddressBasedOnOldModule(DWORD address, DWORD oldModule, DWORD newModule
 {
     return (address-oldModule)+newModule;
 }
+
+
+DWORD GetValueAt(DWORD address)
+{
+    DWORD result = 0;
+    DWORD old;
+    VirtualProtect((LPVOID)address, 4, PAGE_READWRITE, &old);
+    result = *(DWORD*)((DWORD)address);
+    // restore protection
+    VirtualProtect((LPVOID)address, 4, old, &old);
+    return result;
+}
+
+bool SetValueAt(DWORD address, DWORD value)
+{
+    DWORD old;
+    VirtualProtect((LPVOID)address, 4, PAGE_READWRITE, &old);
+    *(DWORD*)((DWORD)address) = value;
+    // restore protection
+    VirtualProtect((LPVOID)address, 4, old, &old);
+    return true;
+}
+
 }

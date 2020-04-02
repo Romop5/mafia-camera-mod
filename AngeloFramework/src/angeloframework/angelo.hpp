@@ -9,6 +9,8 @@
  * 
  */
 
+#include "angeloframework/game/offsets.hpp"
+
 #include <functional>
 
 namespace AngeloFramework
@@ -18,15 +20,30 @@ namespace AngeloFramework
         std::function<void(void)> m_onRender;
         std::function<void(void)> m_onKeyInput;
     };
+
+    /**
+     * @brief Control set up of framework routines
+     * 
+     */
     class Framework
     {
-        public:
+    public:
+        Framework();
+        ~Framework();
         /*
             Controlling the framework/game
         */
+        /// Inject game and set up routines
         bool Load();
+        /// Detach game
         bool Unload();
-        void SetCallbacks(FrameworkCallbacks callbacks);
-        const FrameworkCallbacks& GetCallbacks(FrameworkCallbacks callbacks); 
+
+        using EngineVersion = GameOffsets::EngineVersion;
+        DWORD GetEngineVersion() const;
+        bool IsInMafiaProcess() const;
+
+    private:
+        class Framework_impl;
+        Framework_impl* m_core;
     };
 }

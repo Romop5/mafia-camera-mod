@@ -9,11 +9,12 @@
 #include "injecting_api.hpp"
 
 
+// Required for StrStrIW
 #pragma comment (lib, "Shlwapi.lib")
 
 using namespace std;
 
-bool CheckFileExist(char filename[255])
+bool CheckFileExist(std::wstring filename)
 {
 	fstream file;
 	file.open(filename, ios::in);
@@ -91,13 +92,22 @@ bool TryReloadingDLL(DWORD processID, std::wstring dllName)
     return false;
 }
 
-BOOL Inject(DWORD processID, std::wstring dllName)
+BOOL Inject(DWORD processID, std::wstring dllPath)
 {
     if (!processID)
     {
         std::cout << "Invalid process ID detected" << std::endl;
         return false;
     }
+
+    if (!CheckFileExist(dllPath))
+    {
+        std::wcout << "Dll path does not exist: " << dllPath << std::endl;
+        return false;
+    }
+
+    auto dllNameStart = dllPath.rfind(L"\\");
+    auto dllName = (dllNameStart == std::wstring::npos) ? dllPath : dllPath.substr(dllNameStart+1);
 
     // I. At first, detect if .DLL is already loaded
     auto dllModule = GetHandleToModuleInProcess(processID, dllName);   
@@ -121,16 +131,33 @@ BOOL Inject(DWORD processID, std::wstring dllName)
         This thread will call LoadLibrary() function. However, this function must have the parameter prepared,
         and therefore we need to allocate & write string to process' memory prior to starting the thread.
     */
-	auto LoadLibraryFunctionAddress = (LPVOID)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "LoadLibraryA");
+	auto LoadLibraryFunctionAddress = (LPVOID)GetProcAddress(GetModuleHandleW(L"kernel32.dll"), "LoadLibraryW");
+
+
+    // Size of wide string takes twice as bytes.
+    auto stringSize = sizeof(wchar_t) * dllPath.size() + 1;
 
 	// Allocate space in the process for our DLL 
-	auto RemoteString = (LPVOID)VirtualAllocEx(processHandle, NULL, dllName.size()+1, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	auto RemoteString = (LPVOID)VirtualAllocEx(processHandle, NULL, stringSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 
 	// Write the string name of our DLL in the memory allocated 
-	WriteProcessMemory(processHandle, (LPVOID)RemoteString, dllName.c_str(), dllName.size(), NULL);
+	WriteProcessMemory(processHandle, (LPVOID)RemoteString, dllPath.c_str(), stringSize, NULL);
 
 	// Load our DLL 
-	CreateRemoteThread(processHandle, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryFunctionAddress, (LPVOID)RemoteString, NULL, NULL);
+	auto threadID = CreateRemoteThread(processHandle, NULL, NULL, (LPTHREAD_START_ROUTINE)LoadLibraryFunctionAddress, (LPVOID)RemoteString, NULL, NULL);
+
+    // Wait till remote's thread call to LoadLibrary() finishes
+    WaitForSingleObject(threadID, INFINITE);
+
+    DWORD exitCode;
+    if (GetExitCodeThread(threadID, &exitCode))
+    {
+        std::wcout << "LoadLibrary()'s thread exit code: " << exitCode << std::endl;
+        if(exitCode)
+        {
+            std::wcout << "Non-zero thread return code => LoadLibrary() succeeded" << std::endl;
+        }
+    }
 
 	CloseHandle(processHandle);
 	return true;

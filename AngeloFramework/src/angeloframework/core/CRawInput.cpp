@@ -1,4 +1,4 @@
-#include "game/CRawInput.h"
+#include "CRawInput.h"
 #include "utilslib/logger.hpp"
 
 // Processes WM_INPUT messages and calls onKey/mouse callbacks

@@ -13,7 +13,7 @@ set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
 set(JSON_MultipleHeaders ON CACHE BOOL "" FORCE)
 
 add_subdirectory(vendors)
-add_subdirectory(CameraModInjector)
+add_subdirectory(Injector)
 add_subdirectory(HotLoader)
 #add_subdirectory(CameraMod)
 add_subdirectory(AngeloFramework)

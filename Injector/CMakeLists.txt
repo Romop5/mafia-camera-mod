@@ -1,4 +1,4 @@
-add_executable(camera_injector WIN32 
+add_executable(injector WIN32 
     main.cpp
     injecting_api.cpp
 )

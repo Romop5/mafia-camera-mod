@@ -5,15 +5,14 @@
 #include "d3d8.h"
 #include "d3dx8.h"
 
-class CDirect3DDevice8Proxy : public IDirect3DDevice8 {
+class IDirect3DDevice8Proxy : public IDirect3DDevice8 {
 protected:
     IDirect3DDevice8* p_Dev;
 public:
     IDirect3DDevice8* getProxy() const { return p_Dev; }
-    CDirect3DDevice8Proxy()
-        : p_Dev(NULL)
-    {
-    }
+    IDirect3DDevice8Proxy(): p_Dev(NULL) {}
+
+    IDirect3DDevice8Proxy(IDirect3DDevice8* dev): p_Dev(dev) {}
 
     /*** IUnknown methods ***/
     STDMETHOD(QueryInterface)
