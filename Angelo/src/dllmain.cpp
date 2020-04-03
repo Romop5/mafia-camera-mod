@@ -12,6 +12,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
         DisableThreadLibraryCalls(hModule);
         //MessageBox(NULL, "Angelo injected", "Angelo", 0);
 
+ //       _asm int 3;
+
         framework.Load();
         break;
     }

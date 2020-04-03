@@ -10,7 +10,7 @@ namespace Core
 {
     IDirect3DDevice9* ConvertD3D8ToD3D9(IDirect3DDevice8* device)
     {
-        Direct3D8* wrapper = reinterpret_cast<Direct3D8*>(device);
+        Direct3DDevice8* wrapper = reinterpret_cast<Direct3DDevice8*>(device);
         return reinterpret_cast<IDirect3DDevice9*>(wrapper->GetProxyInterface());
     }
 
