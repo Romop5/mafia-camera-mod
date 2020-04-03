@@ -23,7 +23,8 @@ namespace AngeloFramework
     static std::unordered_map<std::string, Address> m_engineAddresses = 
     {
         /// ptr to IDirect8Device
-        {std::string("D3D8"),{0x1C167C,0x0}}
+        {std::string("D3D8"),Address(0x1C167C,0x0)},
+        {std::string("MAINWINDOW"),Address(0x1C13F4,0)},
     };
     class GameOffsets
     {

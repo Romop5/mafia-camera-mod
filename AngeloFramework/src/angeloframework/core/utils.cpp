@@ -2,7 +2,7 @@
 #include <d3d8to9.hpp>
 #include "AngeloFramework/core/utils.hpp"
 
-class IDirect3DDevice8;
+struct IDirect3DDevice8;
 
 namespace AngeloFramework
 {

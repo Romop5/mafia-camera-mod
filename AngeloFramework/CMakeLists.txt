@@ -7,6 +7,7 @@ add_library(AngeloFramework STATIC
     src/angeloframework/core/CD3D9Accessor.cpp
     src/angeloframework/core/CD3D9Accessor.h
     src/angeloframework/core/manager.hpp
+    src/angeloframework/core/manager.cpp
     src/angeloframework/core/CRawInput.cpp
     src/angeloframework/core/CRawInput.h
     src/angeloframework/core/direct8hookdevice.hpp

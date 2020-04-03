@@ -10,17 +10,16 @@
  */
 
 #include "angeloframework/game/offsets.hpp"
-
 #include <functional>
+
+struct IDirect3DDevice9;
+namespace AngeloFramework
+{
+    class Manager;
+}
 
 namespace AngeloFramework
 {
-    class FrameworkCallbacks
-    {
-        std::function<void(void)> m_onRender;
-        std::function<void(void)> m_onKeyInput;
-    };
-
     /**
      * @brief Control set up of framework routines
      * 
@@ -42,8 +41,15 @@ namespace AngeloFramework
         DWORD GetEngineVersion() const;
         bool IsInMafiaProcess() const;
 
+        void AddRenderCallback(std::function<void(void)> callback);
+        /*
+            Framework features
+        */
+        bool IsImGuiAvailable() const;
+
+        IDirect3DDevice9* GetDirect3D9Device() const;
+
     private:
-        class Framework_impl;
-        Framework_impl* m_core;
+        AngeloFramework::Manager* m_core;
     };
 }

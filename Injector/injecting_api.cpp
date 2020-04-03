@@ -16,6 +16,8 @@ using namespace std;
 
 bool CheckFileExist(std::wstring filename)
 {
+    //auto result = GetFileAttributesW(filename.c_str());
+    //return result != INVALID_FILE_ATTRIBUTES;
 	fstream file;
 	file.open(filename, ios::in);
 	if (file)
