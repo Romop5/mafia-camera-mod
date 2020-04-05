@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 project(AngeloFramework)
 
-add_library(AngeloFramework STATIC 
+set(ANGELOFRAMEWORK_SOURCES 
     src/angeloframework/angelo.cpp
     src/angeloframework/angelo.hpp
     src/angeloframework/core/CD3D9Accessor.cpp
@@ -19,6 +19,9 @@ add_library(AngeloFramework STATIC
     src/angeloframework/core/utils.hpp
     src/angeloframework/game/offsets.hpp
     src/angeloframework/game/utils.hpp
+    src/angeloframework/game/cprogram.hpp
+    src/angeloframework/game/cmission.hpp
+    src/angeloframework/game/internals.hpp
     src/angeloframework/utils/game_hooks.hpp
     src/angeloframework/utils/helpers.cpp
     src/angeloframework/utils/helpers.hpp
@@ -26,6 +29,9 @@ add_library(AngeloFramework STATIC
     src/angeloframework/utils/memory.cpp
     src/angeloframework/utils/memory.hpp
 )
+add_library(AngeloFramework STATIC ${ANGELOFRAMEWORK_SOURCES})
+source_group(TREE "${PROJECT_SOURCE_DIR}/src/angeloframework/" FILES ${ANGELOFRAMEWORK_SOURCES})
+
 # Include "src" to allow "angeloframework/..." includes
 target_include_directories(AngeloFramework PUBLIC "src")
 

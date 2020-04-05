@@ -3,6 +3,9 @@
 #include "imgui/imgui.h"
 #include "angeloframework/angelo.hpp"
 
+#include "angeloframework/game/cprogram.hpp"
+#include "angeloframework/game/cmission.hpp"
+
 AngeloFramework::Framework framework;
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
@@ -32,6 +35,19 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call,
                 return;
             }
             ImGui::Text("Angelo Loaded");
+            
+            auto mission = AngeloFramework::Game::CMission::GetMission();
+            auto game = mission->GetGame();
+            auto localPlayer = game->mLocalPlayer;
+            ImGui::SameLine();
+            if (localPlayer)
+            {
+                //ImGui::Text("Has local player :)");
+                ImGui::Text("Type: %x", localPlayer->objectType);
+            }
+            else {
+                ImGui::Text("Local player not spawned");
+            }
             ImGui::End();
 
         }

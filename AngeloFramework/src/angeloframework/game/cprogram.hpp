@@ -1,48 +1,10 @@
-#include <tuple>
-#include "angeloframework/game/offsets.hpp"
+#ifndef ANGELOFRAMEWORK_GAME_CPROGRAM_HPP
+#define ANGELOFRAMEWORK_GAME_CPROGRAM_HPP
 
-#define ANGELO_CLASS_METHOD_DECLARE(cls,methodname, address10,address12)\
- const auto cls##_##methodname = MafiaAddress(address10, address12)
-
-#define ANGELO_CLASS_TYPE_METHOD_DECLARE(cls,methodname, address10,address12,rettype,...)\
-ANGELO_CLASS_METHOD_DECLARE(cls,methodname,address10,address12); using func_##cls##_##methodname = rettype __fastcall(void*, void*,__VA_ARGS__)
-
-#define ANGELO_CLASS_METHOD_GET(cls,methodname)\
- AngeloFramework::Game::Internal::cls##_##methodname.get()
-
-#define ANGELO_CLASS_TYPE_METHOD_GET(cls,methodname)\
-reinterpret_cast<AngeloFramework::Game::Internal::func_##cls##_##methodname*>(ANGELO_CLASS_METHOD_GET(CProgram,SetSourceCode))
-
-#define ANGELO_CLASS_TYPE_METHOD_CALL(cls,methodname,...)\
-ANGELO_CLASS_TYPE_METHOD_GET(cls, methodname)(this, 0, __VA_ARGS__);
+#include "internals.hpp"
 
 namespace AngeloFramework 
 {
-	struct MafiaAddress
-	{
-		std::pair<void*,void*> m_addresses;
-		MafiaAddress(DWORD a10, DWORD a12)
-		{
-			m_addresses = std::make_pair(reinterpret_cast<void*>(a10), reinterpret_cast<void*>(a12));
-		}
-		/*MafiaAddress(void* a10, void* a12)
-		{
-			m_addresses = std::make_pair(a10, a12);
-		}*/
-		void* get() const
-		{
-			auto version = GameOffsets::GetEngineVersion();
-			switch (version)
-			{
-			case GameOffsets::VERSION_10:
-				return m_addresses.first;
-			case GameOffsets::VERSION_12:
-				return m_addresses.second;
-			default:
-				return 0;
-			}
-		}
-	};
 	namespace Game
 	{
 		class Frame;
@@ -117,3 +79,4 @@ namespace AngeloFramework
 		};
 	}
 }
+#endif
