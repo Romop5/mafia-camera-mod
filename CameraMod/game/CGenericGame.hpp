@@ -2,6 +2,7 @@
 #define CGENERIC_GAME_HPP
 #include <string>
 #include <vector>
+#include <memory>
 #include <glm/glm.hpp>
 
 class CGenericObject

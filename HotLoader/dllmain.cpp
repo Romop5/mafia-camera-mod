@@ -19,7 +19,7 @@ struct LS3DEngine
 
     static inline LS3DEngine* getEngine() 
     {
-        return reinterpret_cast<LS3DEngine*>(*(DWORD*)((*(DWORD*)0x0065115C)+0x10));
+        return reinterpret_cast<LS3DEngine*>(*(DWORD*)((*(DWORD*)0x63788C) + 0x10));
     }
 };
 

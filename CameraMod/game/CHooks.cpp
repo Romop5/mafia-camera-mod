@@ -9,7 +9,7 @@ namespace GameOffsets
     // LS3D_BASE is where ls3df.dll is usually loaded. However, this can vary due
     // to address space randomization, so relative addresses are used below
     const DWORD LS3D_BASE = 0x10000000;
-    const DWORD LS3D_D3D_DRIVER = 0x101C167C;
+    const DWORD LS3D_D3D_DRIVER = 0x101C597C;
 };
 
 MessageHandler_t userHandler;

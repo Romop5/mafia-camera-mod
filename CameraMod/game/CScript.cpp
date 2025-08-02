@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <cctype>
+#include <vector>
 
 #include "CScript.h"
 

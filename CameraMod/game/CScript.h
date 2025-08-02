@@ -1,6 +1,8 @@
 #ifndef MAFIA_SCRIPT_H
 #define MAFIA_SCRIPT_H
 #include <vector>
+#include <string>
+
 enum ArgumentType
 {
     ARG_INT,          // 4-bytes, storing DWORD
